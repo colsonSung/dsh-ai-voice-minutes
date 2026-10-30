@@ -1,0 +1,4 @@
+- insert:
+    - id: ai-voice-minutes
+      name: '@local/ai-voice-minutes'
+      config: {}

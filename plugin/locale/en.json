@@ -1,0 +1,9 @@
+{
+  "meta": {
+    "title": "Local AI Voice Minutes",
+    "description": "Transcribe meeting audio, generate structured minutes, and ask transcript questions."
+  },
+  "app.title": "Local AI Voice Minutes",
+  "app.subtitle": "Local transcription, structured minutes, and meeting Q&A",
+  "nav.label": "Minutes"
+}

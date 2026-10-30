@@ -1,0 +1,30 @@
+node_modules
+package-lock.json
+pnpm-lock.yaml
+*.log
+.DS_Store
+*.tgz
+
+# Runtime state and credentials — never commit these.
+state.json
+*.state.json
+.env
+.env.*
+*.pem
+*.key
+credentials*
+
+# Local models and Python environments for the ASR service — downloaded by
+# plugin/native/asr/download-fun-asr-nano.sh, never committed.
+plugin/native/asr/models/
+plugin/native/asr/runtime/venv/
+plugin/native/asr/runtime/venv-funasr/
+plugin/native/asr/runtime/huggingface/
+plugin/native/asr/runtime/logs/
+*.pid
+
+# Build output of the native helpers — rebuild with plugin/native/build.sh.
+plugin/native/build/
+
+# Playwright CLI trace artifacts: local tool output, not source.
+.playwright-cli/

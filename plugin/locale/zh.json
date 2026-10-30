@@ -1,0 +1,9 @@
+{
+  "meta": {
+    "title": "Local AI Voice Minutes",
+    "description": "在本机转写会议音频、生成结构化纪要，并基于逐字稿问答。"
+  },
+  "app.title": "Local AI Voice Minutes",
+  "app.subtitle": "本地转写、结构化纪要与会议问答",
+  "nav.label": "Minutes"
+}

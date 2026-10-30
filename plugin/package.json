@@ -1,0 +1,61 @@
+{
+  "name": "@local/ai-voice-minutes",
+  "version": "3.6.0",
+  "description": "Local and cloud AI voice transcription, realtime dual-track translation, desktop overlay, meeting minutes, and transcript Q&A.",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "live.js",
+    "realtime.js",
+    "overlay.js",
+    "asr-admin.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "native/bin/audio-capture",
+    "native/bin/floating-overlay",
+    "native/build.sh",
+    "native/*.swift",
+    "native/Info.plist",
+    "native/README.md",
+    "native/asr/**/*"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
+    }
+  },
+  "license": "MIT",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "cordis",
+    "meeting",
+    "minutes",
+    "transcription",
+    "translation",
+    "local-first",
+    "macos"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/colsonSung/dsh-ai-voice-minutes.git"
+  },
+  "homepage": "https://github.com/colsonSung/dsh-ai-voice-minutes"
+}

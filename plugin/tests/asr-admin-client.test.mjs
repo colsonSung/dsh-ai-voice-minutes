@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import test from 'node:test';
+
+const source = await readFile(new URL('../client.js', import.meta.url), 'utf8');
+const host = await readFile(new URL('../index.js', import.meta.url), 'utf8');
+
+test('ASR settings exposes real service lifecycle and model management controls', () => {
+  for (const method of ['asr-status', 'asr-start', 'asr-stop', 'asr-restart', 'asr-download-model', 'asr-select-model']) {
+    assert.ok(source.includes(`onAsrAction('${method}'`) || source.includes(`callHost('${method}'`), `${method} is wired`);
+  }
+  assert.match(source, /settings\.asr\.serviceTitle/);
+  assert.match(source, /settings\.asr\.download/);
+  assert.match(source, /settings\.asr\.autoStart/);
+  assert.match(host, /asrAutoStart:\s*false/);
+});
