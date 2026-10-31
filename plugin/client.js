@@ -2729,12 +2729,15 @@ button.mvm-library-row:hover{background:var(--dsw-alias-bg-layer-2)}
       const updateSetting = (key, value) => setSettings((current) => ({ ...current, [key]: value }));
       const isBusy = busy !== '';
 
+      // The dot already carries the state, so the badge only names the service;
+      // the full status and detail stay in the tooltip.
       const healthBadge = (key, label) => {
         const item = health?.[key];
         const state = item ? (item.alive ? 'is-online' : 'is-offline') : '';
-        return h('span', { className: `mvm-health-item ${state}`, title: item?.detail || '' },
+        const status = item ? t(item.alive ? 'status.online' : 'status.offline') : t('status.unknown');
+        return h('span', { className: `mvm-health-item ${state}`, title: `${label} · ${status}${item?.detail ? ` — ${item.detail}` : ''}` },
           h('span', { className: 'mvm-health-dot' }),
-          `${label} · ${item ? t(item.alive ? 'status.online' : 'status.offline') : t('status.unknown')}`);
+          label);
       };
 
       const settingField = (key, labelKey, options = {}) => h('label', { className: `mvm-field ${options.wide ? 'mvm-field-wide' : ''}` },
@@ -4412,7 +4415,7 @@ button.mvm-library-row:hover{background:var(--dsw-alias-bg-layer-2)}
               h('div', { className: 'mvm-asr-status-line' },
                 h('span', { className: `mvm-health-item ${asrStatus?.online ? 'is-online' : 'is-offline'}` },
                   h('span', { className: 'mvm-health-dot' }),
-                  asrStatus ? `${asrStatus.online ? t('status.online') : t('status.offline')} · ${asrStatus.health?.backend || 'ASR'} · ${asrStatus.catalog?.activeId || t('settings.asr.noModel')}` : t('status.unknown')),
+                  asrStatus ? `${asrStatus.health?.backend || 'ASR'} · ${asrStatus.catalog?.activeId || t('settings.asr.noModel')}` : t('status.unknown')),
                 h(Button, { icon: 'refresh', onClick: refreshAsrStatus, disabled: asrBusy !== '' }, t('action.refresh')),
                 h(Button, { icon: 'play', onClick: () => onAsrAction('asr-start'), disabled: asrBusy !== '' }, t('settings.asr.start')),
                 h(Button, { icon: 'close', onClick: () => onAsrAction('asr-stop'), disabled: asrBusy !== '' }, t('settings.asr.stop')),

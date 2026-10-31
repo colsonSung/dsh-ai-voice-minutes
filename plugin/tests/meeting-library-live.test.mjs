@@ -81,7 +81,7 @@ function createRuntime() {
     const { method, payload } = JSON.parse(options.body);
     requests.push({ method, payload });
     let result;
-    if (method === 'health') result = { settings: {} };
+    if (method === 'health') result = { settings: {}, asr: { alive: true, detail: 'asr ready' }, llm: { alive: false, detail: 'llm refused' } };
     else if (method === 'list') result = { meetings: [running, finished] };
     else if (method === 'templates') result = { templates };
     else if (method === 'voices') result = { profiles: [] };
@@ -194,6 +194,8 @@ const EN = {
   'live.details': 'Details', 'action.settings': 'Settings', 'action.import': 'Import', 'action.delete': 'Delete',
   'action.favorite': 'Favorite', 'action.close': 'Close', 'action.refresh': 'Refresh', 'state.loading': 'Loading',
   'meeting.untitled': 'Untitled meeting', 'view.minutes': 'Minutes', 'view.live': 'Live',
+  'status.asr': 'ASR', 'status.llm': 'LLM', 'status.online': 'Online', 'status.offline': 'Offline',
+  'status.unknown': 'Checking',
 };
 
 test('live studio exposes a floating control bar with markers, timer and incognito', () => {
@@ -218,6 +220,24 @@ test('meeting library shows templates, filter tabs and an in-progress row', () =
   assert.match(source, /meeting\.inProgress/);
   assert.match(source, /mvm-library-progress/);
   assert.match(source, /library\.search/);
+});
+
+test('runtime: the header health badges name the service and keep the state in the tooltip', async () => {
+  const runtime = createRuntime();
+  const { renderer } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+  const text = renderer.text();
+  assert.match(text, /ASR/, 'the ASR badge is named');
+  assert.match(text, /LLM/, 'the LLM badge is named');
+  assert.doesNotMatch(text, /Online/, 'the online word is gone');
+  assert.doesNotMatch(text, /Offline/, 'the offline word is gone');
+  const badges = renderer.findAll((node) => String(node.props?.className || '').includes('mvm-health-item'));
+  assert.equal(badges.length, 2, 'both service badges are rendered');
+  const titles = badges.map((node) => node.props.title);
+  assert.ok(titles.some((title) => /ASR · Online/.test(title)), 'the state stays in the tooltip');
+  assert.ok(titles.some((title) => /LLM · Offline/.test(title)), 'the offline state stays in the tooltip');
 });
 
 test('summaries are generated with the selected template', () => {
