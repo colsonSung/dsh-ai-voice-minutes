@@ -8,7 +8,8 @@
     ".": "./index.js",
     "./client": "./client.js",
     "./locale/*.json": "./locale/*.json",
-    "./icon": "./icon.svg"
+    "./icon": "./icon.svg",
+    "./data/*.json": "./data/*.json"
   },
   "files": [
     "index.js",
@@ -19,6 +20,7 @@
     "asr-admin.js",
     "cordis.patch.yml",
     "locale/*.json",
+    "data/*.json",
     "icon.svg",
     "README.md",
     "native/bin/audio-capture",
@@ -40,22 +42,5 @@
         "@deepseek-ai/dsh-client-ui-conversation"
       ]
     }
-  },
-  "license": "MIT",
-  "keywords": [
-    "deepseek-harness",
-    "dsh",
-    "cordis",
-    "meeting",
-    "minutes",
-    "transcription",
-    "translation",
-    "local-first",
-    "macos"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/colsonSung/dsh-ai-voice-minutes.git"
-  },
-  "homepage": "https://github.com/colsonSung/dsh-ai-voice-minutes"
+  }
 }

@@ -40,7 +40,7 @@ export const MEETING_AUDIO_ROUTE = '/api/ai-minutes/meeting-audio';
 
 const T2S = (() => {
   try {
-    const parsed = JSON.parse(readFileSync(new URL('./locale/t2s.json', import.meta.url), 'utf8'));
+    const parsed = JSON.parse(readFileSync(new URL('./data/t2s.json', import.meta.url), 'utf8'));
     return { map: parsed.map || parsed, maxLen: Number(parsed.maxLen) || 1 };
   } catch {
     return { map: {}, maxLen: 1 };
