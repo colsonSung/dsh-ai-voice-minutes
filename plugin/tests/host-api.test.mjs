@@ -147,3 +147,14 @@ test('existing error envelopes remain unchanged', async (t) => {
   assert.equal(body.ok, false);
   assert.equal(body.error.code, 'minutes/no-audio');
 });
+
+test('voice profiles cannot be deleted through the Host API', async (t) => {
+  const { route, service } = await fixture(t);
+  await service.saveVoiceProfiles([{ id: 'voice-keep', name: '保留声音', embedding: [1], exemplars: [[1]] }]);
+  const { body } = await invoke(route, 'voice-delete', { profileId: 'voice-keep' });
+  assert.equal(body.ok, false);
+  assert.equal(body.error.code, 'minutes/unknown-method');
+  const profiles = await service.loadVoiceProfiles();
+  assert.equal(profiles.length, 1);
+  assert.equal(profiles[0].name, '保留声音');
+});

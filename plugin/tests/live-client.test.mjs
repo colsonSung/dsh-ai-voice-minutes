@@ -124,6 +124,11 @@ function createReactRenderer(React, hooks, beginFrame, mediaElements = []) {
           playCalls: 0,
           pauseCalls: 0,
           loadCalls: 0,
+          listeners: {},
+          addEventListener(name, listener) { this.listeners[name] = listener; },
+          removeEventListener(name, listener) {
+            if (this.listeners[name] === listener) delete this.listeners[name];
+          },
           play() { this.playCalls += 1; this.paused = false; return Promise.resolve(); },
           pause() { this.pauseCalls += 1; this.paused = true; },
           load() { this.loadCalls += 1; this.paused = true; },
@@ -229,6 +234,26 @@ function createLiveRuntime(runtimeOptions = {}) {
     else if (method === 'live-active') result = { session: null, events: [] };
     else if (method === 'live-overlay-status') result = { open: false };
     else if (method === 'voices') result = { profiles: runtimeOptions.voices || [] };
+    else if (method === 'voice-save') {
+      if (runtimeOptions.voiceSaveError) {
+        return { ok: true, status: 200, text: async () => JSON.stringify({
+          ok: false, error: { message: runtimeOptions.voiceSaveError },
+        }) };
+      }
+      result = {
+        speakerLabels: { [payload.speaker]: payload.name },
+        speakerProfiles: { [payload.speaker]: 'voice-auto' },
+        profiles: runtimeOptions.voices || [],
+      };
+    }
+    else if (method === 'voice-rename') result = {
+      profiles: (runtimeOptions.voices || []).map((profile) => profile.id === payload.profileId
+        ? { ...profile, name: payload.name } : profile),
+    };
+    else if (method === 'translate') result = runtimeOptions.translation || {
+      translation: payload.text === 'First' ? 'First translated'
+        : payload.text === 'Second' ? 'Second translated' : 'Translated summary',
+    };
     else if (method === 'templates') result = { templates: [] };
     else if (method === 'settings') {
       if (!runtimeOptions.settingsResult) throw new Error('settings endpoint unavailable');
@@ -239,7 +264,10 @@ function createLiveRuntime(runtimeOptions = {}) {
     else if (method === 'live-resume') result = { session: { ...activeSession, transcriptionPaused: false } };
     else if (method === 'live-overlay-open') result = { overlay: true };
     else if (method === 'live-stop') result = { session: { ...activeSession, status: 'stopped', endedAt: '2026-10-28T07:00:03Z' }, ...(runtimeOptions.stopMeeting ? { meeting: runtimeOptions.stopMeeting } : {}) };
-    else if (method === 'get') result = { meeting: runtimeOptions.stopMeeting };
+    else if (method === 'get') result = {
+      meeting: typeof runtimeOptions.getMeeting === 'function'
+        ? runtimeOptions.getMeeting(payload.id) : runtimeOptions.stopMeeting,
+    };
     else if (method === 'live-status') {
       statusCount += 1;
       if (typeof runtimeOptions.liveStatusEvents === 'function') {
@@ -319,11 +347,21 @@ function createLiveRuntime(runtimeOptions = {}) {
   }, mediaElements);
 
   let definition;
+  const documentListeners = new Map();
+  const document = {
+    addEventListener(type, listener) {
+      const listeners = documentListeners.get(type) || [];
+      listeners.push(listener);
+      documentListeners.set(type, listeners);
+    },
+    removeEventListener(type, listener) {
+      documentListeners.set(type, (documentListeners.get(type) || []).filter((item) => item !== listener));
+    },
+  };
   const window = { __ModuleLoader__: { load(value) { definition = value; } }, confirm: () => runtimeOptions.confirmDelete !== false };
   vm.runInNewContext(source, {
     window, console, fetch, setTimeout, clearTimeout, URLSearchParams,
-    setInterval: () => 0, clearInterval: () => {},
-    document: { addEventListener() {}, removeEventListener() {} },
+    setInterval: () => 0, clearInterval: () => {}, document,
   });
   let dictionaries;
   let mainFactory;
@@ -350,6 +388,7 @@ function createLiveRuntime(runtimeOptions = {}) {
     requests,
     timers,
     mediaElements,
+    documentListeners,
     renderer,
     mainFactory,
     flush: () => new Promise((resolve) => setImmediate(resolve)),
@@ -391,6 +430,26 @@ test('New meeting opens the Live view instead of resetting an already blank draf
   renderer.render();
   assert.match(renderer.text(), /Live transcription and translation/);
   assert.match(renderer.text(), /Start live/);
+});
+
+test('the Live workspace has a back button that returns to the meeting library', async () => {
+  const meeting = {
+    id: 'meeting-live-back', title: 'Library destination', createdAt: '2026-10-28T07:00:00Z',
+    duration: 3, transcript: 'hello', segments: [], minutes: null,
+  };
+  const runtime = createLiveRuntime({ meetings: [meeting], stopMeeting: meeting });
+  const { renderer } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+  await renderer.click('Live');
+  renderer.render();
+  assert.match(renderer.text(), /Live transcription and translation/);
+
+  await renderer.click('Back to library');
+  renderer.render();
+  assert.match(renderer.text(), /Library destination/, 'the meeting library is visible again');
+  assert.doesNotMatch(renderer.text(), /Live transcription and translation/);
 });
 
 test('Live polling runs only while visible and active, and stop, view changes, and unmount clean it up', async () => {
@@ -567,6 +626,447 @@ test('the player never mounts a source-less audio element and never shows an inf
   assert.doesNotMatch(renderer.text(), /NaN/, 'the timeline never shows NaN');
 });
 
+test('the transcript uses readable speaker blocks with numeric badges and secondary translations', async () => {
+  const meeting = {
+    id: 'meeting-readable-transcript', title: 'Readable transcript', createdAt: '2026-10-28T07:00:00Z',
+    duration: 8, transcript: 'First\nSecond', minutes: null,
+    segments: [
+      { start: 1, end: 3, text: 'First', speaker: '1' },
+      { start: 4, end: 6, text: 'Second', speaker: '2' },
+    ],
+    speakerLabels: {}, speakerProfiles: {},
+  };
+  const runtime = createLiveRuntime({ meetings: [meeting], stopMeeting: meeting });
+  const { renderer } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+  const opener = renderer.findAll((node) => node.type === 'button'
+    && (String(node.props.className).includes('mvm-library-open')
+      || String(node.props.className).includes('mvm-meeting-card-title')))[0];
+  await opener.props.onClick({});
+  await runtime.flush();
+  renderer.render();
+
+  const blocks = renderer.findAll((node) => String(node.props.className).includes('mvm-utterance'));
+  assert.ok(blocks.length >= 2, 'each speaker turn is a readable block');
+  const badge = renderer.findAll((node) => String(node.props.className).includes('mvm-utterance-badge'))[0];
+  assert.ok(badge, 'the speaker has a numeric badge');
+  assert.match(renderer.text(), /Speaker 1/);
+  assert.match(renderer.text(), /00:01/);
+
+  await renderer.click('Translation');
+  renderer.render();
+  await renderer.click('English');
+  await runtime.flush();
+  renderer.render();
+  const translations = renderer.findAll((node) => String(node.props.className).includes('mvm-utterance-translation'));
+  assert.equal(translations.length, 2, 'the translation appears below each original block');
+  assert.match(renderer.text(), /First translated/);
+});
+
+test('editing a speaker affects only the clicked utterance block', async () => {
+  const meeting = {
+    id: 'meeting-single-utterance-edit', title: 'Single utterance edit', createdAt: '2026-10-28T07:00:00Z',
+    duration: 8, transcript: 'First\nSecond\nThird', minutes: null,
+    segments: [
+      { start: 0, end: 2, text: 'First', speaker: '1' },
+      { start: 3, end: 5, text: 'Second', speaker: '2' },
+      { start: 6, end: 8, text: 'Third', speaker: '1' },
+    ],
+    speakerLabels: {}, speakerProfiles: {},
+  };
+  const runtime = createLiveRuntime({ meetings: [meeting], stopMeeting: meeting });
+  const { renderer } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+  const opener = renderer.findAll((node) => node.type === 'button'
+    && (String(node.props.className).includes('mvm-library-open')
+      || String(node.props.className).includes('mvm-meeting-card-title')))[0];
+  await opener.props.onClick({});
+  await runtime.flush();
+  renderer.render();
+  const firstSpeaker = renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-utterance-speaker'))[0];
+  await firstSpeaker.props.onClick({});
+  renderer.render();
+
+  const editors = renderer.findAll((node) => node.props?.className === 'mvm-speaker-editor');
+  assert.equal(editors.length, 1, 'only the clicked utterance becomes an editor');
+  const close = renderer.findAll((node) => node.type === 'button'
+    && node.props['aria-label'] === 'Close')[0];
+  assert.ok(close, 'the utterance editor has an accessible close button');
+  await close.props.onClick({});
+  renderer.render();
+  assert.equal(renderer.findAll((node) => node.props?.className === 'mvm-speaker-editor').length, 0,
+    'closing the editor restores the read-only utterance blocks');
+});
+
+test('the viewpoint tree renders as a branched mind map with comparison cards', async () => {
+  const meeting = {
+    id: 'meeting-mindmap', title: 'Mind map', createdAt: '2026-10-28T07:00:00Z',
+    duration: 8, transcript: 'Payment', segments: [],
+    minutes: {
+      viewpoints: [
+        {
+          theme: 'Core scenarios',
+          cards: [
+            { stance: 'Payment voucher', detail: 'Pay first, invoice later', risk: 'Risk A' },
+            { stance: 'Payment request', detail: 'Contains a payment link' },
+            { stance: 'Merchant invoice', detail: 'Input tax deduction' },
+          ],
+        },
+        {
+          theme: 'Comparison',
+          cards: [
+            { stance: 'Request entry', detail: 'New payment entry' },
+            { stance: 'Platform invoice', detail: 'Fee charged by platform' },
+          ],
+        },
+      ],
+    },
+  };
+  const runtime = createLiveRuntime({ meetings: [meeting], stopMeeting: meeting });
+  const { renderer } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+  const opener = renderer.findAll((node) => node.type === 'button'
+    && (String(node.props.className).includes('mvm-library-open')
+      || String(node.props.className).includes('mvm-meeting-card-title')))[0];
+  await opener.props.onClick({});
+  await runtime.flush();
+  renderer.render();
+  await renderer.click('Viewpoint Tree');
+  renderer.render();
+
+  assert.equal(renderer.findAll((node) => String(node.props.className).includes('mvm-mindmap-group')).length, 2);
+  assert.equal(renderer.findAll((node) => String(node.props.className).includes('mvm-mindmap-branch')).length, 3,
+    'the three viewpoints are separate branch nodes');
+  assert.equal(renderer.findAll((node) => String(node.props.className).includes('mvm-mindmap-comparison')).length, 1,
+    'the two related viewpoints use a comparison card');
+  assert.match(renderer.text(), /Core scenarios/);
+  assert.match(renderer.text(), /Payment voucher/);
+  assert.match(renderer.text(), /Pay first, invoice later/);
+  assert.match(renderer.text(), /Risk A/);
+});
+
+test('the speaker count opens the meeting speaker list and saves a voice annotation', async () => {
+  const meeting = {
+    id: 'meeting-speakers-1', title: 'Speaker annotation', createdAt: '2026-10-28T07:00:00Z',
+    duration: 8, transcript: 'hello\nworld', minutes: null,
+    segments: [
+      { start: 0, end: 3, text: 'hello', speaker: '1' },
+      { start: 3, end: 6, text: 'world', speaker: '2' },
+    ],
+    speakerLabels: {}, speakerProfiles: {},
+  };
+  const runtime = createLiveRuntime({ meetings: [meeting], stopMeeting: meeting });
+  const { renderer, requests } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+  const opener = renderer.findAll((node) => node.type === 'button'
+    && (String(node.props.className).includes('mvm-library-open')
+      || String(node.props.className).includes('mvm-meeting-card-title')))[0];
+  await opener.props.onClick({});
+  await runtime.flush();
+  renderer.render();
+
+  const count = renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-speaker-count'))[0];
+  assert.ok(count, 'the speaker count is a button');
+  await count.props.onClick({});
+  renderer.render();
+  const speaker = renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-speaker-person'))[0];
+  assert.ok(speaker, 'the current meeting speakers are listed');
+  await speaker.props.onClick({});
+  renderer.render();
+  assert.equal(renderer.findAll((node) => node.props?.className === 'mvm-speaker-editor').length, 0,
+    'editing in the popover does not turn every matching transcript row into an editor');
+  const input = renderer.findAll((node) => node.type === 'input'
+    && String(node.props.className).includes('mvm-speaker-name-input'))[0];
+  assert.ok(input, 'the selected speaker can be named');
+  input.props.onChange({ target: { value: 'Alice' } });
+  renderer.render();
+  const save = renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-speaker-save'))[0];
+  await save.props.onClick({});
+  await runtime.flush();
+  renderer.render();
+
+  const saved = requests.find((request) => request.method === 'voice-save');
+  assert.deepEqual(saved.payload, { meetingId: 'meeting-speakers-1', speaker: '1', name: 'Alice' });
+  assert.match(renderer.text(), /Alice/, 'the corrected name is shown in the transcript');
+});
+
+test('each speaker has a play button that plays only that speaker excerpt and stops at its end', async () => {
+  const meeting = {
+    id: 'realtime-speakers-play', title: 'Speaker playback', createdAt: '2026-10-28T07:00:00Z',
+    duration: 12, transcript: 'one\ntwo', minutes: null,
+    segments: [
+      { start: 3, end: 6, audioStart: 3, audioEnd: 6, text: 'one', speaker: '1', source: 'mic' },
+      { start: 8, end: 10, audioStart: 8, audioEnd: 10, text: 'two', speaker: '2', source: 'system' },
+    ],
+    speakerLabels: {}, speakerProfiles: {},
+  };
+  const runtime = createLiveRuntime({ meetings: [meeting], stopMeeting: meeting });
+  const { renderer, mediaElements } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+  const opener = renderer.findAll((node) => node.type === 'button'
+    && (String(node.props.className).includes('mvm-library-open')
+      || String(node.props.className).includes('mvm-meeting-card-title')))[0];
+  await opener.props.onClick({});
+  await runtime.flush();
+  renderer.render();
+  const count = renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-speaker-count'))[0];
+  await count.props.onClick({});
+  renderer.render();
+
+  const plays = renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-speaker-play'));
+  assert.equal(plays.length, 2, 'every speaker has a play button before their name');
+  await plays[0].props.onClick({});
+  await runtime.flush();
+  const sample = mediaElements.find((item) => item.playCalls > 0);
+  assert.ok(sample, 'the dedicated speaker audio element plays, not the meeting player');
+  assert.match(sample.src, /live-audio\?id=realtime-speakers-play&track=mic/);
+  sample.listeners.loadedmetadata?.();
+  assert.equal(sample.currentTime, 3, 'playback starts at the speaker segment, not the meeting head');
+  assert.equal(sample.playCalls, 1);
+  assert.equal(mediaElements.filter((item) => item !== sample).every((item) => item.playCalls === 0), true,
+    'the main meeting player is not started');
+
+  sample.currentTime = 6;
+  sample.ontimeupdate();
+  assert.equal(sample.pauseCalls, 2, 'the excerpt pauses at the segment end');
+  assert.equal(sample.loadCalls, 1);
+  assert.equal(sample.src, '', 'the sample source is released after playback');
+});
+
+test('clicking outside an untouched speaker editor closes it without overlapping transcript editors', async () => {
+  const meeting = {
+    id: 'meeting-speakers-outside', title: 'Outside click', createdAt: '2026-10-28T07:00:00Z',
+    duration: 8, transcript: 'one\ntwo\nthree', minutes: null,
+    segments: [
+      { start: 0, end: 2, text: 'one', speaker: '1' },
+      { start: 2, end: 4, text: 'two', speaker: '2' },
+      { start: 4, end: 6, text: 'three', speaker: '1' },
+    ],
+    speakerLabels: {}, speakerProfiles: {},
+  };
+  const runtime = createLiveRuntime({ meetings: [meeting], stopMeeting: meeting });
+  const { renderer, documentListeners } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+  const opener = renderer.findAll((node) => node.type === 'button'
+    && (String(node.props.className).includes('mvm-library-open')
+      || String(node.props.className).includes('mvm-meeting-card-title')))[0];
+  await opener.props.onClick({});
+  await runtime.flush();
+  renderer.render();
+  const count = renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-speaker-count'))[0];
+  await count.props.onClick({});
+  renderer.render();
+  const speaker = renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-speaker-person'))[0];
+  await speaker.props.onClick({});
+  renderer.render();
+  assert.ok(renderer.findAll((node) => node.type === 'input'
+    && String(node.props.className).includes('mvm-speaker-name-input'))[0], 'the untouched editor opens');
+
+  for (const listener of documentListeners.get('mousedown') || []) listener({ target: {} });
+  renderer.render();
+
+  assert.equal(renderer.findAll((node) => String(node.props.className).includes('mvm-speaker-popover')).length, 0,
+    'the speaker popover closes');
+  assert.equal(renderer.findAll((node) => node.props?.className === 'mvm-speaker-editor').length, 0,
+    'no transcript row becomes an inline editor after the outside click');
+  assert.equal(renderer.findAll((node) => String(node.props.className).includes('mvm-speaker-name-input')).length, 0,
+    'the untouched speaker-name editor is fully dismissed');
+});
+
+test('a rejected voice annotation keeps the editor and draft visible', async () => {
+  const meeting = {
+    id: 'meeting-speakers-error', title: 'Missing voiceprint', createdAt: '2026-10-28T07:00:00Z',
+    duration: 3, transcript: 'hello', minutes: null,
+    segments: [{ start: 0, end: 2, text: 'hello', speaker: '1' }],
+    speakerLabels: {}, speakerProfiles: {},
+  };
+  const runtime = createLiveRuntime({
+    meetings: [meeting], stopMeeting: meeting, voiceSaveError: 'No voiceprint is available',
+  });
+  const { renderer } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+  const opener = renderer.findAll((node) => node.type === 'button'
+    && (String(node.props.className).includes('mvm-library-open')
+      || String(node.props.className).includes('mvm-meeting-card-title')))[0];
+  await opener.props.onClick({});
+  await runtime.flush();
+  renderer.render();
+  const count = renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-speaker-count'))[0];
+  await count.props.onClick({});
+  renderer.render();
+  const speaker = renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-speaker-person'))[0];
+  await speaker.props.onClick({});
+  renderer.render();
+  const input = renderer.findAll((node) => node.type === 'input'
+    && String(node.props.className).includes('mvm-speaker-name-input'))[0];
+  input.props.onChange({ target: { value: 'Alice' } });
+  renderer.render();
+  const save = renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-speaker-save'))[0];
+  await save.props.onClick({});
+  await runtime.flush();
+  renderer.render();
+
+  const draft = renderer.findAll((node) => node.type === 'input'
+    && String(node.props.className).includes('mvm-speaker-name-input'))[0];
+  assert.ok(draft, 'the editor stays open after the Host rejects the annotation');
+  assert.equal(draft.props.value, 'Alice');
+  assert.match(renderer.text(), /No voiceprint is available/);
+});
+
+test('renaming a voice refreshes the open meeting speaker labels', async () => {
+  let renamed = false;
+  const meeting = {
+    id: 'meeting-voice-rename-1', title: 'Voice rename', createdAt: '2026-10-28T07:00:00Z',
+    duration: 3, transcript: 'hello', minutes: null,
+    segments: [{ start: 0, end: 2, text: 'hello', speaker: '1' }],
+    speakerLabels: { '1': 'Old name' }, speakerProfiles: { '1': 'voice-1' },
+  };
+  const runtime = createLiveRuntime({
+    meetings: [meeting], stopMeeting: meeting,
+    voices: [{ id: 'voice-1', name: 'Old name', embedding: [1] }],
+    getMeeting: () => ({
+      ...meeting,
+      speakerLabels: { '1': renamed ? 'New name' : 'Old name' },
+    }),
+  });
+  const { renderer, requests } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+  const opener = renderer.findAll((node) => node.type === 'button'
+    && (String(node.props.className).includes('mvm-library-open')
+      || String(node.props.className).includes('mvm-meeting-card-title')))[0];
+  await opener.props.onClick({});
+  await runtime.flush();
+  renderer.render();
+  await renderer.click('Back to library');
+  renderer.render();
+  const trigger = renderer.findAll((node) => node.type === 'button'
+    && node.props['aria-label'] === 'Voice book')[0];
+  assert.ok(trigger, 'the header carries the Voice book button');
+  await trigger.props.onClick({});
+  renderer.render();
+  const voice = renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-voice-button'))[0];
+  assert.ok(voice, 'the voice book panel lists the named voice');
+  await voice.props.onClick({});
+  renderer.render();
+  const input = renderer.findAll((node) => node.type === 'input' && node.props.value === 'Old name')[0];
+  input.props.onChange({ target: { value: 'New name' } });
+  renderer.render();
+  const form = renderer.findAll((node) => node.type === 'form'
+    && String(node.props.className).includes('mvm-voice-rename'))[0];
+  renamed = true;
+  await form.props.onSubmit({ preventDefault() {} });
+  await runtime.flush();
+  renderer.render();
+  const reopen = renderer.findAll((node) => node.type === 'button'
+    && (String(node.props.className).includes('mvm-library-open')
+      || String(node.props.className).includes('mvm-meeting-card-title')))[0];
+  await reopen.props.onClick({});
+  await runtime.flush();
+  renderer.render();
+
+  assert.ok(requests.some((request) => request.method === 'voice-rename'));
+  assert.equal(requests.filter((request) => request.method === 'get').length, 3,
+    'the open meeting is reloaded after the global rename and again when reopened');
+  assert.match(renderer.text(), /New name/);
+});
+
+test('the compact voice book searches and filters named and unnamed voices', async () => {
+  const runtime = createLiveRuntime({
+    voices: [
+      { id: 'voice-alice', name: 'Alice', embedding: [1] },
+      { id: 'voice-bob', name: 'Bob', embedding: [0, 1] },
+      { id: 'voice-new', name: '', embedding: [0.5, 0.5] },
+    ],
+  });
+  const { renderer } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+  const trigger = renderer.findAll((node) => node.type === 'button'
+    && node.props['aria-label'] === 'Voice book')[0];
+  assert.ok(trigger, 'the header carries the Voice book button');
+  assert.equal(trigger.props['aria-expanded'], false, 'the panel starts closed');
+  await trigger.props.onClick({});
+  renderer.render();
+  const search = renderer.findAll((node) => node.type === 'input'
+    && String(node.props.className).includes('mvm-voicebook-search-input'))[0];
+  assert.ok(search, 'search is available inside the voice book');
+  search.props.onChange({ target: { value: 'Alice' } });
+  renderer.render();
+  assert.match(renderer.text(), /Alice/);
+  assert.doesNotMatch(renderer.text(), /Bob/);
+  assert.doesNotMatch(renderer.text(), /Unnamed voice/);
+
+  search.props.onChange({ target: { value: '' } });
+  renderer.render();
+  const filter = (label) => renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-voicebook-filter')
+    && node.props.children === label)[0];
+  await filter('Unnamed').props.onClick({});
+  renderer.render();
+  assert.match(renderer.text(), /Unnamed voice/);
+  assert.doesNotMatch(renderer.text(), /Alice/);
+  assert.doesNotMatch(renderer.text(), /Bob/);
+  await filter('Named').props.onClick({});
+  renderer.render();
+  assert.match(renderer.text(), /Alice/);
+  assert.match(renderer.text(), /Bob/);
+  assert.doesNotMatch(renderer.text(), /Unnamed voice/);
+});
+
+test('the voice book popover has one title row, one empty state and one storage note', async () => {
+  const runtime = createLiveRuntime({ voices: [] });
+  const { renderer } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+  const trigger = renderer.findAll((node) => node.type === 'button'
+    && node.props['aria-label'] === 'Voice book')[0];
+  await trigger.props.onClick({});
+  renderer.render();
+
+  assert.equal(renderer.findAll((node) => String(node.props.className).includes('mvm-voicebook-panel-head')).length, 1,
+    'the panel has one title row');
+  assert.equal(renderer.findAll((node) => String(node.props.className).includes('mvm-voicebook-empty-state')).length, 1,
+    'the empty voice book explains itself once');
+  assert.equal(renderer.findAll((node) => String(node.props.className).includes('mvm-voicebook-note')).length, 1,
+    'the storage note appears once');
+  const panelText = renderer.text();
+  assert.match(panelText, /No voice labels yet/);
+  assert.equal((panelText.match(/Voiceprints are kept permanently/g) || []).length, 1,
+    'the storage note is not repeated');
+  assert.doesNotMatch(panelText, /Voiceprints are permanently stored and backed up\./,
+    'the duplicated hint is gone');
+});
+
 test('a voice without a sample says so where the reader clicked', async () => {
   const runtime = createLiveRuntime({
     voices: [{ id: 'voice-1', name: '', embedding: [0.1] }],
@@ -575,17 +1075,18 @@ test('a voice without a sample says so where the reader clicked', async () => {
   renderer.mount(runtime.mainFactory());
   await runtime.flush();
   renderer.render();
-  await renderer.click('AI assistant');
+  const trigger = renderer.findAll((node) => node.type === 'button'
+    && node.props['aria-label'] === 'Voice book')[0];
+  assert.ok(trigger, 'the header carries the Voice book button');
+  await trigger.props.onClick({});
   renderer.render();
-  // The voice book and the unnamed group are two separate disclosures.
-  for (let step = 0; step < 2; step += 1) {
-    const group = renderer.findAll((node) => node.type === 'button'
-      && String(node.props.className).includes('mvm-voice-group-head')
-      && node.props['aria-expanded'] === false)[0];
-    assert.ok(group, 'the voice book group can be opened');
-    await group.props.onClick({});
-    renderer.render();
-  }
+  // The unnamed group is the only disclosure left inside the panel.
+  const group = renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-voice-group-head')
+    && node.props['aria-expanded'] === false)[0];
+  assert.ok(group, 'the unnamed voice group can be opened');
+  await group.props.onClick({});
+  renderer.render();
   const play = renderer.findAll((node) => node.type === 'button'
     && String(node.props.className).includes('mvm-voice-play'))[0];
   assert.ok(play, 'the voice has a play button');

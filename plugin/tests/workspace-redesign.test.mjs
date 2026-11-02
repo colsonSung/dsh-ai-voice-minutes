@@ -195,6 +195,7 @@ function createRuntime(meetingPatch = {}, { emptyLibrary = false } = {}) {
     'library.moreTemplates': 'More Templates', 'library.selected': '{count} selected',
     'assistant.open': 'AI assistant', 'assistant.close': 'Close assistant',
     'assistant.title': 'AI assistant', 'assistant.scope': 'Meetings',
+    'voice.title': 'Voice book', 'voice.hint': 'Name a speaker once and later meetings recognise the same voice.',
     'history.chatPlaceholder': 'Ask about past meetings, todos, or next steps',
     'history.suggestLabel': 'You may want to ask', 'history.newChat': 'New chat',
     'live.pass.provisional': 'Provisional', 'live.pass.corrected': 'Corrected',
@@ -296,6 +297,38 @@ test('header utility actions are compact icon-only buttons with accessible names
   }
 });
 
+test('the Voice book is a header button that opens a popover panel', async () => {
+  const runtime = createRuntime();
+  const { renderer } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+
+  const header = renderer.findAll((node) => String(node.props.className || '').includes('mvm-header-actions'))[0];
+  assert.ok(header, 'the page header exists');
+  const trigger = renderer.findAllWithin(header, (node) => node.type === 'button' && node.props['aria-label'] === 'Voice book');
+  assert.equal(trigger.length, 1, 'the header carries one Voice book button');
+  assert.equal(trigger[0].props['aria-expanded'], false, 'the panel starts closed');
+  assert.equal(renderer.findAll((node) => String(node.props.className || '').includes('mvm-voicebook-panel')).length, 0,
+    'the panel is not rendered before the button is used');
+
+  await trigger[0].props.onClick({});
+  renderer.render();
+  assert.ok(renderer.findAll((node) => String(node.props.className || '').includes('mvm-voicebook-panel'))[0],
+    'the header button opens the Voice book panel');
+
+  const home = renderer.findAll((node) => node.props.className === 'mvm-home')[0];
+  assert.equal(String(home.props.children[0].props.className || '').includes('mvm-voicebook'), false,
+    'the Voice book no longer occupies the top of the home page');
+
+  await renderer.click('AI assistant');
+  renderer.render();
+  const drawer = renderer.findAll((node) => String(node.props.className || '').includes('mvm-assistant-drawer'))[0];
+  assert.ok(drawer, 'the assistant drawer opens');
+  assert.equal(JSON.stringify(drawer.props.children).includes('mvm-voicebook'), false,
+    'the assistant drawer does not duplicate the Voice book');
+});
+
 test('the AI assistant is closed by default and opens and closes on demand', async () => {
   const runtime = createRuntime();
   const { renderer } = runtime;
@@ -311,6 +344,24 @@ test('the AI assistant is closed by default and opens and closes on demand', asy
   await renderer.click('Close assistant');
   renderer.render();
   assert.equal(drawers().length, 0, 'the drawer closes');
+});
+
+test('the assistant header uses an AI logo and an icon-only close button', async () => {
+  const runtime = createRuntime();
+  const { renderer } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+  await renderer.click('AI assistant');
+  renderer.render();
+
+  const logo = renderer.findAll((node) => String(node.props.className || '').includes('mvm-assistant-logo'));
+  assert.equal(logo.length, 1, 'the assistant title is an AI logo');
+  assert.ok(logo[0].props['aria-label'], 'the AI logo keeps an accessible assistant title');
+  const close = renderer.findAll((node) => node.type === 'button' && node.props['aria-label'] === 'Close assistant');
+  assert.equal(close.length, 1, 'the close control remains accessible by name');
+  assert.doesNotMatch(renderer.text(), /Close assistant/, 'no visible Close assistant text remains');
+  assert.doesNotMatch(renderer.text(), /AI meeting assistant/, 'the text title is replaced by the logo');
 });
 
 test('escape closes the assistant drawer', async () => {

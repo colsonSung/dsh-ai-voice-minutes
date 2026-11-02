@@ -10,6 +10,23 @@ export const DEFAULT_APPEARANCE = {
   compact: true,
 };
 
+/**
+ * The two looks the native window can take.
+ *
+ * The window used to be locked to the light pair, so it stayed a white card
+ * on a dark desktop. The host theme decides which pair it wears; a colour the
+ * reader picked by hand still wins over both.
+ */
+export const THEME_APPEARANCE = {
+  light: { background: '#f6f6f7', text: '#1c1c1e' },
+  dark: { background: '#1c1c1e', text: '#f6f6f7' },
+};
+
+/** The colours that belong to one host theme. */
+export function appearanceForTheme(theme) {
+  return THEME_APPEARANCE[theme] || THEME_APPEARANCE.light;
+}
+
 /** Owns the native always-on-top transcript window process. */
 export class DesktopOverlay {
   constructor(options = {}) {

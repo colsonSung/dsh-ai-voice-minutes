@@ -11,7 +11,7 @@
 import { execFile } from 'node:child_process';
 import { createReadStream } from 'node:fs';
 import { randomUUID } from 'node:crypto';
-import { mkdir, mkdtemp, open, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, open, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { homedir, tmpdir, userInfo } from 'node:os';
@@ -21,7 +21,7 @@ import { join } from 'node:path';
 import { PassThrough, Readable } from 'node:stream';
 import { promisify } from 'node:util';
 import { createLiveManager, listLiveMeetings, liveMeetingFromStatus, pcmToWav } from './live.js';
-import { DesktopOverlay } from './overlay.js';
+import { DesktopOverlay, appearanceForTheme } from './overlay.js';
 import { AsrAdmin, DEFAULT_ASR_LAUNCHER, DEFAULT_ASR_MODEL_DIR } from './asr-admin.js';
 
 export { createCaptureStream, pcmToWav } from './live.js';
@@ -192,12 +192,21 @@ function parseMinutesJson(text) {
   }
 }
 
-/** The overlay look, in the shape the native window expects on the wire. */
-function overlayAppearance(settings = {}) {
+/**
+ * The overlay look, in the shape the native window expects on the wire.
+ *
+ * The window follows the host theme: the built-in colours are the ones that
+ * belong to the theme, and only a colour the reader picked by hand replaces
+ * them.
+ */
+function overlayAppearance(settings = {}, theme = 'light') {
+  const base = appearanceForTheme(theme);
   const opacity = Number(settings.overlayOpacity);
+  const background = String(settings.overlayBackground || '');
+  const text = String(settings.overlayText || '');
   return {
-    background: String(settings.overlayBackground || DEFAULTS.overlayBackground),
-    text: String(settings.overlayText || DEFAULTS.overlayText),
+    background: background && background !== DEFAULTS.overlayBackground ? background : base.background,
+    text: text && text !== DEFAULTS.overlayText ? text : base.text,
     opacity: Number.isFinite(opacity) ? Math.min(1, Math.max(0, opacity)) : DEFAULTS.overlayOpacity,
     compact: settings.overlayCompact !== false,
   };
@@ -480,6 +489,19 @@ class MinutesService {
   constructor(config) {
     this.config = { ...DEFAULTS, ...(config || {}) };
     this.settingsReady = null;
+    this.voiceLibraryQueue = Promise.resolve();
+  }
+
+  async withVoiceLibraryLock(operation) {
+    const previous = this.voiceLibraryQueue;
+    let release;
+    this.voiceLibraryQueue = new Promise((resolve) => { release = resolve; });
+    await previous;
+    try {
+      return await operation();
+    } finally {
+      release();
+    }
   }
 
   settingsPath() {
@@ -1628,6 +1650,7 @@ class MinutesService {
     const directory = join(this.config.dataDir, 'realtime', id);
     const voices = [];
     const spans = [];
+    const voiceprints = {};
     for (const track of ['mic', 'system']) {
       const pcm = await readFile(join(directory, track + '.pcm')).catch(() => null);
       if (!pcm || pcm.length < 64) continue;
@@ -1639,7 +1662,14 @@ class MinutesService {
       for (const span of result.result.spans || []) {
         const local = String(span.speaker || '');
         if (!local) continue;
-        if (!names.has(local)) names.set(local, this._globalVoice(voices, prints[local], local));
+        if (!names.has(local)) {
+          const globalName = this._globalVoice(voices, prints[local], local);
+          names.set(local, globalName);
+          if (Array.isArray(prints[local]) && prints[local].length) {
+            voiceprints[globalName] = voiceprints[globalName]
+              ? averageVector([voiceprints[globalName], prints[local]]) : prints[local];
+          }
+        }
         spans.push({
           start: Number(span.start) || 0,
           end: Number(span.end) || 0,
@@ -1677,20 +1707,10 @@ class MinutesService {
       const next = labelled[index + 1];
       if (next?.speaker) segment.speaker = next.speaker;
     }
-    return { ...meeting, segments: labelled };
+    return { ...meeting, segments: labelled, voiceprints };
   }
 
   /* --------------------------- voice profiles -------------------------- */
-
-  /** Remove one voice profile from the voice book. */
-  async deleteVoice(payload = {}) {
-    const profileId = String(payload.profileId || '');
-    if (!profileId) return fail('minutes/voice-missing', '缺少声音标识');
-    const profiles = await this.loadVoiceProfiles();
-    const next = profiles.filter((profile) => profile.id !== profileId);
-    await this.saveVoiceProfiles(next);
-    return ok({ profiles: next });
-  }
 
   /* -------------------------- session recovery ------------------------- */
 
@@ -1772,21 +1792,76 @@ class MinutesService {
     return join(this.config.dataDir, 'voices', 'profiles.json');
   }
 
+  voiceProfileBackupsDir() {
+    return join(this.config.dataDir, 'voices', 'backups');
+  }
+
   async loadVoiceProfiles() {
-    const raw = await readFile(await this.voiceProfilesPath(), 'utf8').catch(() => '');
-    if (!raw) return [];
-    try {
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed?.profiles) ? parsed.profiles : [];
-    } catch {
-      return [];
+    return this.withVoiceLibraryLock(() => this.loadVoiceProfilesUnlocked());
+  }
+
+  async loadVoiceProfilesUnlocked() {
+    const parse = (raw) => {
+      if (!raw) return null;
+      try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed?.profiles) ? parsed.profiles : null;
+      } catch {
+        return null;
+      }
+    };
+    const primary = parse(await readFile(await this.voiceProfilesPath(), 'utf8').catch(() => ''));
+    if (primary) {
+      // Migrate a library written by an older plugin version the first time it
+      // is read. Later reads see the snapshot and stay read-only.
+      const existing = await readdir(this.voiceProfileBackupsDir()).catch(() => []);
+      if (!existing.some((name) => /^profiles-.*\.json$/.test(name))) {
+        await this.saveVoiceProfilesUnlocked(primary);
+      }
+      return primary;
     }
+    // Voice identities are permanent. If the main file is lost or damaged,
+    // recover the newest complete snapshot instead of silently starting over.
+    const backups = (await readdir(this.voiceProfileBackupsDir()).catch(() => []))
+      .filter((name) => /^profiles-.*\.json$/.test(name))
+      .map((name) => ({
+        name,
+        revision: Number(/^profiles-(\d{12})-/.exec(name)?.[1]) || 0,
+      }))
+      .sort((left, right) => right.revision - left.revision || right.name.localeCompare(left.name));
+    for (const { name } of backups) {
+      const recovered = parse(await readFile(join(this.voiceProfileBackupsDir(), name), 'utf8').catch(() => ''));
+      if (recovered) return recovered;
+    }
+    return [];
   }
 
   async saveVoiceProfiles(profiles) {
+    return this.withVoiceLibraryLock(() => this.saveVoiceProfilesUnlocked(profiles));
+  }
+
+  async saveVoiceProfilesUnlocked(profiles) {
     const directory = join(this.config.dataDir, 'voices');
-    await mkdir(directory, { recursive: true });
-    await writeFile(await this.voiceProfilesPath(), JSON.stringify({ profiles }, null, 2), 'utf8');
+    const backups = this.voiceProfileBackupsDir();
+    await mkdir(backups, { recursive: true });
+    const contents = JSON.stringify({ profiles }, null, 2);
+    const existing = (await readdir(backups).catch(() => []))
+      .filter((name) => /^profiles-.*\.json$/.test(name));
+    const revision = existing.reduce((highest, name) => Math.max(
+      highest, Number(/^profiles-(\d{12})-/.exec(name)?.[1]) || 0,
+    ), existing.length) + 1;
+    // Revisions, not random ids, determine recovery order even for several
+    // writes in one millisecond. The independent snapshot is written first.
+    const backupName = `profiles-${String(revision).padStart(12, '0')}-${nowIso().replace(/[:.]/g, '-')}-${randomUUID()}.json`;
+    await writeFile(join(backups, backupName), contents, { encoding: 'utf8', flag: 'wx' });
+    const temporary = join(directory, `.profiles-${randomUUID()}.tmp`);
+    try {
+      await writeFile(temporary, contents, 'utf8');
+      await rename(temporary, await this.voiceProfilesPath());
+    } catch (error) {
+      await rm(temporary, { force: true }).catch(() => {});
+      throw error;
+    }
     return profiles;
   }
 
@@ -1818,15 +1893,23 @@ class MinutesService {
 
   /** Match voiceprints against the global voice book and create entries for unknown voices. */
   async resolveVoiceLabels(voiceprints, existingLabels = {}, options = {}) {
-    const profiles = await this.loadVoiceProfiles();
+    return this.withVoiceLibraryLock(() => this.resolveVoiceLabelsUnlocked(voiceprints, existingLabels, options));
+  }
+
+  async resolveVoiceLabelsUnlocked(voiceprints, existingLabels = {}, options = {}) {
+    const profiles = await this.loadVoiceProfilesUnlocked();
     const threshold = Number(this.config.voiceMatchThreshold) || 0.5;
     const labels = { ...(existingLabels || {}) };
     const mapping = {};
+    const assigned = new Set();
     for (const [speaker, embedding] of Object.entries(voiceprints || {})) {
       if (!Array.isArray(embedding) || !embedding.length) continue;
       let best = null;
       let bestScore = 0;
       for (const profile of profiles) {
+        // Diarization clusters are distinct people within this meeting. Never
+        // assign two clusters to one global identity or train it with both.
+        if (assigned.has(profile.id)) continue;
         const candidates = [profile.embedding, ...(Array.isArray(profile.exemplars) ? profile.exemplars : [])]
           .filter((value) => Array.isArray(value) && value.length);
         const score = candidates.reduce((best2, candidate) => Math.max(best2, cosineSimilarity(embedding, candidate)), 0);
@@ -1837,6 +1920,7 @@ class MinutesService {
       }
       if (best && bestScore >= threshold) {
         mapping[speaker] = best.id;
+        assigned.add(best.id);
         if (best.name) labels[speaker] = best.name;
         best.exemplars = [...(Array.isArray(best.exemplars) ? best.exemplars : []), embedding].slice(-5);
         best.embedding = averageVector([best.embedding, embedding]);
@@ -1844,16 +1928,20 @@ class MinutesService {
         this._attachVoiceSample(best, speaker, options);
         continue;
       }
-      const id = voiceProfileId(embedding);
-      mapping[speaker] = id;
-      let profile = profiles.find((item) => item.id === id);
+      const baseId = voiceProfileId(embedding);
+      let id = baseId;
+      let profile = assigned.has(id) ? null : profiles.find((item) => item.id === id);
       if (!profile) {
+        let suffix = 2;
+        while (profiles.some((item) => item.id === id)) id = `${baseId}-${suffix++}`;
         profile = { id, name: '', embedding, exemplars: [embedding], createdAt: nowIso(), updatedAt: nowIso() };
         profiles.push(profile);
       }
+      mapping[speaker] = id;
+      assigned.add(id);
       this._attachVoiceSample(profile, speaker, options);
     }
-    await this.saveVoiceProfiles(profiles);
+    await this.saveVoiceProfilesUnlocked(profiles);
     return { labels, profiles: mapping, known: profiles };
   }
 
@@ -1861,53 +1949,93 @@ class MinutesService {
   async labelVoice(payload = {}) {
     const meetingId = String(payload.meetingId || '');
     const speaker = String(payload.speaker || '');
+    if (meetingId.startsWith('realtime-') && speaker) {
+      const record = await this.readMeetingRecord(meetingId);
+      const embedding = record?.voiceprints?.[speaker];
+      if (record && (!Array.isArray(embedding) || !embedding.length)) {
+        // Older meetings stored Speaker labels before they stored voiceprints.
+        // Rebuild them from the retained tracks before taking the library lock.
+        const labelled = await this.labelLiveSpeakers(record, { maxSeconds: null }).catch(() => null);
+        if (Array.isArray(labelled?.voiceprints?.[speaker]) && labelled.voiceprints[speaker].length) {
+          await this.writeMeetingRecord({
+            ...record,
+            segments: labelled.segments,
+            voiceprints: labelled.voiceprints,
+          });
+        }
+      }
+    }
+    return this.withVoiceLibraryLock(() => this.labelVoiceUnlocked(payload));
+  }
+
+  async labelVoiceUnlocked(payload = {}) {
+    const meetingId = String(payload.meetingId || '');
+    const speaker = String(payload.speaker || '');
     const name = String(payload.name || '').trim();
     if (!meetingId || !speaker) return fail('minutes/voice-missing', '缺少会议或说话人标识');
     const record = await this.readMeetingRecord(meetingId);
     if (!record) return fail('minutes/not-found', '没有找到会议：' + meetingId);
-    const voiceprints = record.voiceprints || {};
-    const embedding = voiceprints[speaker];
-    const profiles = await this.loadVoiceProfiles();
-    let profileId = (record.speakerProfiles || {})[speaker] || '';
-    if (embedding) {
-      const id = voiceProfileId(embedding);
-      profileId = profileId || id;
-      const existing = profiles.find((profile) => profile.id === id);
-      if (existing) {
-        existing.name = name;
-        existing.exemplars = [...(Array.isArray(existing.exemplars) ? existing.exemplars : []), embedding].slice(-5);
-        existing.embedding = averageVector([existing.embedding, embedding]);
-        existing.updatedAt = nowIso();
+    const embedding = (record.voiceprints || {})[speaker];
+    if (!Array.isArray(embedding) || !embedding.length) {
+      return fail('minutes/voiceprint-missing', '该说话人没有可用声纹，无法用于后续会议识别；请先重新分离说话人');
+    }
+    const profiles = await this.loadVoiceProfilesUnlocked();
+    const associatedId = String((record.speakerProfiles || {})[speaker] || '');
+    const associated = profiles.find((item) => item.id === associatedId);
+    // An unnamed auto-created profile can be named in place. Changing an
+    // already-named identity is a reassignment, not a global rename: the old
+    // person and every historical meeting that uses them must stay untouched.
+    let profile = associated && (!associated.name || associated.name === name) ? associated : null;
+    let profileId = profile ? associatedId : '';
+    if (!profile && name) {
+      profile = profiles.find((item) => item.id !== associatedId && item.name === name) || null;
+      if (profile) profileId = profile.id;
+    }
+    if (!profile) {
+      const baseId = voiceProfileId(embedding);
+      profile = profiles.find((item) => item.id === baseId && item.id !== associatedId) || null;
+      if (profile) {
+        profileId = profile.id;
       } else {
-        profiles.push({ id, name, embedding, exemplars: [embedding], createdAt: nowIso(), updatedAt: nowIso() });
+        profileId = baseId;
+        let suffix = 2;
+        while (profiles.some((item) => item.id === profileId)) profileId = `${baseId}-${suffix++}`;
+        profile = { id: profileId, name: '', embedding, exemplars: [], createdAt: nowIso(), updatedAt: nowIso() };
+        profiles.push(profile);
       }
-      await this.saveVoiceProfiles(profiles);
     }
+    profile.name = name;
+    profile.exemplars = [...(Array.isArray(profile.exemplars) ? profile.exemplars : []), embedding].slice(-5);
+    profile.embedding = averageVector([profile.embedding, embedding]);
+    profile.updatedAt = nowIso();
     const segments = Array.isArray(record.segments) ? record.segments : [];
-    const sampleSegment = segments.find((segment) => segment.speaker === speaker);
-    if (sampleSegment && embedding) {
-      const profile = profiles.find((item) => item.id === (profileId || voiceProfileId(embedding)));
-      this._attachVoiceSample(profile, speaker, { segments, meetingId });
-      if (profile?.sample) await this.saveVoiceProfiles(profiles);
-    }
+    this._attachVoiceSample(profile, speaker, { segments, meetingId });
+    await this.saveVoiceProfilesUnlocked(profiles);
     record.speakerLabels = { ...(record.speakerLabels || {}), [speaker]: name };
     record.speakerProfiles = { ...(record.speakerProfiles || {}), [speaker]: profileId };
     await this.writeMeetingRecord(record);
-    await this.applyProfileName(profileId, name);
-    return ok({ speakerLabels: record.speakerLabels, profiles: await this.loadVoiceProfiles() });
+    return ok({
+      speakerLabels: record.speakerLabels,
+      speakerProfiles: record.speakerProfiles,
+      profiles,
+    });
   }
 
   /** Rename a voice in the global voice book and refresh every meeting that uses it. */
   async renameVoice(payload = {}) {
+    return this.withVoiceLibraryLock(() => this.renameVoiceUnlocked(payload));
+  }
+
+  async renameVoiceUnlocked(payload = {}) {
     const profileId = String(payload.profileId || '');
     const name = String(payload.name || '').trim();
     if (!profileId) return fail('minutes/voice-missing', '缺少声音标识');
-    const profiles = await this.loadVoiceProfiles();
+    const profiles = await this.loadVoiceProfilesUnlocked();
     const profile = profiles.find((item) => item.id === profileId);
     if (!profile) return fail('minutes/not-found', '没有找到该声音');
     profile.name = name;
     profile.updatedAt = nowIso();
-    await this.saveVoiceProfiles(profiles);
+    await this.saveVoiceProfilesUnlocked(profiles);
     await this.applyProfileName(profileId, name);
     return ok({ profiles });
   }
@@ -2238,8 +2366,11 @@ export function apply(ctx, options = {}) {
   // The live manager is built after the overlay, so the overlay's control
   // handler reads it lazily instead of capturing a second one.
   let liveManager = options.liveManager || null;
+  // The native window follows the host theme; the page tells the Host which
+  // theme the shell is in.
+  let overlayTheme = options.overlayTheme || 'light';
   const desktopOverlay = options.desktopOverlay || new DesktopOverlay({
-    appearance: overlayAppearance(service.config),
+    appearance: overlayAppearance(service.config, overlayTheme),
     // The overlay remembers the window size and place the reader chose.
     statePath: join(service.config.dataDir || '', 'overlay-window.json'),
     onControl: (detail) => handleOverlayControl(detail),
@@ -2295,7 +2426,7 @@ export function apply(ctx, options = {}) {
 
   /** Push the configured look to the overlay; the window may still be closed. */
   async function sendOverlayAppearance() {
-    const appearance = overlayAppearance(service.config);
+    const appearance = overlayAppearance(service.config, overlayTheme);
     if (typeof desktopOverlay.updateAppearance === 'function') {
       await desktopOverlay.updateAppearance(appearance);
       return;
@@ -2362,6 +2493,7 @@ export function apply(ctx, options = {}) {
         duration: meeting.duration,
         transcript: meeting.transcript,
         segments: labelled.segments,
+        voiceprints: labelled.voiceprints,
         minutes: meeting.minutes || undefined,
         audioSize: meeting.size,
         realtime: true,
@@ -2371,7 +2503,7 @@ export function apply(ctx, options = {}) {
         void (async () => {
           try {
             const full = await service.labelLiveSpeakers(meeting, { maxSeconds: null });
-            await service.updateMeeting(meeting.id, { segments: full.segments });
+            await service.updateMeeting(meeting.id, { segments: full.segments, voiceprints: full.voiceprints });
           } catch {
             /* keep the capture track labels when the clustering fails */
           }
@@ -2447,6 +2579,14 @@ export function apply(ctx, options = {}) {
           : await service.readSettings();
         if (payload?.settings) await refreshOverlayAppearance().catch(() => {});
         return ok(settings);
+      }
+      case 'overlay-theme': {
+        // The page knows which theme the shell is in; the native window has to
+        // wear the same one, so it is told as soon as the theme changes.
+        const theme = payload?.theme === 'dark' ? 'dark' : 'light';
+        overlayTheme = theme;
+        await sendOverlayAppearance().catch(() => {});
+        return ok({ theme });
       }
       case 'transcribe':
         return service.transcribe(payload?.audio, payload?.options || {});
@@ -2526,6 +2666,18 @@ export function apply(ctx, options = {}) {
           return ok({ session, events: [] });
         }
       }
+      case 'live-level': {
+        // The loudness of the room right now. The capture measures the RMS of
+        // every frame, so the page can move its ribbon with the voice.
+        const session = liveManager?._session;
+        const level = Number(session?.metrics?.audioLevel);
+        const recording = Boolean(session && ['recording', 'stopping'].includes(session.status));
+        return ok({
+          level: Number.isFinite(level) ? Math.min(1, Math.max(0, level)) : 0,
+          recording,
+          status: String(session?.status || ''),
+        });
+      }
       case 'live-finalize': {
         if (!liveManager) return fail('minutes/live-unavailable', '实时采集尚未就绪');
         const session = liveManager._session;
@@ -2590,8 +2742,6 @@ export function apply(ctx, options = {}) {
         liveSummaryCache.set(cacheKey, entry);
         return ok({ summary: entry.summary, generatedAt: entry.generatedAt, transcriptLength: entry.transcriptLength });
       }
-      case 'voice-delete':
-        return service.deleteVoice(payload || {});
       case 'live-mark':
         if (!liveManager) return fail('minutes/live-unavailable', '实时采集尚未就绪');
         try {

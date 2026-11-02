@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -154,4 +154,55 @@ test('a live meeting is labelled with the people in the recording, not the captu
   assert.equal(labelled.segments[2].speaker, labelled.segments[1].speaker, 'a silent stretch keeps the last speaker');
   assert.ok(labelled.segments.every((segment) => segment.speaker !== 'mic'), 'no track name survives as a speaker');
   assert.ok(requests.some((url) => url.endsWith('/diarize')));
+  assert.deepEqual(Object.keys(labelled.voiceprints || {}).sort(), [
+    labelled.segments[0].speaker, labelled.segments[1].speaker,
+  ].sort(), 'the global speaker labels retain their voiceprints for the voice library');
+});
+
+test('labeling an old live meeting rebuilds missing voiceprints from its retained audio', async (t) => {
+  const requests = [];
+  const server = createServer((request, response) => {
+    requests.push(request.url);
+    response.writeHead(200, { 'content-type': 'application/json' });
+    response.end(JSON.stringify({
+      track: 'mic',
+      spans: [{ start: 0, end: 5, speaker: '发言人 1' }],
+      voiceprints: { '发言人 1': [1, 0] },
+    }));
+  });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise((resolve) => server.close(resolve)));
+  const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-legacy-voiceprint-'));
+  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  const id = 'realtime-legacy';
+  const sessionDir = join(dataDir, 'realtime', id);
+  await (await import('node:fs/promises')).mkdir(sessionDir, { recursive: true });
+  await writeFile(join(sessionDir, 'mic.pcm'), Buffer.alloc(16000 * 2 * 10));
+  await writeFile(join(dataDir, 'settings.json'), JSON.stringify({
+    asrBaseUrl: `http://127.0.0.1:${server.address().port}`,
+  }), 'utf8');
+  const { service } = capturePlugin();
+  service.config.dataDir = dataDir;
+  await service.readSettings();
+  await service.saveMeeting({
+    id, title: 'Legacy meeting', transcript: 'legacy', realtime: true,
+    segments: [{ start: 0, end: 5, audioStart: 0, audioEnd: 5, text: 'legacy', speaker: '发言人 1', source: 'mic' }],
+  });
+
+  const labelled = await service.labelVoice({ meetingId: id, speaker: '发言人 1', name: 'Legacy Person' });
+  assert.equal(labelled.ok, true, 'the retained recording supplies the missing voiceprint');
+  const record = await service.readMeetingRecord(id);
+  assert.deepEqual(record.voiceprints['发言人 1'], [1, 0]);
+  assert.equal(record.speakerLabels['发言人 1'], 'Legacy Person');
+  const profiles = await service.loadVoiceProfiles();
+  assert.ok(profiles.some((profile) => profile.name === 'Legacy Person'));
+  const later = await service.resolveVoiceLabels({ 'Speaker 1': [1, 0] });
+  assert.equal(later.labels['Speaker 1'], 'Legacy Person');
+  assert.ok(requests.some((url) => url.endsWith('/diarize')));
+});
+
+test('the normal live stop path saves synchronous and background voiceprints', async () => {
+  const source = await readFile(join(PLUGIN, 'index.js'), 'utf8');
+  assert.match(source, /voiceprints: labelled\.voiceprints/);
+  assert.match(source, /voiceprints: full\.voiceprints/);
 });

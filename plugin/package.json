@@ -1,6 +1,6 @@
 {
   "name": "@local/ai-voice-minutes",
-  "version": "3.6.0",
+  "version": "3.6.16",
   "description": "Local and cloud AI voice transcription, realtime dual-track translation, desktop overlay, meeting minutes, and transcript Q&A.",
   "private": true,
   "type": "module",

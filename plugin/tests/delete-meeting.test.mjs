@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -61,4 +61,29 @@ test('delete rejects path traversal without touching other files', async (t) => 
   assert.equal(result.ok, false);
   assert.equal(result.error.code, 'minutes/invalid-id');
   assert.equal(await readFile(outside, 'utf8'), 'keep');
+});
+
+test('deleting a meeting and its original audio preserves voice profiles and backups byte-for-byte', async (t) => {
+  const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-delete-voices-'));
+  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  const service = createService();
+  service.config.dataDir = dataDir;
+  await service.saveVoiceProfiles([{ id: 'voice-keep', name: 'Permanent', embedding: [1], exemplars: [[1]] }]);
+  const backupDir = join(dataDir, 'voices', 'backups');
+  const backupName = (await readdir(backupDir))[0];
+  const primaryPath = join(dataDir, 'voices', 'profiles.json');
+  const backupPath = join(backupDir, backupName);
+  const primaryBefore = await readFile(primaryPath, 'utf8');
+  const backupBefore = await readFile(backupPath, 'utf8');
+  const id = 'meeting-delete-voice-1';
+  await mkdir(join(dataDir, 'meetings'), { recursive: true });
+  await mkdir(join(dataDir, 'audio'), { recursive: true });
+  await writeFile(join(dataDir, 'meetings', `${id}.json`), JSON.stringify({ id, title: 'Delete audio', audioId: 'audio-voice-1' }));
+  await writeFile(join(dataDir, 'audio', 'audio-voice-1.wav'), 'original audio');
+
+  const deleted = await service.deleteMeeting(id);
+  assert.equal(deleted.ok, true);
+  await missing(join(dataDir, 'audio', 'audio-voice-1.wav'));
+  assert.equal(await readFile(primaryPath, 'utf8'), primaryBefore);
+  assert.equal(await readFile(backupPath, 'utf8'), backupBefore);
 });

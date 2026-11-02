@@ -87,7 +87,7 @@ test('a partial save never wipes stored segments or minutes', async (t) => {
   assert.equal(record.minutes.summary, '已有纪要', 'minutes survive a partial save');
 });
 
-test('a labelled voice keeps a playable sample and can be deleted', async (t) => {
+test('a labelled voice keeps a playable sample and has no deletion operation', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-sample-'));
   t.after(() => rm(dataDir, { recursive: true, force: true }));
   const service = applyWith({});
@@ -105,10 +105,8 @@ test('a labelled voice keeps a playable sample and can be deleted', async (t) =>
   assert.equal(profile.sample.meetingId, 'meeting-voice-9');
   assert.equal(profile.sample.start, 3);
   assert.equal(profile.sample.end, 6);
-
-  const removed = await service.deleteVoice({ profileId: profile.id });
-  assert.equal(removed.ok, true);
-  assert.equal((await service.loadVoiceProfiles()).length, 0);
+  assert.equal(typeof service.deleteVoice, 'undefined', 'voice profiles are persistent and cannot be deleted');
+  assert.equal((await service.loadVoiceProfiles()).length, 1);
 });
 
 test('live-summary produces progressive minutes from the transcript so far', async (t) => {
