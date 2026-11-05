@@ -31,16 +31,18 @@ async function waitFor(predicate, message = 'condition') {
 
 async function fixture(t, options = {}) {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-realtime-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const captures = [];
   const events = [];
+  let captureOptions = null;
   const manager = new RealtimeManager({
     dataDir,
     retryDelay: 0,
     transcribe: async () => 'transcript',
     translate: async (text) => 'translated:' + text,
     onEvent: (event) => events.push(event),
-    startCapture: async () => {
+    startCapture: async (options) => {
+      captureOptions = options;
       const stdout = new Readable({ read() {} });
       const capture = {
         stdout,
@@ -66,7 +68,7 @@ async function fixture(t, options = {}) {
     },
     ...options,
   });
-  return { manager, dataDir, events, captures, capture: () => captures[0] };
+  return { manager, dataDir, events, captures, capture: () => captures[0], captureOptions: () => captureOptions };
 }
 
 function audioCounts(events) {
@@ -260,6 +262,9 @@ test('queue overflow is bounded, explicitly degraded, and never loses raw PCM', 
   let first = true;
   const { manager, capture, dataDir } = await fixture(t, {
     maxQueue: 2,
+    // The queue gives up immediately here, so the overflow path is exercised
+    // without waiting for room first.
+    queueWaitMs: 0,
     transcribe: async (_bytes, chunk) => {
       if (first) { first = false; await gate.promise; }
       return 'text:' + chunk.chunkId + '.';
@@ -281,6 +286,82 @@ test('queue overflow is bounded, explicitly degraded, and never loses raw PCM', 
   assert.equal(status.session.metrics.queueDepth, 0);
   assert.equal(status.session.metrics.droppedChunks, 2);
   assert.equal((await readFile(join(dataDir, 'realtime', session.id, 'mix.pcm'))).length, bytes.length * 5);
+});
+
+test('a full queue waits for room and keeps the chunk instead of dropping it', async (t) => {
+  const gate = deferred();
+  let first = true;
+  const { manager, capture } = await fixture(t, {
+    maxQueue: 1,
+    queueWaitMs: 4000,
+    transcribe: async (_bytes, chunk) => {
+      if (first) { first = false; await gate.promise; }
+      return 'text:' + chunk.chunkId + '.';
+    },
+  });
+  const session = await manager.start();
+  const bytes = pcm(500, 800);
+  capture().audio('mix', bytes, 1);
+  await yieldToEventLoop();
+  capture().audio('mix', bytes, 2);
+  await yieldToEventLoop();
+  // The queue holds one chunk and one is in flight, so the third chunk has to
+  // wait for room instead of being dropped.
+  capture().audio('mix', bytes, 3);
+  await yieldToEventLoop();
+  let status = await manager.status(session.id);
+  assert.equal(status.session.metrics.droppedChunks, 0);
+  assert.equal(status.session.degraded, false);
+  capture().done();
+  gate.resolve();
+  await waitFor(() => manager.status(session.id).then((value) => value.session.status === 'stopped'), 'drain');
+  status = await manager.status(session.id);
+  assert.equal(status.session.metrics.droppedChunks, 0);
+  assert.equal(status.session.metrics.queuedChunks, 3);
+  assert.equal(status.events.some((event) => event.code === 'queue-overflow'), false);
+});
+
+test('ending a meeting does not wait for the backlog', async (t) => {
+  const gate = deferred();
+  let calls = 0;
+  const { manager, capture } = await fixture(t, {
+    transcribe: async () => { calls += 1; await gate.promise; return 'text'; },
+  });
+  const session = await manager.start();
+  const bytes = pcm(500, 800);
+  capture().audio('mix', bytes, 1);
+  await yieldToEventLoop();
+  for (let index = 2; index <= 5; index += 1) capture().audio('mix', bytes, index);
+  await waitFor(async () => (await manager.status(session.id)).session.metrics.queueDepth >= 3, 'backlog');
+  const stopping = manager.stop(session.id);
+  gate.resolve();
+  const stopped = await stopping;
+  assert.equal(stopped.status, 'stopped');
+  // Only the chunk that was already being transcribed was finished; the rest
+  // of the backlog was left for the final pass.
+  assert.equal(calls, 1);
+  assert.equal(stopped.metrics.abandonedChunks, 4);
+  assert.equal(stopped.metrics.queueDepth, 0);
+});
+
+test('the capture layer is asked for longer chunks when the queue grows', async (t) => {
+  const gate = deferred();
+  const { manager, capture, captureOptions } = await fixture(t, {
+    chunkMs: 3000,
+    maxChunkMs: 20000,
+    transcribe: async () => { await gate.promise; return 'text'; },
+  });
+  const session = await manager.start();
+  const budget = captureOptions().chunkBudget;
+  assert.equal(typeof budget, 'function');
+  assert.equal(budget(), 3000);
+  capture().audio('mix', pcm(500, 800), 1);
+  await waitFor(async () => (await manager.status(session.id)).session.metrics.transcribedChunks === 0, 'a chunk in flight');
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.ok(budget() > 3000, 'a busy queue asks for longer chunks');
+  assert.ok(budget() <= 20000, 'the chunk length stays within the cap');
+  gate.resolve();
+  await manager.stop(session.id);
 });
 
 test('stop waits for accepted work, is idempotent, and leaves no temporary state', async (t) => {

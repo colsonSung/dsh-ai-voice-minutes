@@ -25,7 +25,7 @@ function embedding(seed) {
 
 test('a known voice is recognised automatically in a later meeting', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-test-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
 
@@ -38,7 +38,7 @@ test('a known voice is recognised automatically in a later meeting', async (t) =
 
 test('an unknown voice becomes a nameless profile and can be named later', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-name-test-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   const vector = embedding(2);
@@ -66,7 +66,7 @@ test('an unknown voice becomes a nameless profile and can be named later', async
 
 test('renaming a voice updates every meeting that uses it', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-rename-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   const vector = embedding(3);
@@ -81,7 +81,7 @@ test('renaming a voice updates every meeting that uses it', async (t) => {
 
 test('naming an auto-created voice updates its existing profile without a duplicate', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-correct-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   const vector = embedding(4);
@@ -111,7 +111,7 @@ test('naming an auto-created voice updates its existing profile without a duplic
 
 test('voice profiles have permanent backups and recover from a damaged primary file', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-backup-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   const vector = embedding(5);
@@ -134,7 +134,7 @@ test('voice profiles have permanent backups and recover from a damaged primary f
 
 test('a pre-existing voice library is backed up on its first read', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-migrate-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const voicesDir = join(dataDir, 'voices');
   await mkdir(voicesDir, { recursive: true });
   const vector = embedding(6);
@@ -158,7 +158,7 @@ test('a pre-existing voice library is backed up on its first read', async (t) =>
 
 test('correcting a false auto-match reassigns the speaker without rewriting the original person', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-reassign-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   const alicePrint = [1, 0];
@@ -193,7 +193,7 @@ test('correcting a false auto-match reassigns the speaker without rewriting the 
 
 test('concurrent voice resolutions preserve every profile and its backup history', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-concurrent-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
 
@@ -211,7 +211,7 @@ test('concurrent voice resolutions preserve every profile and its backup history
 
 test('two speaker clusters cannot be assigned and blended into one profile', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-collision-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   const resolved = await service.resolveVoiceLabels({ 'Speaker A': [1, 0], 'Speaker B': [1, 0] });
@@ -221,7 +221,7 @@ test('two speaker clusters cannot be assigned and blended into one profile', asy
 
 test('backup revisions recover the newest valid state even when the latest snapshot is damaged', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-revisions-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   for (const name of ['state-1', 'state-2', 'state-3']) {
@@ -239,7 +239,7 @@ test('backup revisions recover the newest valid state even when the latest snaps
 
 test('a speaker without a voiceprint cannot be presented as a globally recognised voice', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-missing-print-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   await service.saveMeeting({

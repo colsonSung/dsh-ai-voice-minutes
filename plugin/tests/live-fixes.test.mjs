@@ -11,9 +11,12 @@ test('only the explicit End meeting actions stop the capture', () => {
   assert.match(source, /const onEndMeeting = async \(\) => \{/);
 });
 
-test('the live control bar is fixed to the viewport and the timer renders mm:ss', () => {
-  assert.match(source, /\.mvm-live-control-bar\{position:fixed/);
-  assert.match(source, /\.mvm-live-workspace\{padding-bottom:104px\}/);
+test('the live control bar stays inside the plugin column and the timer renders mm:ss', () => {
+  // The bar used to be `position:fixed`, which centred it on the window and
+  // pushed it across the plugin's left edge into the host sidebar.
+  assert.match(source, /\.mvm-live-control-bar\{position:absolute/);
+  assert.doesNotMatch(source, /\.mvm-live-control-bar\{[^}]*position:fixed/);
+  assert.match(source, /\.mvm-workspace\.mvm-live-workspace\{[^}]*position:relative[^}]*overflow:hidden/);
   assert.match(source, /function formatClock\(value\)/);
   assert.match(source, /const elapsedLabel = formatClock\(elapsed\)/);
 });
@@ -48,8 +51,12 @@ test('large second-based timestamps are rebased without another unit conversion'
 test('speaker chips stay on one line at desktop and narrow widths', () => {
   assert.match(source, /\.mvm-speaker\{[^}]*white-space:nowrap/);
   assert.match(source, /\.mvm-speaker-chip\{[^}]*white-space:nowrap/);
-  assert.match(source, /grid-template-columns:64px max-content minmax\(0,1fr\)/);
-  assert.match(source, /grid-template-columns:54px max-content minmax\(0,1fr\)/);
+  // The transcript row is the utterance layout: a flex head (badge, speaker,
+  // time) with the text indented underneath, not the old three-column table.
+  assert.match(source, /\.mvm-utterance-head\{display:flex/);
+  assert.match(source, /\.mvm-utterance-speaker-name\{[^}]*white-space:nowrap/);
+  assert.match(source, /\.mvm-utterance-text\{[^}]*padding-left:40px/);
+  assert.match(source, /@media\(max-width:900px\)\{\.mvm-utterance-text\{padding-left:0\}/);
 });
 
 test('live transcript timestamps are rebased to the recording start', () => {

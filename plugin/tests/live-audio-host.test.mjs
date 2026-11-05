@@ -9,7 +9,7 @@ const LIVE_AUDIO_ROUTE = '/api/ai-minutes/live-audio';
 
 test('live audio endpoint streams a valid WAV for the requested track', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-live-audio-test-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const sessionId = 'realtime-test-1';
   await mkdir(join(dataDir, 'realtime', sessionId), { recursive: true });
   const pcm = Buffer.from([1, 0, 255, 127, 0, 128]);

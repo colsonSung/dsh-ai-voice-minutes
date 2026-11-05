@@ -20,7 +20,7 @@ function createService() {
 
 test('an interrupted session is recovered into a meeting record', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-recovery-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const sessionDir = join(dataDir, 'realtime', 'realtime-interrupted-1');
   await mkdir(sessionDir, { recursive: true });
   await writeFile(join(sessionDir, 'checkpoint.json'), JSON.stringify({

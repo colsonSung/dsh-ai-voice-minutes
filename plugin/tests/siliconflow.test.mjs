@@ -37,7 +37,7 @@ test('SiliconFlow provider sends authenticated transcription without persisting 
   t.after(() => new Promise((resolve) => server.close(resolve)));
 
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-siliconflow-test-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   await writeFile(join(dataDir, 'settings.json'), JSON.stringify({
     asrProvider: 'siliconflow',
     siliconflowBaseUrl: `http://127.0.0.1:${server.address().port}/v1`,

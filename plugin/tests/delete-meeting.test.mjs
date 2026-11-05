@@ -23,7 +23,7 @@ async function missing(path) {
 
 test('delete removes the meeting index, realtime directory, and linked audio', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-delete-test-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const id = 'realtime-delete-1';
   await mkdir(join(dataDir, 'meetings'), { recursive: true });
   await mkdir(join(dataDir, 'audio'), { recursive: true });
@@ -52,7 +52,7 @@ test('delete removes the meeting index, realtime directory, and linked audio', a
 
 test('delete rejects path traversal without touching other files', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-delete-test-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const outside = join(dataDir, 'outside.json');
   await writeFile(outside, 'keep');
   const service = createService();
@@ -65,7 +65,7 @@ test('delete rejects path traversal without touching other files', async (t) => 
 
 test('deleting a meeting and its original audio preserves voice profiles and backups byte-for-byte', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-delete-voices-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   await service.saveVoiceProfiles([{ id: 'voice-keep', name: 'Permanent', embedding: [1], exemplars: [[1]] }]);

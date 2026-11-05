@@ -91,3 +91,46 @@ test('louder speech gets a larger amplitude than quiet speech', async () => {
   assert.ok(loudLevel > quietLevel * 2, `loud ${loudLevel} should dwarf quiet ${quietLevel}`);
   assert.ok(loudLevel > 0.5, 'loud speech really moves the waveform');
 });
+
+test('the chunk length follows the budget the transcription service asks for', async () => {
+  // Thirty seconds of audio, so a twenty second chunk can actually be filled.
+  let asked = 10000;
+  const events = await collect(createCaptureStream(frameStream(1000, 0, 3000), {
+    chunkMs: 10000,
+    maxChunkMs: 20000,
+    chunkBudget: () => asked,
+  }));
+  const audio = events.filter((event) => event.type === 'audio');
+  assert.equal(audio[0].pcmBase64.length, base64Length(16000 * 2 * 10), 'the first chunk follows the budget');
+
+  asked = 20000;
+  const longer = await collect(createCaptureStream(frameStream(1000, 0, 3000), {
+    chunkMs: 10000,
+    maxChunkMs: 20000,
+    chunkBudget: () => asked,
+  }));
+  const longerAudio = longer.filter((event) => event.type === 'audio');
+  assert.equal(
+    longerAudio[0].pcmBase64.length,
+    base64Length(16000 * 2 * 20),
+    'a machine that is behind gets longer chunks',
+  );
+
+  asked = 60000;
+  const capped = await collect(createCaptureStream(frameStream(1000, 0, 3000), {
+    chunkMs: 10000,
+    maxChunkMs: 20000,
+    chunkBudget: () => asked,
+  }));
+  const cappedAudio = capped.filter((event) => event.type === 'audio');
+  assert.equal(cappedAudio[0].pcmBase64.length, base64Length(16000 * 2 * 20), 'the chunk length stays capped');
+
+  asked = 1000;
+  const floored = await collect(createCaptureStream(frameStream(1000, 0, 3000), {
+    chunkMs: 10000,
+    maxChunkMs: 20000,
+    chunkBudget: () => asked,
+  }));
+  const flooredAudio = floored.filter((event) => event.type === 'audio');
+  assert.equal(flooredAudio[0].pcmBase64.length, base64Length(16000 * 2 * 10), 'the chunk never gets shorter than the setting');
+});

@@ -7,7 +7,7 @@ import { apply, ROUTE } from '../index.js';
 
 test('stopped realtime sessions are listed and opened in the meeting library', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-live-library-test-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const id = 'realtime-library-1';
   await mkdir(join(dataDir, 'realtime', id), { recursive: true });
   await writeFile(join(dataDir, 'realtime', id, 'checkpoint.json'), JSON.stringify({

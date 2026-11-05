@@ -34,7 +34,7 @@ function streamingServer(words, options = {}) {
 
 async function fixture(t, options = {}) {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-stream-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   let service;
   apply({
     provide(name, value) { if (name === 'minutes') service = value; },

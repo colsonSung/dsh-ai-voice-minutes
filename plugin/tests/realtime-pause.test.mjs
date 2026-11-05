@@ -7,7 +7,7 @@ import { RealtimeManager } from '../realtime.js';
 
 test('pause suspends transcription while raw recording continues, then resume drains backlog', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-pause-test-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   let finish;
   const done = new Promise((resolve) => { finish = resolve; });
   let transcribeCalls = 0;

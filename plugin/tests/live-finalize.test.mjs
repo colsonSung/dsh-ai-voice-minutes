@@ -18,7 +18,7 @@ function fakeCapture() {
 
 test('chunk transcripts are marked provisional and a final transcript can replace them', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-pass-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const manager = new RealtimeManager({
     dataDir,
     retryDelay: 0,
@@ -48,7 +48,7 @@ test('chunk transcripts are marked provisional and a final transcript can replac
 
 test('the Host exposes live-finalize and live-summary-status', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-finalize-route-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   let route;
   let service;
   apply({
@@ -71,7 +71,7 @@ test('the Host exposes live-finalize and live-summary-status', async (t) => {
 
 test('finalizing a session posts the accumulated audio to the ASR service', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-finalize-call-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const sessionDir = join(dataDir, 'realtime', 'realtime-f-1');
   await mkdir(sessionDir, { recursive: true });
   await writeFile(join(sessionDir, 'mic.pcm'), Buffer.alloc(3200, 7));

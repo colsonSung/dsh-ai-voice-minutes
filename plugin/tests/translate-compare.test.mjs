@@ -43,7 +43,7 @@ test('comparison reports latency and detects chatty or empty output', async (t) 
     },
   });
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-compare-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   service.config.dataDir = dataDir;
   await writeFile(join(dataDir, 'settings.json'), JSON.stringify({
     translationBaseUrl: `http://127.0.0.1:${server.address().port}/v1`,

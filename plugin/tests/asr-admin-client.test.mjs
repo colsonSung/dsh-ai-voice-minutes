@@ -12,5 +12,10 @@ test('ASR settings exposes real service lifecycle and model management controls'
   assert.match(source, /settings\.asr\.serviceTitle/);
   assert.match(source, /settings\.asr\.download/);
   assert.match(source, /settings\.asr\.autoStart/);
-  assert.match(host, /asrAutoStart:\s*false/);
+  // Autostart ships on: a meeting needs the ASR service before its first
+  // caption, and the settings file decides whether it starts.
+  assert.match(host, /asrAutoStart:\s*true/);
+  assert.match(host, /llmAutoStart:\s*true/);
+  assert.match(host, /await service\.ensureSettings\(\)/, 'the boot hook reads the saved settings first');
+  assert.match(host, /NODE_TEST_CONTEXT/, 'a test harness never spawns the real services');
 });

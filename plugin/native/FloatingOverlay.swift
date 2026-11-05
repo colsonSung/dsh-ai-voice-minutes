@@ -6,6 +6,9 @@ import SwiftUI
 
 private let maximumTranscriptRows = 100
 private let maximumLevelSamples = 56
+/// The captions have to win over whatever is behind them, so the window never
+/// goes below this much opacity even if the setting asks for it.
+private let minimumOverlayOpacity = 0.85
 private let compactWindowSize = NSSize(width: 500, height: 340)
 private let expandedWindowSize = NSSize(width: 920, height: 520)
 
@@ -152,7 +155,9 @@ enum OverlayParser {
                 appearance.text = text
             }
             if let opacity = dictionary["opacity"] as? NSNumber {
-                appearance.opacity = min(1, max(0.1, opacity.doubleValue))
+                // Below about 85% the desktop shows through the caption itself,
+                // which is exactly what makes a floating transcript unreadable.
+                appearance.opacity = min(1, max(minimumOverlayOpacity, opacity.doubleValue))
             }
             if let compact = dictionary["compact"] as? Bool {
                 appearance.compact = compact
@@ -670,10 +675,12 @@ struct FloatingOverlayView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             Spacer(minLength: 0)
 
+            // No plate behind the meter: it is a transient signal, and a filled
+            // block at the bottom of the card read louder than the captions it
+            // is supposed to support.
             levelStrip
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(RoundedRectangle(cornerRadius: 10).fill(text.opacity(0.035)))
+                .padding(.horizontal, 2)
+                .padding(.vertical, 2)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .padding(.horizontal, 18)
@@ -691,28 +698,28 @@ struct FloatingOverlayView: View {
         // straddles the centre line, and the bar is as tall as the voice was.
         return Canvas { context, size in
             let middle = size.height / 2
-            var axis = Path()
-            axis.move(to: CGPoint(x: 0, y: middle))
-            axis.addLine(to: CGPoint(x: size.width, y: middle))
-            context.stroke(axis, with: .color(text.opacity(0.12)), lineWidth: 1)
+            // No centre rule: the bars straddle the middle anyway, so a full
+            // width line only added one more line to the card.
             let step = size.width / CGFloat(max(1, slots))
             for index in 0..<slots {
                 guard index >= first else { continue }
                 let level = levels[index - first]
-                let amplitude = max(0.6, level * (middle - 1))
+                let amplitude = max(0.4, level * (middle - 0.5))
                 let x = step * (CGFloat(index) + 0.5)
                 var bar = Path()
                 bar.move(to: CGPoint(x: x, y: middle - amplitude))
                 bar.addLine(to: CGPoint(x: x, y: middle + amplitude))
-                let color = level > 0.06 ? accent.opacity(0.7) : text.opacity(0.22)
+                // Quiet enough that the captions stay the loudest thing in the
+                // window: the voice shows as a fine texture, not as a graph.
+                let color = level > 0.06 ? accent.opacity(0.38) : text.opacity(0.12)
                 context.stroke(
                     bar,
                     with: .color(color),
-                    style: StrokeStyle(lineWidth: 2.4, lineCap: .round)
+                    style: StrokeStyle(lineWidth: 1.1, lineCap: .round)
                 )
             }
         }
-        .frame(height: 28, alignment: .center)
+        .frame(height: 12, alignment: .center)
         .frame(maxWidth: .infinity, alignment: .leading)
         .animation(.linear(duration: 0.09), value: model.levels)
     }
@@ -991,8 +998,12 @@ final class FloatingOverlayAppDelegate: NSObject, NSApplicationDelegate, NSWindo
 
     private func applyAppearance(_ appearance: OverlayAppearance) {
         guard let window else { return }
+        // A window that is meant to be solid has to be solid: an alpha of 0.999
+        // still blends the desktop into the caption text.
+        let opaque = appearance.opacity >= 0.999
+        window.isOpaque = opaque
         window.backgroundColor = NSColor(appearance.backgroundColor)
-            .withAlphaComponent(CGFloat(appearance.opacity))
+            .withAlphaComponent(CGFloat(opaque ? 1 : appearance.opacity))
         window.appearance = NSAppearance(named: appearance.isLight ? .aqua : .darkAqua)
     }
 
@@ -1185,7 +1196,14 @@ enum FloatingOverlaySelfTest {
             if case let .appearance(value)? = appearance {
                 expect(value.background == "#102030", "appearance background")
                 expect(value.text == "#ffffff", "appearance text")
-                expect(abs(value.opacity - 0.8) < 0.0001, "appearance opacity")
+                // 0.8 is under the legibility floor, so it is raised to it.
+                expect(abs(value.opacity - minimumOverlayOpacity) < 0.0001, "appearance opacity floor")
+                let solid = try OverlayParser.parse(
+                    ##"{"type":"appearance","background":"#102030","text":"#ffffff","opacity":1}"##
+                )
+                if case let .appearance(solidValue)? = solid {
+                    expect(abs(solidValue.opacity - 1) < 0.0001, "a solid window stays solid")
+                }
                 expect(value.compact == false, "appearance compact")
             } else {
                 expect(false, "appearance event")

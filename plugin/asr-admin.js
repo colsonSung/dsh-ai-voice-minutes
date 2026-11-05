@@ -5,6 +5,7 @@ import { request as httpRequest } from 'node:http';
 import { request as httpsRequest } from 'node:https';
 import { basename, dirname, join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
+import { pcmToWav } from './live.js';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
@@ -41,12 +42,13 @@ export const ASR_MODEL_CATALOG = [
   { id: 'ggml-large-v3-q5_0.bin', label: 'Large v3 Q5', sizeLabel: '1.0 GB', sizeBytes: 1080525312 },
   { id: 'ggml-large-v3-turbo.bin', label: 'Large v3 Turbo', sizeLabel: '1.6 GB', sizeBytes: 1703240704 },
   { id: 'ggml-large-v3-turbo-q5_0.bin', label: 'Large v3 Turbo Q5', sizeLabel: '547 MB', sizeBytes: 573645568 },
-].map((entry) => ({ ...entry, backend: 'whispercpp', role: 'asr', kind: 'file', url: WHISPER_CPP_BASE + entry.id })).concat([
+].map((entry) => ({ ...entry, backend: 'whispercpp', role: 'asr', capability: 'live', kind: 'file', url: WHISPER_CPP_BASE + entry.id })).concat([
   {
     id: 'sensevoice',
     label: 'SenseVoice',
     backend: 'sensevoice',
     role: 'asr',
+    capability: 'live',
     kind: 'tar.bz2',
     sizeLabel: '1.05 GB',
     sizeBytes: 1047870769,
@@ -60,6 +62,8 @@ export const ASR_MODEL_CATALOG = [
     label: 'Fun-ASR-Nano',
     backend: 'funasr',
     role: 'asr',
+    // The refinement pass, not a caption model: /finalize always uses it.
+    capability: 'refine',
     kind: 'files',
     sizeLabel: '约 1.9 GB',
     sizeBytes: 2000000000,
@@ -70,6 +74,7 @@ export const ASR_MODEL_CATALOG = [
     label: 'ECAPA 说话人模型',
     backend: 'diarize',
     role: 'diarize',
+    capability: 'diarize',
     kind: 'files',
     sizeLabel: '85 MB',
     sizeBytes: 89000000,
@@ -84,6 +89,9 @@ export const ASR_MODEL_CATALOG = [
 ]);
 
 export const DEFAULT_ASR_MODEL_DIR = fileURLToPath(new URL('./native/asr/models/', import.meta.url));
+/** Backends that can serve live captions; Fun-ASR is refinement only. */
+export const LIVE_BACKENDS = ['whispercpp', 'sensevoice'];
+
 export const DEFAULT_ASR_LAUNCHER = fileURLToPath(new URL('./native/asr/local_services.py', import.meta.url));
 export const DEFAULT_FUN_ASR_PYTHON = fileURLToPath(new URL('./native/asr/runtime/venv-funasr/bin/python', import.meta.url));
 
@@ -141,12 +149,24 @@ export class AsrAdmin {
     return this.config.asrLauncher || DEFAULT_ASR_LAUNCHER;
   }
 
+  /**
+   * The backend that serves **live captions**.
+   *
+   * Fun-ASR-Nano is not one of them, on purpose: it is the pass-2 refinement
+   * model (`/finalize` always uses it, whatever this returns), and as a live
+   * backend it costs about fifteen seconds per request just to reload its
+   * weights. A 3-second caption chunk measured 28s on Fun-ASR against 0.5s on
+   * SenseVoice, which is the difference between "subtitles" and "nothing".
+   */
   backend() {
-    const backend = this.config.asrBackend || 'whispercpp';
-    if (!['whispercpp', 'sensevoice', 'funasr'].includes(backend)) {
-      throw new Error('未知 ASR 后端：' + backend);
+    const configured = this.config.asrBackend || 'whispercpp';
+    // A saved `funasr` predates this split; treat it as "the refinement model
+    // is on, but live captions need a fast one".
+    if (configured === 'funasr') return 'sensevoice';
+    if (!LIVE_BACKENDS.includes(configured)) {
+      throw new Error('未知 ASR 后端：' + configured);
     }
-    return backend;
+    return configured;
   }
 
   modelPaths() {
@@ -196,8 +216,26 @@ export class AsrAdmin {
   async status() {
     const [probe, catalog] = await Promise.all([this.probe(), this.catalog()]);
     const models = catalog.entries.filter((entry) => entry.downloaded);
+    const live = catalog.entries.find((entry) => entry.id === catalog.activeId)
+      || catalog.entries.find((entry) => entry.capability === 'live' && entry.downloaded)
+      || null;
+    const refine = catalog.entries.find((entry) => entry.capability === 'refine') || null;
     return {
       catalog,
+      // Two roles, two answers. The panel shows them separately because they
+      // have different jobs and different failure modes: a slow live model
+      // costs captions, a missing refinement model costs the final text.
+      live: live ? {
+        id: live.id, label: live.label || live.id, backend: live.backend,
+        downloaded: Boolean(live.downloaded), size: live.actualSize || 0,
+      } : null,
+      refine: refine ? {
+        id: refine.id, label: refine.label || refine.id, backend: refine.backend,
+        downloaded: Boolean(refine.downloaded), size: refine.actualSize || 0,
+        // /finalize is unavailable without it, and it is independent of the
+        // live backend by design.
+        ready: Boolean(refine.downloaded),
+      } : null,
       online: probe.online,
       endpoint: this.config.asrBaseUrl,
       health: probe.health,
@@ -249,10 +287,54 @@ export class AsrAdmin {
     return this.start();
   }
 
-  /** Resolve which catalog entry is currently in use. */
+  /**
+   * Load the refinement model ahead of time.
+   *
+   * The Fun-ASR worker reloads its weights on a fresh process, so the first
+   * `/finalize` of the day pays about fifteen seconds. Warming it moves that
+   * cost off the end of a meeting.
+   */
+  async warmRefiner() {
+    const base = String(this.config.asrBaseUrl || '').replace(/\/v1\/?$/, '');
+    const started = Date.now();
+    try {
+      const response = await fetch(base + '/health', { signal: AbortSignal.timeout(4000) });
+      if (!response.ok) return { ok: false, detail: 'ASR 服务未就绪（HTTP ' + response.status + '）' };
+    } catch (error) {
+      return { ok: false, detail: 'ASR 服务未就绪：' + errorOf(error) };
+    }
+    try {
+      // One second of silence is enough to make the worker build its model.
+      const silence = Buffer.alloc(16000 * 2);
+      const wav = pcmToWav(silence);
+      const boundary = '----ai-minutes-warmup-' + Date.now();
+      const body = Buffer.concat([
+        Buffer.from('--' + boundary + '\r\nContent-Disposition: form-data; name="track"\r\n\r\nmic\r\n'),
+        Buffer.from('--' + boundary + '\r\nContent-Disposition: form-data; name="language"\r\n\r\nauto\r\n'),
+        Buffer.from('--' + boundary + '\r\nContent-Disposition: form-data; name="file"; filename="warmup.wav"\r\nContent-Type: audio/wav\r\n\r\n'),
+        wav,
+        Buffer.from('\r\n--' + boundary + '--\r\n'),
+      ]);
+      const response = await fetch(base + '/finalize', {
+        method: 'POST',
+        headers: { 'content-type': 'multipart/form-data; boundary=' + boundary, 'content-length': String(body.length) },
+        body,
+        signal: AbortSignal.timeout(180000),
+      });
+      const text = await response.text();
+      return {
+        ok: response.ok,
+        elapsed: (Date.now() - started) / 1000,
+        detail: response.ok ? '' : 'HTTP ' + response.status + ' ' + text.slice(0, 120),
+      };
+    } catch (error) {
+      return { ok: false, detail: errorOf(error) };
+    }
+  }
+
+  /** Resolve which catalog entry is currently in use for live captions. */
   activeModelId(downloadedIds = []) {
     if (this.backend() === 'sensevoice') return 'sensevoice';
-    if (this.backend() === 'funasr') return 'fun-asr-nano';
     const configured = this.config.whisperCppModel ? this.config.whisperCppModel.split('/').pop() : '';
     if (configured) return configured;
     if (downloadedIds.includes('ggml-large-v3.bin')) return 'ggml-large-v3.bin';
@@ -283,7 +365,17 @@ export class AsrAdmin {
       entries: await Promise.all(ASR_MODEL_CATALOG.map(async (entry) => {
         if (entry.kind !== 'file') {
           const state = await this.nativeEntryState(entry);
-          return { ...entry, ...state, active: entry.id === activeId, selectable: entry.role === 'asr', downloadable: true, deletable: true };
+          return {
+            ...entry,
+            ...state,
+            active: entry.id === activeId,
+            // Fun-ASR is the pass-2 refiner. It is always wired, so it is not a
+            // live backend the reader can switch to.
+            refine: entry.capability === 'refine',
+            selectable: entry.capability === 'live',
+            downloadable: true,
+            deletable: true,
+          };
         }
         return {
           ...entry,
@@ -291,7 +383,8 @@ export class AsrAdmin {
           path: byName.get(entry.id)?.path || join(this.modelDir(), entry.id),
           actualSize: byName.get(entry.id)?.size || 0,
           active: entry.id === activeId,
-          selectable: entry.role === 'asr',
+          refine: false,
+          selectable: entry.capability === 'live',
           downloadable: true,
           deletable: true,
         };

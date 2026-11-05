@@ -20,7 +20,7 @@ function createService() {
 
 test('translation defaults to the local model with the cloud model as the fallback', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-translation-defaults-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   // The local model speaks first: no network round trip on the caption path.
@@ -35,7 +35,7 @@ test('translation defaults to the local model with the cloud model as the fallba
 
 test('a failed local translation falls back to the cloud model', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-translation-fallback-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   const calls = [];
@@ -58,7 +58,7 @@ test('a failed local translation falls back to the cloud model', async (t) => {
 
 test('the cloud fallback can be disabled without changing the primary provider', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-translation-no-fallback-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   service.config.translationFallbackEnabled = false;
@@ -75,7 +75,7 @@ test('the cloud fallback can be disabled without changing the primary provider',
 
 test('minutes and Q&A default to the local general model with reasoning disabled', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-llm-defaults-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   assert.equal(service.config.llmProvider, 'lmstudio');
@@ -105,7 +105,7 @@ test('a local LLM that rejects json_object still returns structured minutes cont
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   t.after(() => new Promise((resolve) => server.close(resolve)));
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-local-json-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   service.config.llmProvider = 'lmstudio';

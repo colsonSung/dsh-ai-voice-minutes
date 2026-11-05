@@ -19,7 +19,7 @@ function createService() {
 
 async function serviceWith(t, prefix) {
   const dataDir = await mkdtemp(join(tmpdir(), prefix));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   return service;

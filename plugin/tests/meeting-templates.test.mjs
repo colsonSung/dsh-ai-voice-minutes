@@ -41,7 +41,7 @@ async function withModel(t, reply, run) {
 
 test('each template asks for its own output structure', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-template-prompt-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   await withModel(t, '{"summary":"s"}', async (service, prompts) => {
     service.config.dataDir = dataDir;
     const visual = await service.summarize('一段会议内容', { template: 'visual-summary' });
@@ -60,7 +60,7 @@ test('each template asks for its own output structure', async (t) => {
 
 test('the template keeps its own fields and is recorded with the meeting', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-template-store-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   await withModel(t, '{"summary":"s","highlights":[{"title":"要点","detail":"细节"}]}', async (service) => {
     service.config.dataDir = dataDir;
     const result = await service.summarize('一段会议内容', { template: 'visual-summary' });

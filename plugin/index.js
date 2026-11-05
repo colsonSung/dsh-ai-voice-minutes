@@ -12,7 +12,7 @@ import { execFile } from 'node:child_process';
 import { createReadStream } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { mkdir, mkdtemp, open, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { homedir, tmpdir, userInfo } from 'node:os';
 import { request as httpRequest } from 'node:http';
@@ -23,6 +23,7 @@ import { promisify } from 'node:util';
 import { createLiveManager, listLiveMeetings, liveMeetingFromStatus, pcmToWav } from './live.js';
 import { DesktopOverlay, appearanceForTheme } from './overlay.js';
 import { AsrAdmin, DEFAULT_ASR_LAUNCHER, DEFAULT_ASR_MODEL_DIR } from './asr-admin.js';
+import { LocalLlmAdmin } from './llm-admin.js';
 
 export { createCaptureStream, pcmToWav } from './live.js';
 
@@ -66,6 +67,7 @@ const TEMPLATE_PROMPTS = {
 
 const TEMPLATE_SCHEMAS = {
   'intelligent-slicing': {
+    title: '会议标题（不超过20字，概括这场会议在谈什么，不要照抄转写的第一句）',
     summary: '一句话结论（不超过60字）',
     topics: [{ title: '议题标题', start: 0, end: 0, summary: '本段讨论了什么', decisions: ['达成的结论'] }],
     chapters: [{ start: 0, end: 0, title: '章节标题', summary: '章节摘要' }],
@@ -76,6 +78,7 @@ const TEMPLATE_SCHEMAS = {
     risks: [{ text: '暴露的风险' }],
   },
   'visual-summary': {
+    title: '会议标题（不超过20字，概括这场会议在谈什么，不要照抄转写的第一句）',
     summary: '一句话结论（不超过60字）',
     highlights: [{ title: '要点标题', detail: '要点说明' }],
     topics: [{ title: '议题标题', start: 0, end: 0, summary: '本段讨论了什么' }],
@@ -83,6 +86,7 @@ const TEMPLATE_SCHEMAS = {
     risks: [{ text: '暴露的风险' }],
   },
   'classic': {
+    title: '会议标题（不超过20字，概括这场会议在谈什么，不要照抄转写的第一句）',
     summary: '会议概述（不超过60字）',
     background: '会议背景与目标',
     agenda: ['议题一', '议题二'],
@@ -92,6 +96,7 @@ const TEMPLATE_SCHEMAS = {
     todos: [{ text: '待办事项', owner: '责任人', due: '截止时间' }],
   },
   'meeting-minutes': {
+    title: '会议标题（不超过20字，概括这场会议在谈什么，不要照抄转写的第一句）',
     summary: '会议摘要（不超过60字）',
     conclusions: ['关键结论一', '关键结论二'],
     actions: [{ text: '行动项', owner: '责任人', due: '完成时间' }],
@@ -102,7 +107,12 @@ const TEMPLATE_SCHEMAS = {
 
 const DEFAULTS = {
   asrProvider: 'local',
-  asrAutoStart: false,
+  asrAutoStart: true,
+  // Starting LM Studio's server and loading the translation model takes a few
+  // seconds and a few gigabytes, but it only ever happens when a provider in
+  // the settings is actually local.
+  llmAutoStart: true,
+  llmLmsBinary: '',
   liveChunkSeconds: 3,
   asrDiarizeThreshold: 0.82,
   voiceMatchThreshold: 0.5,
@@ -488,6 +498,13 @@ async function pathExists(path) {
 class MinutesService {
   constructor(config) {
     this.config = { ...DEFAULTS, ...(config || {}) };
+    // A harness that mounts the plugin must never write into the reader's real
+    // library: a test once saved its fixture settings over ~/.ai-minutes and
+    // replaced the reader's providers. With no explicit directory under a test
+    // runner, the service gets a throwaway one instead.
+    if (!config?.dataDir && process.env.NODE_TEST_CONTEXT) {
+      this.config.dataDir = mkdtempSync(join(tmpdir(), 'ai-minutes-unclaimed-'));
+    }
     this.settingsReady = null;
     this.voiceLibraryQueue = Promise.resolve();
   }
@@ -627,15 +644,20 @@ class MinutesService {
     const timer = setTimeout(() => controller.abort(), 2500);
     try {
       const headers = {};
+      const translation = kind === 'translation';
+      const provider = translation ? this.config.translationProvider : this.config.llmProvider;
+      const local = provider === 'lmstudio';
       const apiKey = kind === 'asr' && this.config.asrProvider === 'siliconflow'
         ? await this.loadSiliconflowApiKey()
-        : kind === 'llm' && this.config.llmProvider !== 'lmstudio' ? this.config.apiKey || (await this.loadApiKey()) : '';
+        : translation
+          ? local ? '' : (await this.loadTranslationApiKey()) || this.config.apiKey || (await this.loadApiKey())
+          : kind === 'llm' && !local ? this.config.apiKey || (await this.loadApiKey()) : '';
       if (apiKey) headers.Authorization = 'Bearer ' + apiKey;
       const target = kind === 'asr'
         ? this.config.asrProvider === 'siliconflow'
           ? joinUrl(this.config.siliconflowBaseUrl, '/models')
           : joinUrl(this.config.asrBaseUrl, '/health')
-        : joinUrl(this.config.llmBaseUrl, '/models');
+        : joinUrl(translation ? this.config.translationBaseUrl : this.config.llmBaseUrl, '/models');
       const res = await fetch(target, { headers, signal: controller.signal });
       if (!res.ok) return { alive: false, detail: 'HTTP ' + res.status };
       const text = await res.text();
@@ -658,11 +680,15 @@ class MinutesService {
     // Re-read the file every time, so the panel never shows a cached model or
     // provider that the settings file no longer holds.
     await this.readSettingsFile();
-    const [asr, llm] = await Promise.all([
+    const [asr, llm, translation] = await Promise.all([
       this.probe(this.config.asrBaseUrl, 'asr'),
       this.probe(this.config.llmBaseUrl, 'llm'),
+      // The translation model is its own endpoint; probing it separately is
+      // what lets the panel say "translation is down" instead of only "the
+      // summarizer is down".
+      this.probe(this.config.translationBaseUrl, 'translation'),
     ]);
-    return { asr, llm, settings: this.getSettings() };
+    return { asr, llm, translation, settings: this.getSettings() };
   }
 
   /* ---------------------------- transcribe ---------------------------- */
@@ -840,6 +866,10 @@ class MinutesService {
     if (!cloud) {
       if (opts.hotwords) fields.hotwords = String(opts.hotwords);
       if (opts.itn !== undefined) fields.itn = String(opts.itn !== false);
+      // A live caption chunk is one of a stream of 3-second slices, so it must
+      // not pay for speaker clustering; an imported file is transcribed once
+      // and keeps it.
+      if (opts.live) fields.diarize = 'false';
     }
     try {
       const headers = cloud ? { Authorization: 'Bearer ' + await this.loadSiliconflowApiKey() } : {};
@@ -1756,6 +1786,12 @@ class MinutesService {
           end: Number(event.timestamp) / 1000 || previous.end || 0,
           speaker: event.speaker || previous.speaker || event.source || '',
           text: event.type === 'transcript' ? event.text || previous.text || '' : event.transcript || previous.text || '',
+          // A translation event carries the sentence it translated. Keeping it
+          // here is what stops a recovered meeting from losing every line of
+          // translation while keeping the transcript.
+          translation: event.type === 'translation'
+            ? event.translation || event.text || previous.translation || ''
+            : previous.translation || '',
           source: event.source || previous.source || '',
           offset: Number.isFinite(offset) ? offset : previous.offset,
           length: Number.isFinite(length) ? length : previous.length,
@@ -2096,6 +2132,10 @@ class MinutesService {
             size: Number(meeting.audioSize) || 0,
             creator: meeting.creator || userInfo().username,
             favorite: Boolean(meeting.favorite),
+            // Archiving is a listing decision, not a deletion: the record and
+            // its audio stay exactly where they were.
+            archived: Boolean(meeting.archived),
+            archivedAt: meeting.archivedAt || '',
             inProgress: false,
             liveStatus: '',
             hasMinutes: Boolean(meeting.minutes && Object.keys(meeting.minutes).length > 0),
@@ -2133,7 +2173,11 @@ class MinutesService {
   async updateMeeting(id, patch) {
     const path = join(this.meetingsDir(), id + '.json');
     const raw = await readFile(path, 'utf8').catch(() => null);
-    const current = raw ? JSON.parse(raw) : {};
+    // An update never creates a meeting. A record that was deleted stays
+    // deleted: a background job that finishes late must not bring a meeting
+    // back without its audio.
+    if (!raw) return fail('minutes/not-found', '没有找到会议：' + id);
+    const current = JSON.parse(raw);
     return this.saveMeeting({ ...current, ...patch, id });
   }
 
@@ -2283,6 +2327,13 @@ class MinutesService {
     }
     if (!merged.transcript && existing?.transcript) merged.transcript = existing.transcript;
     if (!merged.minutes && existing?.minutes) merged.minutes = existing.minutes;
+    // The first words of the transcript are a placeholder, not a title. When
+    // the minutes carry a real title it wins — unless someone named the
+    // meeting by hand.
+    const minutesTitle = String(merged.minutes?.title || '').trim();
+    const spoken = (Array.isArray(merged.segments) ? merged.segments : []).find((segment) => segment && segment.text);
+    const autoTitle = spoken ? String(spoken.text).trim().slice(0, 48) : '';
+    if (minutesTitle && (!merged.title || merged.title === autoTitle)) merged.title = minutesTitle;
     const record = this.withSimplified({
       ...merged,
       audioSize,
@@ -2351,9 +2402,12 @@ class MinutesService {
  * ------------------------------------------------------------------ */
 
 export function apply(ctx, options = {}) {
-  const service = new MinutesService({});
+  // The data directory is a construction-time decision: the boot hook reads the
+  // settings file as soon as it runs, so it has to know where that file is.
+  const service = new MinutesService(options.dataDir ? { dataDir: options.dataDir } : {});
   // The service replaces its config object on every write, so the admin reads it live.
   const asrAdmin = options.asrAdmin || new AsrAdmin({ config: () => service.config });
+  const llmAdmin = options.llmAdmin || new LocalLlmAdmin({ config: () => service.config });
   const liveSummaryCache = new Map();
   const liveFinalizeState = new Map();
   const openPath = options.openPath || (async (target) => {
@@ -2394,7 +2448,6 @@ export function apply(ctx, options = {}) {
   service.liveManager = liveManager;
   ctx.provide('minutes', service);
   void service.recoverMeetings().catch(() => {});
-  if (service.config.asrAutoStart) void asrAdmin.start().catch(() => {});
   ctx.effect?.(() => async () => {
     const session = liveManager?._session;
     if (session && ['recording', 'stopping'].includes(session.status)) {
@@ -2403,6 +2456,55 @@ export function apply(ctx, options = {}) {
     await desktopOverlay.stop().catch(() => {});
     return undefined;
   }, 'ai-minutes: stop live capture on dispose');
+
+  /**
+   * Bring the local services up once, when the plugin loads.
+   *
+   * This is what makes a host restart self-sufficient: the transcription
+   * service and the translation model are the two things a meeting needs
+   * before its first caption, and both of them die with the machine.
+   *
+   * The settings used to be checked before `settings.json` had been read, so
+   * `asrAutoStart` always looked `false` and the ASR service never started on
+   * its own. Reading the settings first is the whole fix.
+   */
+  let bootstrapped = null;
+  function bootstrapLocalModels() {
+    if (bootstrapped) return bootstrapped;
+    bootstrapped = (async () => {
+      let settingsLoaded = false;
+      try {
+        await service.ensureSettings();
+        settingsLoaded = true;
+      } catch {
+        /* keep the defaults when the settings file cannot be read */
+      }
+      const started = { asr: null, llm: null, settingsLoaded };
+      if (service.config.asrAutoStart) {
+        started.asr = await asrAdmin.start().catch((error) => ({ started: false, detail: String(error) }));
+      }
+      // Loading a local model is only justified by an explicit setting. If
+      // the settings file could not be read, the defaults would point at a
+      // local LLM the reader may have replaced with a cloud one, so nothing is
+      // loaded on a guess.
+      if (settingsLoaded && service.config.llmAutoStart) {
+        started.llm = await llmAdmin.ensure().catch((error) => ({ ok: false, detail: String(error) }));
+      }
+      return started;
+    })();
+    return bootstrapped;
+  }
+
+  // Started after the guard exists, so the first call cannot hit its own TDZ.
+  //
+  // A boot that spawns external processes is a side effect the caller has to
+  // own, so it is an explicit option. The default follows the platform: the
+  // real host starts the services a meeting needs, a test runner never does
+  // (a harness that mounts the plugin twenty times must not launch twenty
+  // python servers and load a translation model twenty times).
+  const autoStartLocalServices = options.autoStartLocalServices
+    ?? !process.env.NODE_TEST_CONTEXT;
+  if (autoStartLocalServices) void bootstrapLocalModels();
 
   /** Point the overlay's elapsed clock at the running live session. */
   async function announceOverlaySession(session = liveManager?._session) {
@@ -2448,27 +2550,56 @@ export function apply(ctx, options = {}) {
     await desktopOverlay.start();
   }
 
-  /** Close the overlay after the reader has had time to see the result. */
-  function closeOverlayLater(delay = 3500) {
-    const timer = setTimeout(() => {
-      void desktopOverlay.stop().catch(() => {});
-    }, delay);
-    timer.unref?.();
-  }
-
-  /** Show the end-of-meeting progress in the floating window. */
-  async function notifyOverlay(phase, text) {
-    await desktopOverlay.send({ type: 'notice', phase, text }).catch(() => {});
-  }
-
   /** End the live session and land it in the library, like the UI's End meeting. */
+  /** Stops still finishing in the background, keyed by meeting id. */
+  const stoppingMeetings = new Map();
+
   async function stopLiveSession(sessionId, stopOptions = {}) {
     const manager = liveManager;
     if (!manager) throw new Error('minutes/live-unavailable');
-    // Ending a meeting still has to drain the queue, finalize the transcript
-    // and write the minutes, so the overlay shows that it is stopping instead
-    // of vanishing at once.
-    await sendOverlayState(manager._session, { stopping: true }).catch(() => {});
+    if (stoppingMeetings.has(sessionId)) return stoppingMeetings.get(sessionId).shell;
+    const shell = {
+      session: { id: sessionId, status: 'stopping' },
+      meeting: { id: sessionId, inProgress: true },
+    };
+    // The floating window has done its job the moment the reader pressed End
+    // meeting. Narrating the save inside it is what made the window feel like
+    // it was blocking the whole app.
+    void desktopOverlay.stop().catch(() => {});
+    // Everything slow — the capture drain, the speaker clustering, the final
+    // pass and the minutes — runs after the caller has been released. The page
+    // moves on immediately and the record fills in behind it.
+    const finished = finishStoppedMeeting(sessionId, stopOptions).catch((error) => {
+      console.warn('[ai-minutes] stopped meeting failed to finish: ' + String(error));
+      return null;
+    });
+    stoppingMeetings.set(sessionId, { shell, finished });
+    void finished.finally(() => stoppingMeetings.delete(sessionId));
+    return shell;
+  }
+
+  /** Everything that happens after End meeting, off the caller's critical path. */
+  async function finishStoppedMeeting(sessionId, stopOptions = {}) {
+    const manager = liveManager;
+    // Park a record from the journal that already exists, so the meeting page
+    // has content to show while the capture drains. It is replaced below.
+    await (async () => {
+      const parked = await manager.status(sessionId, 0).catch(() => null);
+      if (!parked?.session) return;
+      const draft = liveMeetingFromStatus(parked);
+      if (!draft?.transcript) return;
+      await service.saveMeeting({
+        id: draft.id,
+        title: draft.title || 'Live meeting',
+        createdAt: draft.createdAt,
+        duration: draft.duration,
+        transcript: draft.transcript,
+        segments: draft.segments,
+        audioSize: draft.size,
+        realtime: true,
+        source: 'AI Minutes',
+      }).catch(() => null);
+    })();
     const session = await manager.stop(sessionId);
     const status = await manager.status(sessionId, 0);
     const meeting = liveMeetingFromStatus(status);
@@ -2478,28 +2609,44 @@ export function apply(ctx, options = {}) {
       meeting.segments = finalized.finalTranscript;
     }
     if (meeting?.transcript && !status?.session?.incognito) {
-      // 说话人来自录音里真实的人，而不是采集音轨名（mic / system）。
-      // 短录音当场分人；长录音放到后台，完成后写回会议记录。
-      const trackSeconds = await service.realtimeTrackSeconds(meeting.id);
-      const syncBudget = trackSeconds <= 300 ? 300 : null;
-      let labelled = meeting;
-      if (syncBudget !== null) {
-        labelled = await service.labelLiveSpeakers(meeting, { maxSeconds: syncBudget }).catch(() => meeting);
-      }
       await service.saveMeeting({
         id: meeting.id,
         title: meeting.title || 'Live meeting',
         createdAt: meeting.createdAt,
         duration: meeting.duration,
         transcript: meeting.transcript,
-        segments: labelled.segments,
-        voiceprints: labelled.voiceprints,
+        segments: meeting.segments,
+        voiceprints: meeting.voiceprints,
         minutes: meeting.minutes || undefined,
         audioSize: meeting.size,
         realtime: true,
         source: 'AI Minutes',
       });
-      if (syncBudget === null) {
+      // The meeting closes before the queued audio is transcribed, so the text
+      // that was still waiting is recovered by the final pass over the saved
+      // audio. It runs in the background and replaces the provisional text.
+      const metrics = status?.session?.metrics || {};
+      const missed = Number(metrics.abandonedChunks || 0) + Number(metrics.droppedChunks || 0);
+      if (missed > 0) {
+        // The final pass brings the text and the speakers in one go.
+        void (async () => {
+          try {
+            const finalized = await service.finalizeSession({ id: meeting.id }, {});
+            if (!finalized?.ok || !finalized.result?.text) return;
+            await service.updateMeeting(meeting.id, {
+              transcript: finalized.result.text,
+              finalTranscript: finalized.result.segments,
+              segments: finalized.result.segments,
+              finalAt: nowIso(),
+              voiceprints: finalized.result.voiceprints || undefined,
+            });
+          } catch {
+            /* the provisional captions stay in place */
+          }
+        })();
+      } else {
+        // 说话人来自录音里真实的人，而不是采集音轨名（mic / system）。
+        // 分离要跑一遍声纹模型，放在后台：结束会议不能等它跑完。
         void (async () => {
           try {
             const full = await service.labelLiveSpeakers(meeting, { maxSeconds: null });
@@ -2510,32 +2657,19 @@ export function apply(ctx, options = {}) {
         })();
       }
     }
+    // The floating window is already closed. The minutes are generated here,
+    // in the background, and land on the meeting record when they are ready —
+    // the reader watches that on the meeting page instead of on top of the app.
     const worthSummarizing = meeting?.transcript && meeting.transcript.length >= 200 && Number(meeting.duration) >= 60;
-    // Recording has stopped and the transcript is safely in the library. Keep
-    // the window open only to explain what is happening to the minutes.
-    await sendOverlayState(manager._session).catch(() => {});
     if (worthSummarizing && !status?.session?.incognito) {
-      await notifyOverlay('working', '录音已结束，正在整理会议纪要…');
-      void (async () => {
-        try {
-          const summary = await service.summarize(meeting.transcript, {
-            title: meeting.title, date: meeting.createdAt, template: stopOptions.template,
-          });
-          if (summary.ok) {
-            await service.updateMeeting(meeting.id, { minutes: summary.result.minutes });
-            await notifyOverlay('ready', '会议纪要已就绪，可以在会议库中查看');
-          } else {
-            await notifyOverlay('ready', '录音已保存，可在会议详情页重新生成纪要');
-          }
-        } catch {
-          await notifyOverlay('ready', '录音已保存，可在会议详情页重新生成纪要');
-        } finally {
-          closeOverlayLater(4200);
-        }
-      })();
-    } else {
-      await notifyOverlay('ready', status?.session?.incognito ? '录音已结束' : '录音已保存到会议库');
-      closeOverlayLater(2800);
+      try {
+        const summary = await service.summarize(meeting.transcript, {
+          title: meeting.title, date: meeting.createdAt, template: stopOptions.template,
+        });
+        if (summary.ok) await service.updateMeeting(meeting.id, { minutes: summary.result.minutes });
+      } catch {
+        /* the reader can regenerate the minutes from the meeting page */
+      }
     }
     return { session, meeting };
   }
@@ -2598,6 +2732,39 @@ export function apply(ctx, options = {}) {
         return service.summarize(payload?.transcript || '', payload?.context || {});
       case 'ask':
         return service.ask(payload?.transcript || '', payload?.question || '', payload?.context || {});
+      case 'archive-meetings': {
+        // Batch archive. Archiving keeps the record, the audio and the minutes;
+        // it only changes where the meeting is listed.
+        const ids = Array.isArray(payload?.ids) ? payload.ids.map(String).filter(Boolean) : [];
+        const archived = payload?.archived !== false;
+        const done = [];
+        const failed = [];
+        for (const id of ids) {
+          const patch = archived
+            ? { archived: true, archivedAt: nowIso() }
+            : { archived: false, archivedAt: '' };
+          const result = await service.updateMeeting(id, patch).catch((error) => ({ ok: false, error: String(error) }));
+          if (result?.ok) done.push(id);
+          else failed.push({ id, error: result?.error?.message || String(result?.error || 'archive failed') });
+        }
+        return ok({ archived, done, failed });
+      }
+      case 'delete-meetings': {
+        // Batch delete. Every id goes through the same single-meeting delete
+        // path, so the audio and the realtime directory are cleaned up too.
+        const ids = Array.isArray(payload?.ids) ? payload.ids.map(String).filter(Boolean) : [];
+        const done = [];
+        const failed = [];
+        for (const id of ids) {
+          if (liveManager?._session?.id === id && ['recording', 'stopping'].includes(liveManager._session.status)) {
+            await stopLiveSession(id).catch(() => {});
+          }
+          const result = await service.deleteMeeting(id).catch((error) => ({ ok: false, error: String(error) }));
+          if (result?.ok) done.push(id);
+          else failed.push({ id, error: result?.error?.message || String(result?.error || 'delete failed') });
+        }
+        return ok({ done, failed });
+      }
       case 'list': {
         const result = await service.listMeetings();
         if (!result.ok) return result;
@@ -2751,8 +2918,35 @@ export function apply(ctx, options = {}) {
         }
       case 'list-models':
         return service.listModels(payload?.options || {});
-      case 'asr-status':
+      case 'local-models-status':
+        // Read the file first: the admin decides what is local from the saved
+        // providers, and the defaults point at a local LLM that this reader may
+        // have replaced with a cloud one.
+        await service.readSettingsFile();
+        return ok(await llmAdmin.status());
+      case 'local-models-start':
+        // Manual retry from the panel: the same path the boot hook takes, so a
+        // restart from the UI and a restart of the host behave identically.
+        await service.readSettingsFile();
+        return ok({ boot: await bootstrapLocalModels(), status: await llmAdmin.status() });
+      case 'asr-refine-warmup': {
+        // Loading the refinement model costs about fifteen seconds, so the
+        // reader can pay it before a meeting instead of after one.
+        const warm = await asrAdmin.warmRefiner().catch((error) => ({ ok: false, detail: String(error) }));
+        return ok({ ...warm, status: await asrAdmin.status() });
+      }
+      case 'asr-status': {
+        // The admin answers from the live config, and the panel can ask before
+        // anything else has read settings.json. Without this the page reports
+        // the DEFAULTS backend instead of the saved one.
+        await service.readSettingsFile();
+        // A saved `funasr` predates the live/refine split: keep the file honest
+        // so the panel and the settings agree about what serves captions.
+        if (service.config.asrBackend === 'funasr') {
+          await service.writeSettings({ asrBackend: 'sensevoice' });
+        }
         return ok(await asrAdmin.status());
+      }
       case 'asr-start':
         return ok(await asrAdmin.start());
       case 'asr-stop':
@@ -2789,6 +2983,7 @@ export function apply(ctx, options = {}) {
         return ok(await asrAdmin.status());
       }
       case 'asr-select-model': {
+        await service.readSettingsFile();
         const selection = await asrAdmin.selectModel({ id: payload?.id, path: payload?.path });
         if (!selection.ok) {
           const code = selection.code === 'not-selectable'
@@ -2851,6 +3046,14 @@ export function apply(ctx, options = {}) {
         } catch (error) {
           return fail('minutes/live-overlay-failed', error instanceof Error ? error.message : String(error));
         }
+      case 'live-stop-status': {
+        // The stop itself is asynchronous, so the page needs a way to ask
+        // "is the record written yet" without guessing.
+        const id = String(payload?.id || '');
+        const pending = stoppingMeetings.has(id);
+        const record = id ? await service.readMeetingRecord(id).catch(() => null) : null;
+        return ok({ pending, saved: Boolean(record), meeting: record || null });
+      }
       case 'live-stop':
         if (!liveManager) return fail('minutes/live-unavailable', '实时采集尚未就绪');
         try {

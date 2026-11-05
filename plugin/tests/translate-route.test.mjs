@@ -23,7 +23,7 @@ test('translate method is callable through the Host route', async (t) => {
     },
   });
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-translate-route-test-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   service.config.dataDir = dataDir;
   service.config.translationBaseUrl = `http://127.0.0.1:${server.address().port}/v1`;
   const response = await route.fetch(new Request('http://localhost' + ROUTE, {

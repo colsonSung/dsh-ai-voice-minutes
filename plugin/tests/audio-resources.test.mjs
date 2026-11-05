@@ -38,7 +38,7 @@ function capturePlugin() {
 
 async function fixture(t) {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-audio-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const { routes, service } = capturePlugin();
   service.config.dataDir = dataDir;
   await service.readSettings();

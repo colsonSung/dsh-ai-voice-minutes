@@ -56,13 +56,17 @@ test('startArguments builds exact backend-specific native service arguments', ()
   assert.deepEqual(sense.slice(7, 11), pass2);
   assert.deepEqual(sense.slice(11), common);
 
+  // Fun-ASR is the refinement model, never the live one: its weights take about
+  // fifteen seconds to load, so a 3-second caption chunk would never catch up.
+  // A saved `funasr` therefore starts a fast live backend and keeps pass 2.
   config.asrBackend = 'funasr';
   const fun = admin.startArguments();
-  assert.deepEqual(fun.slice(0, 5), [
-    config.asrLauncher, 'start', 'asr', '--backend', 'funasr',
+  assert.deepEqual(fun.slice(0, 7), [
+    config.asrLauncher, 'start', 'asr', '--backend', 'sensevoice',
+    '--sense-voice-dir', join(modelDir, 'sensevoice'),
   ]);
-  assert.deepEqual(fun.slice(5, 9), pass2);
-  assert.deepEqual(fun.slice(9), common);
+  assert.deepEqual(fun.slice(7, 11), pass2, 'the refinement model is still wired');
+  assert.deepEqual(fun.slice(11), common);
 });
 
 test('catalog reports SenseVoice and Fun-ASR-Nano download/active state by backend', async (t) => {
@@ -85,12 +89,14 @@ test('catalog reports SenseVoice and Fun-ASR-Nano download/active state by backe
   assert.equal(catalog.entries.find((entry) => entry.id === 'fun-asr-nano').downloaded, true);
   assert.equal(catalog.entries.find((entry) => entry.id === 'fun-asr-nano').active, false);
 
+  // A saved `funasr` is read as "refine with Fun-ASR", so the live backend
+  // reported here has to be a fast one.
   admin.config.asrBackend = 'funasr';
   catalog = await admin.catalog();
-  assert.equal(catalog.entries.find((entry) => entry.id === 'fun-asr-nano').active, true);
+  assert.equal(catalog.entries.find((entry) => entry.id === 'sensevoice').active, true);
   admin.probe = async () => ({ online: false, health: { status: 'offline' } });
   const status = await admin.status();
-  assert.equal(status.backend, 'funasr');
+  assert.equal(status.backend, 'sensevoice', 'Fun-ASR never serves live captions');
   assert.equal(status.modelPaths.whispercpp, join(modelDir, 'ggml-large-v3.bin'));
   assert.equal(status.modelPaths.sensevoice, join(modelDir, 'sensevoice'));
   assert.equal(status.modelPaths.funasr, join(modelDir, 'fun-asr-nano'));

@@ -25,9 +25,18 @@ function fakeLiveManager() {
   };
 }
 
+async function waitFor(predicate, message) {
+  const deadline = Date.now() + 6000;
+  while (Date.now() < deadline) {
+    if (await predicate()) return;
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  throw new Error('Timed out waiting for ' + message);
+}
+
 test('ending a live meeting persists the transcript as a stored meeting record', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-persist-live-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   let route;
   let service;
   apply({
@@ -47,6 +56,15 @@ test('ending a live meeting persists the transcript as a stored meeting record',
   }));
   const body = await response.json();
   assert.equal(body.ok, true);
+  // Saving happens after the route has answered, so wait for the record the
+  // same way the meeting page does.
+  await waitFor(async () => {
+    const status = await route.fetch(new Request('http://localhost' + ROUTE, {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ method: 'live-stop-status', payload: { id: 'realtime-test-1' } }),
+    })).then((res) => res.json());
+    return status.ok && status.result.saved === true && status.result.pending === false;
+  }, 'the meeting record to be written');
   const stored = JSON.parse(await readFile(join(dataDir, 'meetings', 'realtime-test-1.json'), 'utf8'));
   assert.ok(stored.transcript.includes('实时会议逐字稿内容'));
   assert.equal(stored.duration, 730);
@@ -55,7 +73,7 @@ test('ending a live meeting persists the transcript as a stored meeting record',
 
 test('saving a meeting keeps transcript, segments and minutes on disk', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-persist-save-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = (() => {
     let value;
     apply({
@@ -84,7 +102,7 @@ test('saving a meeting keeps transcript, segments and minutes on disk', async (t
 
 test('history answers are persisted to the assistant history file', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-persist-assistant-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const requests = [];
   const { createServer } = await import('node:http');
   const server = createServer((request, response) => {

@@ -49,7 +49,7 @@ async function invoke(route, method, payload = {}) {
 
 async function fixture(t) {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-voice-minutes-test-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const captured = capturePlugin();
   captured.service.config.dataDir = dataDir;
   return { ...captured, dataDir };

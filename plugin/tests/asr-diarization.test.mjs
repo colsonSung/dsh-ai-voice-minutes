@@ -127,7 +127,7 @@ test('a live meeting is labelled with the people in the recording, not the captu
   t.after(() => new Promise((resolve) => server.close(resolve)));
 
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-speakers-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const sessionDir = join(dataDir, 'realtime', 'realtime-test');
   await (await import('node:fs/promises')).mkdir(sessionDir, { recursive: true });
   await writeFile(join(sessionDir, 'mic.pcm'), Buffer.alloc(16000 * 2 * 10));
@@ -173,7 +173,7 @@ test('labeling an old live meeting rebuilds missing voiceprints from its retaine
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   t.after(() => new Promise((resolve) => server.close(resolve)));
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-legacy-voiceprint-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const id = 'realtime-legacy';
   const sessionDir = join(dataDir, 'realtime', id);
   await (await import('node:fs/promises')).mkdir(sessionDir, { recursive: true });

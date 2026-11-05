@@ -133,6 +133,7 @@ window.__ModuleLoader__.load({
         'live.stop': '停止实时',
         'live.starting': '正在启动…',
         'live.stopping': '正在停止…',
+        'live.stoppedSaving': '录音已结束，正在后台保存并生成纪要，可以先做别的事。',
         'live.source.auto': '自动识别',
         'live.source.zhEn': '仅支持中英文',
         'live.source.zh': '中文',
@@ -169,6 +170,22 @@ window.__ModuleLoader__.load({
         'library.filter.created': '我创建的',
         'library.filter.shared': '共享的',
         'library.filter.favorite': '收藏',
+        'library.filter.archived': '归档',
+        'library.titleColumn': '会议',
+        'library.selectAll': '全选当前列表',
+        'library.selectRow': '选择这场会议',
+        'library.archivedTag': '已归档',
+        'library.batchBar': '批量操作',
+        'library.clearSelection': '取消选择',
+        'library.batchPartial': '有 {failed} 场没能完成，请稍后重试。',
+        'library.archiveConfirm': '把选中的 {count} 场会议归档？会议、录音和纪要都会保留，只是不再出现在「最近」里。',
+        'library.unarchiveConfirm': '把选中的 {count} 场会议移出归档？',
+        'library.deleteSelectedConfirm': '删除选中的 {count} 场会议？录音、逐字稿和纪要会一起删除，无法恢复。',
+        'library.archivedDone': '已归档 {count} 场会议',
+        'library.unarchivedDone': '已移出归档 {count} 场会议',
+        'library.deletedDone': '已删除 {count} 场会议',
+        'action.archive': '归档',
+        'action.unarchive': '移出归档',
         'library.view.list': '列表视图',
         'library.view.grid': '网格视图',
         'library.template.intelligentSlicing': '智能切片',
@@ -285,6 +302,11 @@ window.__ModuleLoader__.load({
         'detail.transcribe': '转写',
         'detail.summary': 'AI 摘要',
         'detail.viewpoints': '观点树',
+        'mindmap.views': '{n} 个观点',
+        'mindmap.risks': '{n} 项风险',
+        'mindmap.risk': '风险',
+        'mindmap.decisions': '结论',
+        'mindmap.summary': '概述',
         'detail.chapter': '章节',
         'detail.outline': '大纲',
         'detail.hideDetails': '隐藏章节详情',
@@ -313,6 +335,7 @@ window.__ModuleLoader__.load({
         'detail.sendToChat': '发送到聊天',
         'detail.format': '文件格式',
         'detail.noAudio': '这场会议没有可播放的音频',
+        'detail.noRecording': '这场会议没有可播放的录音',
         'detail.saveChanges': '保存修改',
         'detail.backToLibrary': '返回会议库',
         'detail.searchPlaceholder': '搜索本次会议内容',
@@ -415,6 +438,21 @@ window.__ModuleLoader__.load({
         'settings.asr.stop': '停止服务',
         'settings.asr.restart': '重启服务',
         'settings.asr.autoStart': '插件启动时自动启动 ASR',
+        'settings.asr.refiner': '精修模型',
+        'settings.asr.asrBackendLive': '实时字幕模型',
+        'settings.asr.refineModel': '会后精修模型',
+        'settings.asr.ready': '已就绪',
+        'settings.asr.refineNow': '预热',
+        'settings.asr.refineHint': '会议结束整理终稿、Refine 按钮、以及发言稿的说话人区间都靠它。换实时字幕模型不影响它，删掉它只影响终稿质量，不影响实时字幕。',
+        'settings.asr.liveHint': '只影响实时字幕和导入音频的初稿：换模型会重启 ASR 服务，当前录音会中断，请在没有会议时切换。',
+        'settings.asr.refineWarmed': '精修模型已加载，下一场会议的终稿会更快。',
+        'settings.asr.backendHint': '实时字幕用快后端；Fun-ASR 只做会后精修，每段要重载约 15 秒，不能拿来做实时字幕。',
+        'settings.llm.autoStart': '启动时自动拉起本地翻译模型（LM Studio）',
+        'settings.llm.hint': '只会加载设置里实际指向本机的模型；用云端翻译时不会启动任何本地服务。',
+        'settings.llm.start': '现在启动',
+        'settings.llm.ready': '已就绪',
+        'settings.llm.pending': '未就绪',
+        'settings.llm.missing': '未找到 lms',
         'settings.asr.openModelDir': '打开文件夹',
         'settings.asr.openLauncher': '打开脚本',
         'settings.asr.modelList': '本地模型库',
@@ -437,7 +475,7 @@ window.__ModuleLoader__.load({
         'settings.section.overlay': '实时字幕浮窗',
         'settings.overlayBackground': '浮窗背景色',
         'settings.overlayText': '浮窗文字颜色',
-        'settings.overlayOpacity': '浮窗不透明度',
+        'settings.overlayOpacity': '浮窗不透明度（低于 0.85 会看不清字幕）',
         'settings.overlayCompact': '默认只显示最新一句',
         'settings.overlayHint': '浮窗默认只显示最新一句和译文；点右上角展开可以回看之前的对话。窗口的大小和位置会被记住。',
         'settings.asrModel': 'ASR 模型 ID',
@@ -553,6 +591,7 @@ window.__ModuleLoader__.load({
         'live.stop': 'Stop live',
         'live.starting': 'Starting…',
         'live.stopping': 'Stopping…',
+        'live.stoppedSaving': 'Recording ended. Saving and writing the minutes in the background — carry on.',
         'live.source.auto': 'Automatic Identification',
         'live.source.zhEn': 'Support only Chinese and English',
         'live.source.zh': '中文',
@@ -589,6 +628,22 @@ window.__ModuleLoader__.load({
         'library.filter.created': 'Created',
         'library.filter.shared': 'Shared',
         'library.filter.favorite': 'Favorite',
+        'library.filter.archived': 'Archived',
+        'library.titleColumn': 'Meeting',
+        'library.selectAll': 'Select everything in this list',
+        'library.selectRow': 'Select this meeting',
+        'library.archivedTag': 'Archived',
+        'library.batchBar': 'Batch actions',
+        'library.clearSelection': 'Clear selection',
+        'library.batchPartial': '{failed} of them did not finish; try again.',
+        'library.archiveConfirm': 'Archive the {count} selected meetings? The recordings, transcripts and minutes are kept; they just leave Recent.',
+        'library.unarchiveConfirm': 'Move the {count} selected meetings out of the archive?',
+        'library.deleteSelectedConfirm': 'Delete the {count} selected meetings? Their recordings, transcripts and minutes go with them, and this cannot be undone.',
+        'library.archivedDone': 'Archived {count} meetings',
+        'library.unarchivedDone': 'Moved {count} meetings out of the archive',
+        'library.deletedDone': 'Deleted {count} meetings',
+        'action.archive': 'Archive',
+        'action.unarchive': 'Unarchive',
         'library.view.list': 'List view',
         'library.view.grid': 'Grid view',
         'library.template.intelligentSlicing': '智能切片',
@@ -705,6 +760,11 @@ window.__ModuleLoader__.load({
         'detail.transcribe': 'Transcribe',
         'detail.summary': 'AI Summary',
         'detail.viewpoints': 'Viewpoint Tree',
+        'mindmap.views': '{n} viewpoints',
+        'mindmap.risks': '{n} risks',
+        'mindmap.risk': 'Risk',
+        'mindmap.decisions': 'Decisions',
+        'mindmap.summary': 'Summary',
         'detail.chapter': 'Chapter',
         'detail.outline': 'Outline',
         'detail.hideDetails': 'Hide chapter details',
@@ -733,6 +793,7 @@ window.__ModuleLoader__.load({
         'detail.sendToChat': 'Send to chat',
         'detail.format': 'File Format',
         'detail.noAudio': 'No playable audio is available for this meeting',
+        'detail.noRecording': 'There is no recording to play for this meeting',
         'detail.saveChanges': 'Save changes',
         'detail.backToLibrary': 'Back to library',
         'detail.searchPlaceholder': 'Search within this meeting',
@@ -835,6 +896,21 @@ window.__ModuleLoader__.load({
         'settings.asr.stop': 'Stop service',
         'settings.asr.restart': 'Restart service',
         'settings.asr.autoStart': 'Start ASR when the plugin starts',
+        'settings.asr.refiner': 'Refinement model',
+        'settings.asr.asrBackendLive': 'Live caption model',
+        'settings.asr.refineModel': 'Meeting refinement model',
+        'settings.asr.ready': 'Ready',
+        'settings.asr.refineNow': 'Warm up',
+        'settings.asr.refineHint': 'The final transcript, the Refine button and the speaker spans all come from it. Changing the caption model does not touch it, and removing it only affects the final text.',
+        'settings.asr.liveHint': 'Affects live captions and the first draft of imported audio only: switching restarts the ASR service, so do it outside a meeting.',
+        'settings.asr.refineWarmed': 'The refinement model is warm, so the next meeting finalises faster.',
+        'settings.asr.backendHint': 'Live captions need a fast backend; Fun-ASR only refines the meeting afterwards, and its weights take about 15s to reload.',
+        'settings.llm.autoStart': 'Load the local translation model on start (LM Studio)',
+        'settings.llm.hint': 'Only models the settings point at locally are loaded; a cloud translation provider starts nothing.',
+        'settings.llm.start': 'Start now',
+        'settings.llm.ready': 'Ready',
+        'settings.llm.pending': 'Not ready',
+        'settings.llm.missing': 'lms not found',
         'settings.asr.openModelDir': 'Open folder',
         'settings.asr.openLauncher': 'Open script',
         'settings.asr.modelList': 'Local model library',
@@ -857,7 +933,7 @@ window.__ModuleLoader__.load({
         'settings.section.overlay': 'Live transcript overlay',
         'settings.overlayBackground': 'Overlay background',
         'settings.overlayText': 'Overlay text colour',
-        'settings.overlayOpacity': 'Overlay opacity',
+        'settings.overlayOpacity': 'Overlay opacity (below 0.85 the captions lose contrast)',
         'settings.overlayCompact': 'Show only the newest line by default',
         'settings.overlayHint': 'The overlay shows the newest line and its translation; the button at the top right expands the earlier conversation. Its size and place are remembered.',
         'settings.asrModel': 'ASR model ID',
@@ -894,424 +970,530 @@ window.__ModuleLoader__.load({
     // The plugin owns its own hue and its own surface ramp. The host's brand
     // token is achromatic, so it can never carry the accent; the accent hexes
     // live here as constants so the stylesheet itself stays free of literals.
-    const ACCENT = { light: '#2f6be0', dark: '#74a6ff' };
+    //
+    // Material: cold graphite under warm brass. The accent value itself clears
+    // 4.5:1 on every surface in both themes, so one value serves as fill,
+    // border and text. --gold is the vivid graphic step and is only ever used
+    // on the dark instrument strip, never on paper.
+    // Every value below was contrast-checked against the surface ramp.
+    const ACCENT = {
+      light: '#8A5E0C', lightStrong: '#7A5209', gold: '#D9A441',
+      dark: '#E3A82B', darkStrong: '#EFBB4E', darkGold: '#F0C561',
+      okFill: '#158048', ok: '#1E9E5A', okInk: '#12703C',
+      warnFill: '#A85F08', warn: '#C77A0B', warnInk: '#8A560A',
+      errFill: '#C4362E', err: '#D64A42', errInk: '#A92C25',
+      infoFill: '#235FBE', info: '#2E72D9', infoInk: '#1D559E',
+      darkOkFill: '#1E7A4D', darkOk: '#3FBF7F', darkOkInk: '#7FD9AC',
+      darkWarnFill: '#8A5B12', darkWarn: '#E0A03A', darkWarnInk: '#F0C57E',
+      darkErrFill: '#8E2B24', darkErr: '#F2726A', darkErrInk: '#F5A9A3',
+      darkInfoFill: '#24548F', darkInfo: '#5C9BF0', darkInfoInk: '#A7C8F7',
+    };
 
     const CSS = `
+/* ------------------------------------------------------------------ tokens
+   The shell owns the theme. Every surface, every line and every shadow below
+   is derived from a host token, so the plugin follows a host theme change.
+
+   Why the plugin still declares its own ramp: the host has NO surface ramp in
+   light mode -- the four background-layer tokens all resolve to the same
+   white. A card built from them is white on white. So in light
+   the canvas is the base mixed 5% toward the ink (a real 4.5% step) and the
+   sunken well is the base mixed 10%; in dark the host's own three-step ramp
+   is already correct and is used as-is.
+
+   Accent: one hue family (brass). The accent value itself clears 4.5:1 on
+   every surface in both themes, so it may be used as a fill, a border or
+   text without a second value -- which is why there is no second "text
+   only" accent and no separate graphic step.
+
+   Text: three steps of the host ink, mixed toward the base. The host's own
+   label-tertiary is only 3.71:1 on white, so it cannot carry secondary text;
+   these two derived steps do (5.49:1 and 4.94:1 on card and sunken).
+
+   Shadows carry no hue and never use the text token: in dark mode the host
+   ink is near-white, so shadows are tinted from --mvm-shade, which is always
+   the darkest thing the theme allows.
+
+   Semantic colours are their own triples (fill / ink / soft). They are never
+   restyled toward the brand. */
 .mvm-page{
-  --mvm-surface-0:var(--dsw-alias-bg-base);
-  --mvm-surface-1:color-mix(in oklab,var(--dsw-alias-bg-base) 94%,var(--dsw-alias-label-primary) 6%);
-  --mvm-surface-2:color-mix(in oklab,var(--dsw-alias-bg-base) 89%,var(--dsw-alias-label-primary) 11%);
-  --mvm-surface-3:color-mix(in oklab,var(--dsw-alias-bg-base) 84%,var(--dsw-alias-label-primary) 16%);
-  --mvm-overlay:var(--dsw-alias-bg-overlay);
-  --mvm-line:color-mix(in oklab,var(--dsw-alias-label-primary) 11%,transparent);
-  --mvm-line-strong:color-mix(in oklab,var(--dsw-alias-label-primary) 18%,transparent);
-  --mvm-shadow-card:0 1px 2px color-mix(in oklab,var(--dsw-alias-label-primary) 7%,transparent),0 4px 14px -6px color-mix(in oklab,var(--dsw-alias-label-primary) 10%,transparent);
-  --mvm-shadow-float:0 2px 6px color-mix(in oklab,var(--dsw-alias-label-primary) 10%,transparent),0 16px 36px -12px color-mix(in oklab,var(--dsw-alias-label-primary) 22%,transparent);
-  --mvm-shadow-drawer:-12px 0 32px -10px color-mix(in oklab,var(--dsw-alias-label-primary) 22%,transparent);
-  --mvm-edge:inset 0 1px 0 color-mix(in oklab,var(--dsw-alias-label-primary) 7%,transparent);
+  /* ---- surfaces: canvas (sunken) -> card (raised) -> overlay (raised again) ---- */
+  --mvm-surface-0:color-mix(in oklab,var(--dsw-alias-bg-base) 95%,var(--dsw-alias-label-primary) 5%);
+  --mvm-surface-1:var(--dsw-alias-bg-base);
+  --mvm-surface-2:var(--dsw-alias-bg-base);
+  --mvm-sunken:color-mix(in oklab,var(--dsw-alias-bg-base) 90%,var(--dsw-alias-label-primary) 10%);
+  /* one hairline per edge, never two stacked */
+  --mvm-line:color-mix(in srgb,var(--dsw-alias-label-primary) 10%,transparent);
+  --mvm-line-strong:color-mix(in srgb,var(--dsw-alias-label-primary) 18%,transparent);
+  /* ---- text: three steps, all above 4.5:1 ---- */
+  --mvm-ink:var(--dsw-alias-label-primary);
+  --mvm-ink-2:color-mix(in oklab,var(--dsw-alias-label-primary) 76%,var(--dsw-alias-bg-base) 24%);
+  --mvm-ink-3:color-mix(in oklab,var(--dsw-alias-label-primary) 66%,var(--dsw-alias-bg-base) 34%);
+  --mvm-idle:color-mix(in oklab,var(--dsw-alias-label-primary) 55%,var(--dsw-alias-bg-base) 45%);
+  --mvm-hover:color-mix(in oklab,var(--mvm-ink) 6%,transparent);
+  --mvm-hover-strong:color-mix(in oklab,var(--mvm-ink) 11%,transparent);
+  /* ---- accent: one hue family (brass) ---- */
+  --mvm-accent-base:${ACCENT.light};
   --mvm-accent:var(--mvm-accent-base);
-  --mvm-accent-soft:color-mix(in oklab,var(--mvm-accent-base) 14%,transparent);
-  --mvm-accent-line:color-mix(in oklab,var(--mvm-accent-base) 42%,transparent);
+  --mvm-accent-strong:${ACCENT.lightStrong};
+  --mvm-accent-soft:color-mix(in oklab,var(--mvm-accent-base) 12%,transparent);
+  --mvm-accent-line:color-mix(in oklab,var(--mvm-accent-base) 38%,transparent);
   --mvm-accent-ink:var(--mvm-accent-base);
   --mvm-on-accent:var(--dsw-alias-bg-layer-1);
+  --mvm-on-semantic:var(--dsw-alias-bg-layer-1);
+  /* ---- the instrument strip: the darkest surface the theme allows ---- */
+  /* ---- semantics: fill / ink / soft, never restyled toward the brand ---- */
+  --mvm-ok-fill:${ACCENT.okFill}; --mvm-ok:${ACCENT.ok}; --mvm-ok-ink:${ACCENT.okInk}; --mvm-ok-soft:color-mix(in oklab,${ACCENT.ok} 13%,transparent);
+  --mvm-warn-fill:${ACCENT.warnFill}; --mvm-warn:${ACCENT.warn}; --mvm-warn-ink:${ACCENT.warnInk}; --mvm-warn-soft:color-mix(in oklab,${ACCENT.warn} 14%,transparent);
+  --mvm-err-fill:${ACCENT.errFill}; --mvm-err:${ACCENT.err}; --mvm-err-ink:${ACCENT.errInk}; --mvm-err-soft:color-mix(in oklab,${ACCENT.err} 12%,transparent);
+  --mvm-info-fill:${ACCENT.infoFill}; --mvm-info:${ACCENT.info}; --mvm-info-ink:${ACCENT.infoInk}; --mvm-info-soft:color-mix(in oklab,${ACCENT.info} 12%,transparent);
+  /* ---- shadows: tinted from the shade, never from the text token ---- */
+  --mvm-shade:var(--dsw-alias-label-primary);
+  --mvm-shadow-card:0 1px 2px color-mix(in srgb,var(--mvm-shade) 6%,transparent),0 10px 24px -16px color-mix(in srgb,var(--mvm-shade) 20%,transparent);
+  --mvm-shadow-card-hover:0 2px 4px color-mix(in srgb,var(--mvm-shade) 8%,transparent),0 18px 34px -18px color-mix(in srgb,var(--mvm-shade) 28%,transparent);
+  --mvm-shadow-float:0 2px 6px color-mix(in srgb,var(--mvm-shade) 10%,transparent),0 18px 40px -18px color-mix(in srgb,var(--mvm-shade) 34%,transparent);
+  --mvm-shadow-drawer:-12px 0 32px -10px color-mix(in srgb,var(--mvm-shade) 30%,transparent);
+  --mvm-scrim:color-mix(in srgb,var(--mvm-shade) 46%,transparent);
   --mvm-ease:cubic-bezier(.23,1,.32,1);
   --mvm-dur-fast:100ms;
   --mvm-dur:200ms;
 }
-.mvm-page{--mvm-accent-base:${ACCENT.light}}
-body[data-ds-dark-theme] .mvm-page{--mvm-accent-base:${ACCENT.dark}}
-.mvm-page{display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;background:var(--mvm-surface-0);color:var(--dsw-alias-label-primary);font-size:13px;line-height:1.5}
+body[data-ds-dark-theme] .mvm-page{
+  /* the host's own dark ramp is already a real three-step surface ladder */
+  --mvm-surface-0:var(--dsw-alias-bg-base);
+  --mvm-surface-1:var(--dsw-alias-bg-layer-1);
+  --mvm-surface-2:var(--dsw-alias-bg-layer-2);
+  --mvm-sunken:var(--dsw-alias-bg-base);
+  --mvm-line:color-mix(in srgb,var(--dsw-alias-label-primary) 13%,transparent);
+  --mvm-line-strong:color-mix(in srgb,var(--dsw-alias-label-primary) 21%,transparent);
+  --mvm-accent-base:${ACCENT.dark};
+  --mvm-accent-strong:${ACCENT.darkStrong};
+  --mvm-on-accent:var(--dsw-alias-bg-base);
+  --mvm-on-semantic:var(--dsw-alias-label-primary);
+  --mvm-ok-fill:${ACCENT.darkOkFill}; --mvm-ok:${ACCENT.darkOk}; --mvm-ok-ink:${ACCENT.darkOkInk}; --mvm-ok-soft:color-mix(in oklab,${ACCENT.darkOk} 16%,transparent);
+  --mvm-warn-fill:${ACCENT.darkWarnFill}; --mvm-warn:${ACCENT.darkWarn}; --mvm-warn-ink:${ACCENT.darkWarnInk}; --mvm-warn-soft:color-mix(in oklab,${ACCENT.darkWarn} 16%,transparent);
+  --mvm-err-fill:${ACCENT.darkErrFill}; --mvm-err:${ACCENT.darkErr}; --mvm-err-ink:${ACCENT.darkErrInk}; --mvm-err-soft:color-mix(in oklab,${ACCENT.darkErr} 16%,transparent);
+  --mvm-info-fill:${ACCENT.darkInfoFill}; --mvm-info:${ACCENT.darkInfo}; --mvm-info-ink:${ACCENT.darkInfoInk}; --mvm-info-soft:color-mix(in oklab,${ACCENT.darkInfo} 16%,transparent);
+  --mvm-shade:var(--dsw-alias-bg-base);
+  --mvm-scrim:color-mix(in srgb,var(--mvm-shade) 72%,transparent);
+}
+.mvm-page{display:flex;flex-direction:column;height:100%;min-height:0;overflow:hidden;background:var(--mvm-surface-0);color:var(--mvm-ink);font-size:13px;line-height:1.5}
 .mvm-page *{box-sizing:border-box}
-.mvm-page select option{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary)}
-.mvm-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:22px 28px 18px;border-bottom:1px solid var(--mvm-line);background:var(--mvm-surface-1);flex:none}
+.mvm-page select option{background:var(--mvm-surface-1);color:var(--mvm-ink)}
+.mvm-header{position:relative;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:20px 28px 16px;border-bottom:1px solid var(--mvm-line);background:var(--mvm-surface-1);flex:none}
+/* the capture rail — the plugin's one signature device: a brass line under
+   the masthead that the live ribbon continues when the microphone is open */
+.mvm-header::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none;background:linear-gradient(90deg,var(--mvm-accent) 0 24%,color-mix(in oklab,var(--mvm-accent) 20%,transparent) 24% 100%)}
 .mvm-heading{min-width:0}
-.mvm-title{margin:0;font-size:18px;line-height:1.3;font-weight:600;letter-spacing:-.02em}
-.mvm-subtitle{margin-top:4px;color:var(--dsw-alias-label-secondary);font-size:12px}
+.mvm-title{margin:0;font-size:18px;line-height:1.3;font-weight:600;letter-spacing:-.015em}
+.mvm-subtitle{margin-top:5px;color:var(--mvm-ink-3);font-size:12px}
 .mvm-header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .mvm-health{display:flex;align-items:center;gap:6px;margin-right:4px}
-.mvm-health-item{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid var(--mvm-line);border-radius:999px;color:var(--dsw-alias-label-secondary);font-size:12px;background:var(--mvm-surface-2)}
-.mvm-health-dot{width:6px;height:6px;border-radius:50%;background:var(--dsw-alias-state-idle-primary)}
-.mvm-health-item.is-online .mvm-health-dot{background:var(--dsw-alias-state-success-primary)}
-.mvm-health-item.is-offline .mvm-health-dot{background:var(--dsw-alias-state-error-primary)}
-.mvm-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:32px;padding:6px 12px;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1);color:var(--dsw-alias-label-primary);font:inherit;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap}
-.mvm-button:hover:not(:disabled){background:var(--mvm-surface-2)}
+.mvm-health-item{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--mvm-line);border-radius:999px;color:var(--mvm-ink-2);font-size:12px;background:var(--mvm-sunken)}
+.mvm-health-dot{width:6px;height:6px;border-radius:50%;background:var(--mvm-idle)}
+.mvm-health-item.is-online .mvm-health-dot{background:var(--mvm-ok)}
+.mvm-health-item.is-offline .mvm-health-dot{background:var(--mvm-err)}
+.mvm-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:32px;padding:6px 12px;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1);color:var(--mvm-ink);font:inherit;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap}
+.mvm-button:hover:not(:disabled){background:var(--mvm-hover);border-color:var(--mvm-accent-line)}
 .mvm-button:focus-visible,.mvm-icon-button:focus-visible,.mvm-library-open:focus-visible{outline:2px solid var(--mvm-accent);outline-offset:2px}
 .mvm-button:disabled,.mvm-icon-button:disabled{opacity:.45;cursor:not-allowed}
-.mvm-button-primary{border-color:var(--mvm-accent);background:var(--mvm-accent);color:var(--mvm-on-accent)}
-.mvm-button-primary:hover:not(:disabled){background:var(--mvm-accent);opacity:.88}
-.mvm-button-danger{color:var(--dsw-alias-state-error-primary)}
-.mvm-icon-button{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--dsw-alias-label-secondary);cursor:pointer}
-.mvm-icon-button:hover:not(:disabled){background:var(--mvm-surface-2);color:var(--dsw-alias-label-primary)}
-.mvm-settings-backdrop{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:color-mix(in srgb,var(--dsw-alias-bg-overlay) 82%,transparent);backdrop-filter:blur(3px)}
+.mvm-button-primary{border-color:var(--mvm-accent);background:var(--mvm-accent);color:var(--mvm-on-accent);font-weight:600}
+.mvm-button-primary:hover:not(:disabled){background:var(--mvm-accent-strong);border-color:var(--mvm-accent-strong)}
+.mvm-button-danger{color:var(--mvm-err-ink)}
+.mvm-icon-button{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--mvm-ink-2);cursor:pointer}
+.mvm-icon-button:hover:not(:disabled){background:var(--mvm-hover);color:var(--mvm-ink)}
+.mvm-settings-backdrop{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--mvm-scrim);backdrop-filter:blur(3px)}
 .mvm-settings-modal{width:min(1100px,100%);max-height:88vh;overflow-y:auto;margin:0;box-shadow:var(--mvm-shadow-float)}
-.mvm-settings{margin:16px 28px 0;padding:16px 18px;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-lg);background:var(--mvm-surface-1);flex:none}
+.mvm-settings{margin:16px 28px 0;padding:16px 18px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-lg);background:var(--mvm-surface-2);flex:none}
 .mvm-settings-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .mvm-settings-layout{display:grid;grid-template-columns:168px minmax(0,1fr);gap:18px;align-items:start}
-.mvm-settings-nav{display:flex;flex-direction:column;gap:4px;padding:5px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-2)}
-.mvm-settings-tab{padding:9px 11px;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;text-align:left;cursor:pointer}
-.mvm-settings-tab:hover{background:var(--mvm-surface-1);color:var(--dsw-alias-label-primary)}
-.mvm-settings-tab.is-active{background:var(--mvm-accent-soft);color:var(--mvm-accent-ink);font-weight:600;box-shadow:var(--mvm-shadow-card)}
+.mvm-settings-nav{display:flex;flex-direction:column;gap:4px;padding:5px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-sunken)}
+.mvm-settings-tab{padding:9px 11px;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--mvm-ink-2);font:inherit;font-size:12px;text-align:left;cursor:pointer}
+.mvm-settings-tab:hover{background:var(--mvm-hover);color:var(--mvm-ink)}
+.mvm-settings-tab.is-active{background:var(--mvm-accent-soft);color:var(--mvm-accent-ink);font-weight:600;box-shadow:inset 0 0 0 1px var(--mvm-accent-line)}
 .mvm-settings-content{min-width:0}
 @media(max-width:760px){.mvm-settings-layout{grid-template-columns:1fr}.mvm-settings-nav{flex-direction:row;overflow-x:auto}.mvm-settings-tab{white-space:nowrap}}
-.mvm-settings-actions{position:sticky;bottom:0;display:flex;justify-content:flex-end;margin-top:16px;padding-top:12px;background:var(--mvm-surface-1);border-top:1px solid var(--mvm-line)}
-.mvm-section-title{margin:0;font-size:14px;font-weight:600}
+.mvm-settings-actions{position:sticky;bottom:0;display:flex;justify-content:flex-end;margin-top:16px;padding-top:12px;background:var(--mvm-surface-2);border-top:1px solid var(--mvm-line)}
+.mvm-section-title{margin:0;font-size:14px;font-weight:600;letter-spacing:-.01em}
 .mvm-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.mvm-settings-section-title{grid-column:1/-1;margin-top:10px;padding-top:12px;border-top:1px solid var(--mvm-line);font-size:12px;font-weight:600;color:var(--dsw-alias-label-primary)}
+.mvm-settings-section-title{grid-column:1/-1;margin-top:10px;padding-top:12px;border-top:1px solid var(--mvm-line);font-size:12px;font-weight:600;color:var(--mvm-ink)}
 .mvm-settings-row{grid-column:1/-1;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .mvm-settings-row .mvm-input{max-width:320px}
-.mvm-asr-admin{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-2)}
+.mvm-asr-admin{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-sunken)}
 .mvm-asr-status-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .mvm-model-picker{display:flex;flex-direction:column;gap:8px;position:relative}
-.mvm-model-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:8px 10px;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1);color:var(--dsw-alias-label-primary);font:inherit;font-size:12px;text-align:left;cursor:pointer}
+.mvm-model-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:8px 10px;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1);color:var(--mvm-ink);font:inherit;font-size:12px;text-align:left;cursor:pointer}
 .mvm-model-trigger:hover{border-color:var(--mvm-accent)}
 .mvm-model-trigger-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mvm-model-caret{flex:none;color:var(--dsw-alias-label-secondary)}
-.mvm-model-menu{position:absolute;z-index:20;top:calc(100% + 4px);left:0;right:0;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding:6px;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-lg);background:var(--dsw-alias-bg-overlay);box-shadow:var(--mvm-shadow-float)}
+.mvm-model-caret{flex:none;color:var(--mvm-ink-3)}
+.mvm-model-menu{position:absolute;z-index:20;top:calc(100% + 4px);left:0;right:0;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding:6px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-lg);background:var(--mvm-surface-2);box-shadow:var(--mvm-shadow-float)}
 .mvm-model-option{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 8px;border-radius:var(--dsw-radius-sm)}
-.mvm-model-option:hover{background:var(--mvm-surface-2)}
-.mvm-model-option.is-active{background:var(--mvm-surface-2)}
+.mvm-model-option:hover{background:var(--mvm-hover)}
+.mvm-model-option.is-active{background:var(--mvm-accent-soft)}
 .mvm-model-option-main{display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding:0;border:0;background:transparent;color:inherit;font:inherit;font-size:12px;text-align:left;cursor:pointer}
+.mvm-model-option.is-active .mvm-model-option-name{color:var(--mvm-accent-ink)}
 .mvm-model-option-name{font-weight:500;white-space:nowrap}
-.mvm-model-option-size{color:var(--dsw-alias-label-secondary);font-size:12px;font-variant-numeric:tabular-nums}
+.mvm-model-option-size{color:var(--mvm-ink-3);font-size:12px;font-variant-numeric:tabular-nums}
 .mvm-model-option-actions{display:flex;align-items:center;gap:6px;flex:none}
-.mvm-model-badge{flex:none;padding:2px 8px;border-radius:999px;background:var(--mvm-surface-1);color:var(--dsw-alias-label-secondary);font-size:12px}
+.mvm-model-badge{flex:none;padding:2px 8px;border-radius:999px;background:var(--mvm-sunken);color:var(--mvm-ink-2);font-size:12px}
 .mvm-model-badge.is-active{background:var(--mvm-accent);color:var(--mvm-on-accent)}
-.mvm-model-badge.is-ready{color:var(--dsw-alias-state-success-primary)}
+.mvm-model-badge.is-ready{background:var(--mvm-ok-soft);color:var(--mvm-ok-ink)}
+.mvm-model-badge.is-missing{border:1px dashed var(--mvm-line-strong);background:transparent;color:var(--mvm-ink-3)}
+.mvm-role-block{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-sunken)}
+.mvm-role-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.mvm-role-name{font-size:13px;font-weight:600;color:var(--mvm-ink)}
+.mvm-model-badge.is-refine{border-color:var(--mvm-accent-line);background:var(--mvm-accent-soft);color:var(--mvm-accent-strong)}
+.mvm-local-models{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 12px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-sunken)}
+.mvm-local-models-state{display:inline-flex;align-items:center;gap:8px;color:var(--mvm-ink-2);font-size:12px;min-width:0}
+.mvm-local-models-dot{width:6px;height:6px;flex:none;border-radius:50%;background:var(--mvm-idle)}
+.mvm-local-models-dot.is-ready{background:var(--mvm-ok)}
+.mvm-local-models-dot.is-pending{background:var(--mvm-warn)}
+.mvm-local-models-dot.is-missing{background:var(--mvm-err)}
+.mvm-local-models-hint{margin:0}
 .mvm-path-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .mvm-model-list-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.mvm-model-actions{display:flex;align-items:center;gap:6px;justify-content:flex-end}
 .mvm-field{display:flex;flex-direction:column;gap:5px;min-width:0}
 .mvm-field-wide{grid-column:1/-1}
-.mvm-label{color:var(--dsw-alias-label-secondary);font-size:12px}
-.mvm-input,.mvm-textarea{width:100%;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-2);color:var(--dsw-alias-label-primary);font:inherit;font-size:12px;padding:8px 10px}
+.mvm-label{color:var(--mvm-ink-2);font-size:12px;font-weight:500}
+.mvm-input,.mvm-textarea{width:100%;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-sm);background:var(--mvm-sunken);color:var(--mvm-ink);font:inherit;font-size:12px;padding:8px 10px}
 .mvm-input:focus,.mvm-textarea:focus{outline:2px solid var(--mvm-accent);outline-offset:1px;border-color:transparent}
-.mvm-textarea{resize:vertical;min-height:86px}
-.mvm-body{display:grid;grid-template-columns:280px minmax(0,1fr);flex:1;min-height:0}
-.mvm-library{display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--mvm-line);background:var(--mvm-surface-1)}
+.mvm-textarea{resize:vertical;min-height:86px;line-height:1.6}
 .mvm-library-head{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;border-bottom:1px solid var(--mvm-line)}
-.mvm-library-list{flex:1;min-height:0;overflow-y:auto;padding:8px}
-.mvm-library-item{display:flex;align-items:center;gap:4px;margin-bottom:4px;border:1px solid transparent;border-radius:var(--dsw-radius-sm);box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
-.mvm-library-item.is-active{border-color:var(--mvm-line-strong);background:var(--mvm-surface-2)}
 .mvm-library-open{display:flex;flex:1;min-width:0;flex-direction:column;align-items:flex-start;gap:4px;padding:10px;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;border-radius:var(--dsw-radius-sm)}
-.mvm-library-name{width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
-.mvm-library-meta{color:var(--dsw-alias-label-secondary);font-size:12px}
-.mvm-empty{padding:28px 18px;text-align:center;color:var(--dsw-alias-label-secondary)}
-.mvm-empty-title{color:var(--dsw-alias-label-primary);font-weight:500;margin-bottom:5px}
-.mvm-empty-text{font-size:12px;line-height:1.6}
+.mvm-empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:40px 24px;text-align:center;color:var(--mvm-ink-3)}
+.mvm-studio-column>.mvm-empty,.mvm-live-events>.mvm-empty{margin:auto}
+.mvm-empty-mark{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;border:1px solid var(--mvm-accent-line);background:var(--mvm-accent-soft);color:var(--mvm-accent-ink)}
+.mvm-empty-title{color:var(--mvm-ink);font-size:14px;font-weight:600;margin-bottom:6px}
+.mvm-empty-text{font-size:13px;line-height:1.6}
 .mvm-workspace{min-width:0;min-height:0;overflow-y:auto;padding:24px 28px 56px}
-.mvm-detail{max-width:none;width:100%;min-height:0;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 .mvm-detail-page{width:100%;height:100%;min-height:0;max-width:none;display:flex;flex-direction:column;gap:16px;overflow:hidden}
-.mvm-detail-main>.mvm-detail-header,.mvm-detail-main>.mvm-player,.mvm-detail-main>.mvm-detail-tabs,.mvm-detail-main>.mvm-card{flex:none}
 .mvm-detail-page .mvm-transcript{width:100%;min-width:0}
-.mvm-title-input{width:100%;padding:0 0 12px;border:0;border-bottom:1px solid var(--mvm-line);background:transparent;color:var(--dsw-alias-label-primary);font:inherit;font-size:18px;font-weight:600}
+.mvm-title-input{width:100%;padding:0 0 12px;border:0;border-bottom:1px solid var(--mvm-line);background:transparent;color:var(--mvm-ink);font:inherit;font-size:18px;font-weight:600}
 .mvm-title-input:focus{outline:0;border-bottom-color:var(--mvm-accent-line)}
-.mvm-card{border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);overflow:hidden;box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
+.mvm-card{border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);overflow:hidden;box-shadow:var(--mvm-shadow-card)}
 .mvm-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid var(--mvm-line)}
 .mvm-card-body{padding:16px}
 .mvm-import{display:flex;align-items:center;gap:14px}
-.mvm-file-icon{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:var(--dsw-radius-md);background:var(--mvm-surface-2);color:var(--mvm-accent);flex:none}
+.mvm-file-icon{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:var(--dsw-radius-md);background:var(--mvm-accent-soft);border:1px solid var(--mvm-accent-line);color:var(--mvm-accent-ink);flex:none}
 .mvm-file-meta{flex:1;min-width:0}
-.mvm-file-name{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mvm-file-detail{margin-top:3px;color:var(--dsw-alias-label-secondary);font-size:12px}
+.mvm-file-name{font-weight:600;color:var(--mvm-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mvm-file-detail{margin-top:3px;color:var(--mvm-ink-3);font-size:12px}
 .mvm-import-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .mvm-file-input{display:none}
-.mvm-hint{margin-top:12px;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.6}
-.mvm-progress{display:flex;align-items:center;gap:8px;margin-top:12px;color:var(--mvm-accent);font-size:12px}
+.mvm-hint{margin-top:12px;color:var(--mvm-ink-3);font-size:12px;line-height:1.6}
+.mvm-progress{display:flex;align-items:center;gap:8px;margin-top:12px;color:var(--mvm-accent-ink);font-size:12px;font-weight:500}
 .mvm-spinner{width:13px;height:13px;border:2px solid var(--mvm-line-strong);border-top-color:var(--mvm-accent);border-radius:50%;animation:mvm-spin .7s linear infinite}
 @keyframes mvm-spin{to{transform:rotate(360deg)}}
-.mvm-transcript{max-height:none;overflow:visible;display:flex;flex-direction:column;gap:2px}
-.mvm-segment{display:grid;grid-template-columns:64px max-content minmax(0,1fr);gap:10px;padding:9px 8px;border-radius:var(--dsw-radius-sm)}
-.mvm-segment:nth-child(even){background:var(--mvm-surface-2)}
-.mvm-time{color:var(--dsw-alias-label-secondary);font-size:12px;font-variant-numeric:tabular-nums;padding-top:2px}
-.mvm-speaker{color:var(--mvm-accent);font-size:12px;font-weight:600;padding-top:2px;white-space:nowrap}
-.mvm-segment-text{white-space:pre-wrap;line-height:1.65}
-.mvm-bilingual-segment{align-items:start}
-.mvm-original-line{color:var(--dsw-alias-label-primary)}
-.mvm-translation-line{margin-top:7px;padding:7px 10px;border-left:2px solid var(--mvm-accent-line);border-radius:0 var(--dsw-radius-sm) var(--dsw-radius-sm) 0;background:var(--mvm-surface-2);color:var(--dsw-alias-label-secondary);font-size:12px;font-weight:400;line-height:1.75}
-.mvm-translation-skeleton{height:14px;margin-top:8px;border-radius:var(--dsw-radius-xs);background:linear-gradient(90deg,var(--mvm-surface-2),color-mix(in srgb,var(--mvm-line) 45%,var(--mvm-surface-2)),var(--mvm-surface-2));background-size:200% 100%;animation:mvm-shimmer 1.4s infinite}
-.mvm-utterance{display:block;padding:18px 0 22px;border-bottom:1px solid var(--mvm-line)}
+.mvm-transcript{max-height:none;overflow:visible;display:flex;flex-direction:column;gap:0}
+.mvm-time{color:var(--mvm-ink-3);font-size:12px;font-variant-numeric:tabular-nums;padding-top:3px}
+.mvm-speaker{color:var(--mvm-accent-ink);font-size:12px;font-weight:600;padding-top:3px;white-space:nowrap}
+.mvm-translation-skeleton{height:14px;margin-top:8px;border-radius:var(--dsw-radius-xs);background:linear-gradient(90deg,var(--mvm-sunken),color-mix(in srgb,var(--mvm-line) 55%,var(--mvm-sunken)),var(--mvm-sunken));background-size:200% 100%;animation:mvm-shimmer 1.4s infinite}
+.mvm-utterance{display:block;padding:13px 0 17px;border-bottom:1px solid var(--mvm-line)}
 .mvm-utterance:last-child{border-bottom:0}
-.mvm-utterance-head{display:flex;align-items:center;gap:10px;min-height:32px;margin-bottom:12px}
-.mvm-utterance-badge{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;flex:none;border-radius:var(--dsw-radius-sm);background:var(--mvm-accent);color:var(--mvm-surface-1);font-size:12px;font-weight:600}
-.mvm-utterance-speaker{display:inline-flex;align-items:center;gap:10px;padding:0;border:0;background:transparent;color:var(--dsw-alias-label-secondary);font:inherit;font-size:14px;font-weight:400;text-align:left;cursor:pointer}
+.mvm-utterance-head{display:flex;align-items:center;gap:10px;min-height:30px;margin-bottom:7px}
+.mvm-utterance-badge{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;flex:none;border-radius:50%;border:1px solid var(--mvm-accent-line);background:var(--mvm-accent-soft);color:var(--mvm-accent-ink);font-size:12px;font-weight:600;letter-spacing:.02em}
+.mvm-utterance-speaker{display:inline-flex;align-items:center;gap:10px;min-width:0;padding:0;border:0;background:transparent;color:var(--mvm-ink-2);font:inherit;font-size:13px;font-weight:600;text-align:left;cursor:pointer}
 .mvm-utterance-speaker:hover .mvm-utterance-speaker-name{color:var(--mvm-accent)}
-.mvm-utterance-speaker-name{color:var(--dsw-alias-label-secondary)}
-.mvm-utterance-time{color:var(--dsw-alias-label-secondary);font-size:14px;font-variant-numeric:tabular-nums}
-.mvm-utterance-text{display:flex;flex-direction:column;gap:12px;padding-left:44px}
-.mvm-utterance-original{color:var(--dsw-alias-label-primary);font-size:16px;line-height:1.75;white-space:pre-wrap}
-.mvm-utterance-translation{color:var(--dsw-alias-label-secondary);font-size:14px;line-height:1.75;white-space:pre-wrap}
+.mvm-utterance-speaker-name{color:var(--mvm-ink);font-weight:600;min-width:0;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mvm-utterance-time{color:var(--mvm-ink-3);font-size:12px;font-weight:400;font-variant-numeric:tabular-nums}
+.mvm-utterance-text{display:flex;flex-direction:column;gap:9px;max-width:44em;padding-left:40px}
+.mvm-utterance-original{color:var(--mvm-ink);font-size:14px;line-height:1.6;white-space:pre-wrap}
+.mvm-utterance-translation{color:var(--mvm-ink-2);font-size:13px;line-height:1.6;white-space:pre-wrap}
 @media(max-width:900px){.mvm-utterance-text{padding-left:0}}
-.mvm-translating-banner{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-2);color:var(--mvm-accent);font-size:12px}
-.mvm-translation-progress{flex:1;height:4px;overflow:hidden;border-radius:999px;background:color-mix(in srgb,var(--mvm-line) 40%,var(--mvm-surface-2))}
+.mvm-translating-banner{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--mvm-accent-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-accent-soft);color:var(--mvm-accent-ink);font-size:12px;font-weight:500}
+.mvm-translation-progress{flex:1;height:4px;overflow:hidden;border-radius:999px;background:color-mix(in srgb,var(--mvm-line) 50%,var(--mvm-sunken))}
 .mvm-translation-progress span{display:block;height:100%;background:var(--mvm-accent);transition:width .25s ease}
 @keyframes mvm-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.mvm-plain-transcript{white-space:pre-wrap;line-height:1.7}
-.mvm-summary{padding:14px 16px;border-left:3px solid var(--mvm-accent-line);background:var(--mvm-surface-2);border-radius:var(--dsw-radius-sm);line-height:1.7}
+.mvm-plain-transcript{white-space:pre-wrap;line-height:1.6}
 .mvm-minute-section{margin-top:18px}
-.mvm-minute-heading{margin:0 0 9px;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}
-.mvm-summary-paragraph{margin:0;line-height:1.75}
-.mvm-template-badge{padding:2px 8px;border-radius:999px;background:var(--mvm-surface-2);color:var(--dsw-alias-label-secondary);font-size:12px}
+.mvm-minute-heading{margin:0 0 9px;font-size:12px;font-weight:600;color:var(--mvm-ink-2);letter-spacing:.03em}
+.mvm-summary-paragraph{margin:0;line-height:1.6}
+.mvm-template-badge{padding:2px 8px;border-radius:999px;background:var(--mvm-sunken);color:var(--mvm-ink-2);font-size:12px}
 .mvm-topic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
-.mvm-topic{padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-2);box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
-.mvm-topic-title{font-weight:600;margin-bottom:5px}
-.mvm-topic-text{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.65}
+.mvm-topic{padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-sunken)}
+.mvm-topic-title{font-weight:600;margin-bottom:5px;color:var(--mvm-ink)}
+.mvm-topic-text{color:var(--mvm-ink-2);font-size:12px;line-height:1.6}
 .mvm-list{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
-.mvm-list-item{padding:10px 12px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-2)}
-.mvm-list-title{font-weight:500}
-.mvm-list-detail{margin-top:3px;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.6}
-.mvm-list-meta{margin-top:5px;color:var(--mvm-accent);font-size:12px}
-.mvm-ask-answer{margin-top:12px;padding:13px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-2);white-space:pre-wrap;line-height:1.7}
-.mvm-ask-label{display:block;margin-bottom:6px;color:var(--dsw-alias-label-secondary);font-size:12px;font-weight:600}
-.mvm-ask-actions{display:flex;justify-content:flex-end;margin-top:10px}
-.mvm-alert{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:12px 28px 0;padding:10px 12px;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-sm);font-size:12px;flex:none}
-.mvm-alert-error{color:var(--dsw-alias-state-error-primary);background:var(--mvm-surface-1)}
-.mvm-alert-notice{color:var(--dsw-alias-state-success-primary);background:var(--mvm-surface-1)}
+.mvm-list-item{padding:11px 13px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-sunken)}
+.mvm-list-title{font-weight:600;color:var(--mvm-ink)}
+.mvm-list-detail{margin-top:3px;color:var(--mvm-ink-2);font-size:12px;line-height:1.6}
+.mvm-list-meta{margin-top:5px;color:var(--mvm-accent-ink);font-size:12px;font-weight:500}
+.mvm-alert{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:12px 28px 0;padding:10px 12px;border:1px solid var(--mvm-line);border-left-width:3px;border-radius:var(--dsw-radius-sm);font-size:12px;flex:none}
+.mvm-alert-error{color:var(--mvm-err-ink);background:var(--mvm-err-soft);border-left-color:var(--mvm-err)}
+.mvm-alert-notice{color:var(--mvm-ok-ink);background:var(--mvm-ok-soft);border-left-color:var(--mvm-ok)}
 .mvm-settings-alert{margin:12px 0 0}
-.mvm-card-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.mvm-view-switch{display:inline-flex;padding:3px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-2)}
-.mvm-view-tab{min-height:26px;padding:4px 10px;border:0;border-radius:var(--dsw-radius-xs);background:transparent;color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;cursor:pointer}
-.mvm-view-tab.is-active{background:var(--mvm-accent-soft);color:var(--mvm-accent-ink);font-weight:600}
+.mvm-view-switch{display:inline-flex;padding:3px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-sunken)}
+.mvm-view-tab{min-height:26px;padding:4px 12px;border:0;border-radius:var(--dsw-radius-xs);background:transparent;color:var(--mvm-ink-2);font:inherit;font-size:12px;cursor:pointer}
+.mvm-view-tab.is-active{background:var(--mvm-accent-soft);color:var(--mvm-accent-ink);font-weight:600;box-shadow:inset 0 0 0 1px var(--mvm-accent-line)}
 .mvm-view-tab:focus-visible{outline:2px solid var(--mvm-accent);outline-offset:2px}
-.mvm-live-workspace{flex:1;background:var(--mvm-surface-0)}
-.mvm-live-container{width:100%;max-width:none;margin:0;display:flex;flex-direction:column;gap:12px}
-.mvm-live-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.mvm-live-workspace{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--mvm-surface-0)}
+.mvm-live-container{width:100%;max-width:none;margin:0;display:flex;flex-direction:column;gap:12px;flex:1;min-height:0;position:relative}
 .mvm-live-select{cursor:pointer}
-.mvm-live-session-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.mvm-live-metrics{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--dsw-alias-label-secondary);font-size:12px}
-.mvm-live-status-badge{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border:1px solid var(--mvm-line);border-radius:999px;background:var(--mvm-surface-1);color:var(--dsw-alias-label-primary);font-size:12px;font-weight:500}
-.mvm-live-status-time{color:var(--dsw-alias-label-secondary);font-variant-numeric:tabular-nums}
-.mvm-live-diagnostics{font-size:12px;color:var(--dsw-alias-label-secondary)}
+.mvm-live-session-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.mvm-live-metrics{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--mvm-ink-3);font-size:12px}
+.mvm-live-status-badge{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border:1px solid var(--mvm-line);border-radius:999px;background:var(--mvm-surface-1);color:var(--mvm-ink);font-size:12px;font-weight:500}
+.mvm-live-status-time{color:var(--mvm-ink-3);font-variant-numeric:tabular-nums}
+.mvm-live-diagnostics{font-size:12px;color:var(--mvm-ink-3)}
 .mvm-live-diagnostics-summary{cursor:pointer;padding:4px 8px;border-radius:var(--dsw-radius-sm);user-select:none}
-.mvm-live-diagnostics-summary:hover{background:var(--mvm-surface-2)}
+.mvm-live-diagnostics-summary:hover{background:var(--mvm-hover)}
 .mvm-live-diagnostics-body{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px}
-.mvm-live-metric{padding:4px 8px;border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-2);font-variant-numeric:tabular-nums}
-.mvm-live-metric.is-degraded{color:var(--dsw-alias-state-error-primary);border:1px solid var(--dsw-alias-state-error-primary)}
+.mvm-live-metric{padding:4px 8px;border-radius:var(--dsw-radius-sm);background:var(--mvm-sunken);font-variant-numeric:tabular-nums}
+.mvm-live-metric.is-degraded{color:var(--mvm-err-ink);border:1px solid var(--mvm-err);background:var(--mvm-err-soft)}
 .mvm-live-alert{margin:0;white-space:pre-wrap;word-break:break-word}
-.mvm-studio-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,1fr);gap:18px;align-items:start}
-.mvm-studio-column{min-width:0;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);overflow:hidden;box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
-.mvm-studio-header{display:flex;align-items:center;gap:16px;min-height:56px;padding:12px 16px;border-bottom:1px solid var(--mvm-line)}
-.mvm-studio-title{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}
+.mvm-studio-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,1fr);grid-template-rows:minmax(0,1fr);gap:18px;align-items:stretch;flex:1;min-height:0}
+.mvm-studio-column{min-width:0;min-height:0;display:flex;flex-direction:column;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);overflow:hidden;box-shadow:var(--mvm-shadow-card)}
+.mvm-studio-header{display:flex;align-items:center;gap:16px;min-height:58px;flex:none;padding:12px 18px;border-bottom:1px solid var(--mvm-line);background:var(--mvm-surface-1)}
+.mvm-studio-title{margin:0;font-size:18px;font-weight:600;letter-spacing:-.015em}
 .mvm-studio-tabs{display:flex;align-items:center;gap:14px}
-.mvm-studio-tab{padding:5px 0;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;cursor:pointer}
-.mvm-studio-tab.is-active{color:var(--dsw-alias-label-primary);border-bottom-color:var(--mvm-accent-line)}
-.mvm-live-events{display:flex;flex-direction:column;max-height:62vh;overflow-y:auto;padding:10px 14px}
-.mvm-live-event{padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-2);margin-bottom:10px}
-.mvm-live-event.is-error{border-color:var(--dsw-alias-state-error-primary)}
+.mvm-studio-tab{padding:6px 0;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--mvm-ink-3);font:inherit;font-size:13px;white-space:nowrap;cursor:pointer}
+.mvm-studio-tab.is-active{color:var(--mvm-accent-ink);border-bottom-color:var(--mvm-accent);font-weight:600}
+/* The scroll area owns the scrolling; the bottom padding is the room the
+   floating control bar takes, so the last transcript line is never hidden
+   behind it. */
+.mvm-live-events{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;padding:10px 14px 88px}
+.mvm-live-event{padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-sunken);margin-bottom:10px}
+.mvm-live-event.is-error{border-color:var(--mvm-err);background:var(--mvm-err-soft)}
 .mvm-transcript-column .mvm-live-event{border:0;border-bottom:1px solid var(--mvm-line);border-radius:0;background:transparent;padding:12px 4px;margin-bottom:0}
-.mvm-summary-column .mvm-live-event{border-color:var(--mvm-accent)}
-.mvm-live-event-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px;color:var(--dsw-alias-label-secondary);font-size:12px}
+.mvm-summary-column .mvm-live-event{border-color:var(--mvm-accent-line);background:var(--mvm-accent-soft)}
+.mvm-live-event-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px;color:var(--mvm-ink-3);font-size:12px}
 .mvm-live-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.mvm-live-text-label{display:block;margin-bottom:4px;color:var(--dsw-alias-label-secondary);font-size:12px;font-weight:600}
-.mvm-live-text{white-space:pre-wrap;line-height:1.65;word-break:break-word}
-.mvm-live-translation{color:var(--mvm-accent)}
-.mvm-live-detail{margin-top:10px;padding-top:9px;border-top:1px solid var(--mvm-line);color:var(--dsw-alias-state-error-primary)}
+.mvm-live-text-label{display:block;margin-bottom:4px;color:var(--mvm-ink-2);font-size:12px;font-weight:600}
+.mvm-live-text{white-space:pre-wrap;line-height:1.6;word-break:break-word}
+.mvm-live-translation{color:var(--mvm-accent-ink)}
+.mvm-live-detail{margin-top:10px;padding-top:9px;border-top:1px solid var(--mvm-line);color:var(--mvm-err-ink)}
 .mvm-live-detail pre{margin:5px 0 0;white-space:pre-wrap;word-break:break-word;font:inherit;font-size:12px}
 .mvm-playback-bar{position:sticky;bottom:0;z-index:2;display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1)}
 .mvm-playback-spacer{flex:1}
 .mvm-live-audio{display:none}
 .mvm-library-page{display:flex;flex-direction:column;gap:18px;width:100%;max-width:none;margin:0}
-.mvm-library-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
-.mvm-library-table{display:flex;flex-direction:column;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-lg);overflow-x:auto;background:var(--mvm-surface-1)}
-.mvm-library-row{display:grid;grid-template-columns:32px minmax(260px,1.8fr) 150px 90px 120px 110px 90px 40px;align-items:center;gap:14px;width:100%;min-width:1180px;padding:13px 16px;border:0;border-bottom:1px solid var(--mvm-line);background:transparent;color:inherit;font:inherit;text-align:left}
+.mvm-meeting-card-check{flex:none;margin-right:2px}
+.mvm-meeting-card.is-selected{border-color:var(--mvm-accent);background:var(--mvm-accent-soft)}
+/* Row actions stay quiet until the row is touched: the list is for reading
+   meetings, not for aiming at icons. */
+.mvm-library-actions{opacity:0;transition:opacity var(--dsw-duration-fast) ease}
+.mvm-library-row:hover .mvm-library-actions,
+.mvm-library-row:focus-within .mvm-library-actions,
+.mvm-library-row.is-selected .mvm-library-actions{opacity:1}
+@media (hover:none){.mvm-library-actions{opacity:1}}
+.mvm-check{width:14px;height:14px;margin:0;accent-color:var(--mvm-accent);cursor:pointer}
+.mvm-library-check-cell{display:flex;align-items:center;justify-content:center}
+.mvm-library-row.is-selected{background:var(--mvm-accent-soft)}
+.mvm-library-row.is-selected .mvm-library-title-copy strong{color:var(--mvm-accent-strong)}
+.mvm-library-archived-pill{display:inline-flex;align-items:center;padding:1px 7px;border-radius:999px;background:var(--mvm-sunken);color:var(--mvm-ink-3);font-size:11px;font-weight:500;white-space:nowrap}
+.mvm-library-when{white-space:nowrap;font-variant-numeric:tabular-nums}
+.mvm-batch-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 12px;padding:10px 14px;border:1px solid var(--mvm-accent-line);border-radius:var(--dsw-radius-md);background:var(--mvm-accent-soft)}
+.mvm-batch-count{color:var(--mvm-accent-strong);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.mvm-batch-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mvm-library-table{display:flex;flex-direction:column;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-lg);overflow-x:auto;overflow-y:hidden;background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-card)}
+.mvm-library-row{display:grid;grid-template-columns:28px minmax(200px,1.8fr) 142px 76px 92px 88px 68px 36px;align-items:center;gap:10px;width:100%;min-width:828px;padding:12px 14px;border:0;border-bottom:1px solid var(--mvm-line);background:transparent;color:inherit;font:inherit;text-align:left;flex:none}
 .mvm-library-row:last-child{border-bottom:0}
 button.mvm-library-row{cursor:pointer}
-button.mvm-library-row:hover{background:var(--mvm-surface-2)}
-.mvm-library-head{color:var(--dsw-alias-label-secondary);font-size:12px;font-weight:500;cursor:default}
+button.mvm-library-row:hover{background:var(--mvm-hover)}
+.mvm-library-head{color:var(--mvm-ink-3);font-size:12px;font-weight:600;letter-spacing:.03em;cursor:default}
 .mvm-library-title-cell{display:flex;align-items:center;gap:12px;min-width:0}
-.mvm-meeting-thumb{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;flex:none;border-radius:var(--dsw-radius-sm);background:var(--mvm-accent);color:var(--mvm-on-accent);font-size:12px;font-weight:600}
+.mvm-meeting-thumb{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;flex:none;border-radius:50%;background:var(--mvm-accent-soft);border:1px solid var(--mvm-accent-line);color:var(--mvm-accent-ink);font-size:12px;font-weight:600}
 .mvm-library-title-copy{display:flex;flex-direction:column;gap:4px;min-width:0}
 .mvm-library-title-copy strong,.mvm-library-title-copy small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mvm-library-title-copy small{color:var(--dsw-alias-label-secondary);font-size:12px}
+.mvm-library-title-copy small{color:var(--mvm-ink-3);font-size:12px}
 .mvm-library-title-cell .mvm-library-open{flex-direction:row;align-items:center;gap:12px;padding:0}
-.mvm-library-size-cell{display:block;color:var(--dsw-alias-label-secondary);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mvm-library-size-cell{display:block;color:var(--mvm-ink-3);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .mvm-library-actions{display:flex;align-items:center;justify-content:flex-end}
 .mvm-library-select-cell{display:flex;align-items:center;justify-content:center}
 .mvm-library-row .mvm-library-title-cell{min-width:0}
 .mvm-detail-page{width:100%;height:100%;min-height:0;max-width:none;margin:0;display:flex;flex-direction:column;gap:16px;overflow:hidden}
-.mvm-detail-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) clamp(340px,26vw,420px);gap:18px;align-items:stretch}
-.mvm-detail-main{display:flex;flex-direction:column;gap:16px;min-width:0;min-height:0}
-.mvm-detail-main>.mvm-detail-tab-content{flex:1;min-height:0;overflow-y:auto}
-.mvm-detail-rail{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-lg);background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
-.mvm-rail-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid var(--mvm-line);background:var(--mvm-surface-2)}
-.mvm-assistant-logo{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex:none;border:1px solid color-mix(in oklab,var(--mvm-accent) 42%,var(--mvm-line));border-radius:var(--dsw-radius-sm);background:color-mix(in oklab,var(--mvm-accent) 14%,var(--mvm-surface-1));color:var(--mvm-accent);box-shadow:inset 0 1px 0 color-mix(in oklab,var(--dsw-alias-label-primary) 6%,transparent)}
+.mvm-rail-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid var(--mvm-line);background:var(--mvm-sunken)}
+.mvm-assistant-logo{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;flex:none;border:1px solid var(--mvm-accent-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-accent-soft);color:var(--mvm-accent-ink)}
 .mvm-assistant-logo svg{stroke-width:1.8}
 .mvm-rail-tools{display:flex;align-items:center;gap:8px}
 .mvm-rail-scroll{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:16px;padding:14px 16px}
 .mvm-rail-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.mvm-rail-tile{display:flex;align-items:center;gap:9px;padding:11px 12px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-2);color:inherit;font:inherit;text-align:left;cursor:pointer;box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
-.mvm-rail-tile:hover{border-color:var(--mvm-accent);color:var(--mvm-accent)}
-.mvm-rail-tile-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex:none;border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1);color:var(--mvm-accent)}
+.mvm-rail-tile{display:flex;align-items:center;gap:9px;padding:11px 12px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-sunken);color:inherit;font:inherit;text-align:left;cursor:pointer;transition:border-color var(--mvm-dur-fast) ease,background-color var(--mvm-dur-fast) ease}
+.mvm-rail-tile:hover{border-color:var(--mvm-accent);background:var(--mvm-accent-soft);color:var(--mvm-accent-ink)}
+.mvm-rail-tile-icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;flex:none;border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1);border:1px solid var(--mvm-line);color:var(--mvm-accent-ink)}
 .mvm-rail-tile-body{display:flex;flex-direction:column;gap:2px;min-width:0}
-.mvm-rail-tile-body strong{font-size:12px;font-weight:600}
-.mvm-rail-tile-body small{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.4}
-.mvm-rail-subtitle{margin:0;font-size:12px;font-weight:600;color:var(--dsw-alias-label-primary)}
-.mvm-rail-link{padding:0;border:0;background:transparent;color:var(--mvm-accent);font:inherit;font-size:12px;cursor:pointer}
-.mvm-rail-label{margin-bottom:8px;color:var(--dsw-alias-label-secondary);font-size:12px}
+.mvm-rail-tile-body strong{font-size:13px;font-weight:600;color:var(--mvm-ink)}
+.mvm-rail-tile-body small{color:var(--mvm-ink-3);font-size:12px;line-height:1.4}
+.mvm-rail-subtitle{margin:0;font-size:12px;font-weight:600;color:var(--mvm-ink-2)}
+.mvm-rail-link{padding:0;border:0;background:transparent;color:var(--mvm-accent-ink);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
+.mvm-rail-label{margin-bottom:8px;color:var(--mvm-ink-3);font-size:12px;font-weight:500}
 .mvm-rail-suggestion-block{display:flex;flex-direction:column}
-.mvm-rail-suggestion{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-bottom:8px;padding:10px 12px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-2);color:var(--dsw-alias-label-primary);font:inherit;font-size:12px;text-align:left;cursor:pointer;box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
+.mvm-rail-suggestion{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-bottom:8px;padding:10px 12px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-sunken);color:var(--mvm-ink);font:inherit;font-size:12px;text-align:left;cursor:pointer;transition:border-color var(--mvm-dur-fast) ease,background-color var(--mvm-dur-fast) ease}
 .mvm-rail-suggestion:last-child{margin-bottom:0}
-.mvm-rail-suggestion:hover:not(:disabled){border-color:var(--mvm-accent);color:var(--mvm-accent)}
-.mvm-rail-suggestion.is-primary{background:var(--mvm-surface-1);border-color:var(--mvm-line-strong)}
+.mvm-rail-suggestion:hover:not(:disabled){border-color:var(--mvm-accent);background:var(--mvm-accent-soft);color:var(--mvm-accent-ink)}
+.mvm-rail-suggestion.is-primary{background:var(--mvm-surface-1);border-color:var(--mvm-accent-line)}
 .mvm-rail-suggestion:disabled{opacity:.55;cursor:not-allowed}
 .mvm-rail-suggestion-text{min-width:0}
-.mvm-rail-suggestion-arrow{flex:none;color:var(--dsw-alias-label-secondary)}
+.mvm-rail-suggestion-arrow{flex:none;color:var(--mvm-ink-3)}
 .mvm-rail-composer{flex:none;padding:12px 16px;border-top:1px solid var(--mvm-line);background:var(--mvm-surface-1)}
-.mvm-chat-empty{padding:2px 0;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.7}
+.mvm-chat-empty{padding:2px 0;color:var(--mvm-ink-3);font-size:12px;line-height:1.6}
 .mvm-compare-dialog{width:min(880px,100%)}
 .mvm-compare-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:16px}
-.mvm-compare-column{display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-2);box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
+.mvm-compare-column{display:flex;flex-direction:column;gap:10px;padding:13px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-sunken)}
 .mvm-compare-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px}
-.mvm-compare-flag{padding:2px 7px;border-radius:999px;background:var(--mvm-surface-1);color:var(--dsw-alias-state-warn-primary);font-size:12px}
+.mvm-compare-flag{padding:2px 8px;border-radius:999px;background:var(--mvm-warn-soft);color:var(--mvm-warn-ink);font-size:12px;font-weight:500}
 .mvm-compare-samples{display:flex;flex-direction:column;gap:10px}
 .mvm-compare-sample{display:flex;flex-direction:column;gap:4px;padding-bottom:10px;border-bottom:1px solid var(--mvm-line)}
 .mvm-compare-sample:last-child{border-bottom:0;padding-bottom:0}
-.mvm-compare-source{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.6}
-.mvm-compare-target{color:var(--dsw-alias-label-primary);font-size:12px;line-height:1.7}
-.mvm-speaker-chip{display:inline-flex;align-items:center;padding:2px 7px;border:1px solid var(--mvm-line);border-radius:999px;background:transparent;color:var(--mvm-accent);font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex:none}
-.mvm-speaker-chip:hover:not(:disabled){border-color:var(--mvm-accent);background:var(--mvm-surface-2)}
-.mvm-speaker-chip.is-named{color:var(--dsw-alias-label-primary)}
+.mvm-compare-source{color:var(--mvm-ink-3);font-size:12px;line-height:1.6}
+.mvm-compare-target{color:var(--mvm-ink);font-size:12px;line-height:1.6}
+.mvm-speaker-chip{display:inline-flex;align-items:center;padding:3px 9px;border:1px solid var(--mvm-line);border-radius:999px;background:var(--mvm-sunken);color:var(--mvm-ink-2);font:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex:none}
+.mvm-speaker-chip:hover:not(:disabled){border-color:var(--mvm-accent);background:var(--mvm-accent-soft);color:var(--mvm-accent-ink)}
+.mvm-speaker-chip.is-named{border-color:var(--mvm-accent-line);background:var(--mvm-accent-soft);color:var(--mvm-accent-ink)}
 .mvm-speaker-editor{display:inline-flex;align-items:center;gap:4px}
 .mvm-speaker-input{width:110px;min-height:24px;padding:2px 7px;font-size:12px}
 .mvm-voice-list{display:flex;flex-direction:column;max-height:200px;overflow-y:auto}
 .mvm-voice-item{padding:0;border-bottom:1px solid var(--mvm-line)}
 .mvm-voice-item:last-child{border-bottom:0}
 .mvm-voice-button{display:flex;align-items:center;gap:8px;width:100%;padding:9px 13px;border:0;background:transparent;color:inherit;font:inherit;font-size:12px;text-align:left;cursor:pointer}
-.mvm-voice-button:hover{background:var(--mvm-surface-2)}
-.mvm-voice-dot{width:7px;height:7px;flex:none;border-radius:50%;background:var(--dsw-alias-label-secondary)}
-.mvm-voice-dot.is-named{background:var(--mvm-accent)}
+.mvm-voice-button:hover{background:var(--mvm-hover)}
 .mvm-voice-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mvm-voice-rename{display:flex;align-items:center;gap:6px;padding:9px 13px}
 .mvm-voice-rename .mvm-input{flex:1;min-width:0;min-height:26px;padding:3px 8px;font-size:12px}
-.mvm-rail-card{display:flex;flex-direction:column;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);overflow:hidden;box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
+.mvm-rail-card{display:flex;flex-direction:column;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);overflow:hidden;box-shadow:var(--mvm-shadow-card)}
 .mvm-rail-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;border-bottom:1px solid var(--mvm-line)}
-.mvm-rail-title{margin:0;font-size:13px;font-weight:600;letter-spacing:-.01em}
-.mvm-rail-count{padding:2px 8px;border-radius:999px;background:var(--mvm-surface-1);color:var(--dsw-alias-label-secondary);font-size:12px}
-.mvm-rail-scope{max-width:130px;padding:4px 8px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1);color:var(--dsw-alias-label-primary);font:inherit;font-size:12px}
+.mvm-rail-title{margin:0;font-size:13px;font-weight:600;letter-spacing:-.01em;color:var(--mvm-ink)}
+.mvm-rail-scope{max-width:130px;padding:4px 8px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1);color:var(--mvm-ink);font:inherit;font-size:12px}
 .mvm-recent-list{display:flex;flex-direction:column;max-height:220px;overflow-y:auto}
 .mvm-recent-item{display:block;width:100%;padding:10px 14px;border:0;border-bottom:1px solid var(--mvm-line);background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
 .mvm-recent-item:last-child{border-bottom:0}
-.mvm-recent-item:hover{background:var(--mvm-surface-2)}
-.mvm-recent-item.is-active{background:var(--mvm-surface-2);box-shadow:inset 2px 0 0 var(--mvm-accent)}
+.mvm-recent-item:hover{background:var(--mvm-hover)}
+.mvm-recent-item.is-active{background:var(--mvm-accent-soft);box-shadow:inset 2px 0 0 var(--mvm-accent)}
 .mvm-recent-item-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
-.mvm-recent-item-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:500}
-.mvm-recent-item-time{flex:none;color:var(--dsw-alias-label-secondary);font-size:12px}
-.mvm-recent-item-excerpt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.6}
-.mvm-chat-card{flex:1;min-height:340px}
+.mvm-recent-item-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:600;color:var(--mvm-ink)}
+.mvm-recent-item-time{flex:none;color:var(--mvm-ink-3);font-size:12px}
+.mvm-recent-item-excerpt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--mvm-ink-3);font-size:12px;line-height:1.6}
 .mvm-chat-messages{flex:1;min-height:120px;max-height:none;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:0}
 .mvm-chat-message{display:flex}
 .mvm-chat-message.is-user{justify-content:flex-end}
 .mvm-chat-message.is-assistant{justify-content:flex-start}
-.mvm-chat-bubble{max-width:88%;padding:8px 11px;border-radius:var(--dsw-radius-md);font-size:12px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+.mvm-chat-bubble{max-width:88%;padding:8px 11px;border-radius:var(--dsw-radius-md);font-size:12px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
 .mvm-chat-message.is-user .mvm-chat-bubble{background:var(--mvm-accent);color:var(--mvm-on-accent);border-bottom-right-radius:var(--dsw-radius-xs)}
-.mvm-chat-message.is-assistant .mvm-chat-bubble{border:1px solid var(--mvm-line);border-bottom-left-radius:3px;background:var(--mvm-surface-2);color:var(--dsw-alias-label-primary)}
-.mvm-chat-bubble.is-failed{border-color:var(--dsw-alias-state-error-primary);color:var(--dsw-alias-state-error-primary)}
+.mvm-chat-message.is-assistant .mvm-chat-bubble{border:1px solid var(--mvm-line);border-bottom-left-radius:3px;background:var(--mvm-sunken);color:var(--mvm-ink)}
+.mvm-chat-bubble.is-failed{border-color:var(--mvm-err);background:var(--mvm-err-soft);color:var(--mvm-err-ink)}
 .mvm-chat-sources{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 10px}
-.mvm-chat-source{padding:4px 9px;border:1px solid var(--mvm-line);border-radius:999px;background:transparent;color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mvm-chat-source:hover{border-color:var(--mvm-accent);color:var(--mvm-accent)}
-.mvm-chat-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 10px}
-.mvm-chat-chip{padding:5px 10px;border:1px solid var(--mvm-line);border-radius:999px;background:var(--mvm-surface-2);color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;cursor:pointer}
-.mvm-chat-chip:hover:not(:disabled){border-color:var(--mvm-accent);color:var(--mvm-accent)}
-.mvm-chat-chip:disabled{opacity:.55;cursor:not-allowed}
+.mvm-chat-source{padding:4px 9px;border:1px solid var(--mvm-line);border-radius:999px;background:transparent;color:var(--mvm-ink-2);font:inherit;font-size:12px;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mvm-chat-source:hover{border-color:var(--mvm-accent);color:var(--mvm-accent-ink)}
 .mvm-chat-input{display:flex;align-items:center;gap:8px;padding:12px 14px;border-top:1px solid var(--mvm-line);background:var(--mvm-surface-1)}
 .mvm-chat-input .mvm-input{flex:1;min-width:0}
 .mvm-detail-header{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:12px 20px;position:relative}
-.mvm-breadcrumb{display:flex;align-items:center;gap:8px;min-width:0;font-size:13px;color:var(--dsw-alias-label-secondary)}
-.mvm-breadcrumb h2{margin:0;color:var(--dsw-alias-label-primary);font-size:18px;font-weight:600}
-.mvm-link-button{padding:0;border:0;background:transparent;color:var(--mvm-accent);font:inherit;cursor:pointer}
+.mvm-breadcrumb{display:flex;align-items:center;gap:8px;min-width:0;font-size:13px;color:var(--mvm-ink-3)}
+.mvm-breadcrumb h2{margin:0;color:var(--mvm-ink);font-size:18px;font-weight:600;letter-spacing:-.015em}
 .mvm-detail-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .mvm-detail-actions .mvm-button{min-height:30px}
 .mvm-detail-search{grid-column:1/-1;width:100%;margin-top:0}
 .mvm-translation-menu{position:relative}
-.mvm-translation-options{position:absolute;z-index:20;top:calc(100% + 6px);right:0;display:flex;flex-direction:column;min-width:220px;padding:8px;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-lg);background:var(--dsw-alias-bg-overlay);box-shadow:var(--mvm-shadow-float)}
+.mvm-translation-options{position:absolute;z-index:20;top:calc(100% + 6px);right:0;display:flex;flex-direction:column;min-width:220px;padding:8px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-lg);background:var(--mvm-surface-2);box-shadow:var(--mvm-shadow-float)}
 .mvm-translation-options button{padding:8px 10px;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
-.mvm-translation-options button:hover,.mvm-translation-options button.is-active{background:var(--mvm-surface-2);color:var(--mvm-accent)}
-.mvm-bilingual-toggle{display:flex;align-items:center;gap:8px;margin-top:6px;padding:9px 10px;border-top:1px solid var(--mvm-line);color:var(--dsw-alias-label-secondary);font-size:12px}
-.mvm-player{display:flex;flex-direction:column;gap:10px;padding:14px 16px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-2);box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
-.mvm-player-timeline{display:flex;align-items:center;gap:10px;color:var(--dsw-alias-label-secondary);font-size:12px;font-variant-numeric:tabular-nums}
+.mvm-translation-options button:hover,.mvm-translation-options button.is-active{background:var(--mvm-accent-soft);color:var(--mvm-accent-ink)}
+.mvm-bilingual-toggle{display:flex;align-items:center;gap:8px;margin-top:6px;padding:9px 10px;border-top:1px solid var(--mvm-line);color:var(--mvm-ink-2);font-size:12px}
+.mvm-player{display:flex;flex-direction:column;gap:12px;padding:16px 18px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-card)}
+.mvm-player-timeline{display:flex;align-items:center;gap:10px;color:var(--mvm-ink-3);font-size:12px;font-variant-numeric:tabular-nums}
 .mvm-player-timeline input{flex:1;accent-color:var(--mvm-accent)}
 .mvm-player-play{flex:none;min-width:76px;justify-content:center}
 .mvm-player-controls{display:flex;align-items:center;gap:12px;padding-top:2px}
-.mvm-skip-group{display:inline-flex;align-items:center;gap:3px;padding:3px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1)}
-.mvm-skip-button{display:inline-flex;align-items:center;justify-content:center;gap:3px;height:28px;padding:0 8px;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--dsw-alias-label-secondary);font-size:12px;font-weight:600;cursor:pointer}
-.mvm-skip-button:hover:not(:disabled){background:var(--mvm-surface-2);color:var(--dsw-alias-label-primary)}
+.mvm-skip-group{display:inline-flex;align-items:center;gap:3px;padding:3px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-sunken)}
+.mvm-skip-button{display:inline-flex;align-items:center;justify-content:center;gap:3px;height:28px;padding:0 8px;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--mvm-ink-2);font-size:12px;font-weight:600;cursor:pointer}
+.mvm-skip-button:hover:not(:disabled){background:var(--mvm-hover);color:var(--mvm-ink)}
 .mvm-skip-button:focus-visible,.mvm-rate-select:focus-visible{outline:2px solid var(--mvm-accent);outline-offset:2px}
-.mvm-rate-control{display:inline-flex;align-items:center;gap:7px;color:var(--dsw-alias-label-secondary);font-size:12px}
-.mvm-rate-select{height:30px;min-width:74px;padding:0 8px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1);color:var(--dsw-alias-label-primary);font-size:12px;font-weight:600}
+.mvm-rate-control{display:inline-flex;align-items:center;gap:7px;color:var(--mvm-ink-3);font-size:12px}
+.mvm-rate-select{height:30px;min-width:74px;padding:0 8px;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1);color:var(--mvm-ink);font-size:12px;font-weight:600}
 .mvm-player-files{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .mvm-player-files .mvm-button{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;font-size:12px}
+/* A meeting whose recording is gone gets one quiet line, not an alert and
+   not a player that cannot play anything. */
+.mvm-detail-audio-empty{margin:0;color:var(--mvm-ink-3);font-size:12px;line-height:1.6}
 .mvm-audio-select{max-width:180px;padding:4px 6px;font-size:12px}
-.mvm-voice-error{margin:2px 0 0;color:var(--dsw-alias-state-error-primary);font-size:12px}
+.mvm-voice-error{margin:2px 0 0;color:var(--mvm-err-ink);font-size:12px}
 .mvm-speaker-control{position:relative;display:inline-flex}
-.mvm-speaker-count{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid var(--mvm-line);border-radius:999px;background:var(--mvm-surface-2);color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer}
-.mvm-speaker-count:hover,.mvm-speaker-count[aria-expanded="true"]{border-color:var(--mvm-accent);color:var(--mvm-accent);background:var(--mvm-surface-1)}
+.mvm-speaker-count{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--mvm-line);border-radius:999px;background:var(--mvm-sunken);color:var(--mvm-ink-2);font:inherit;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer}
+.mvm-speaker-count:hover,.mvm-speaker-count[aria-expanded="true"]{border-color:var(--mvm-accent);color:var(--mvm-accent-ink);background:var(--mvm-accent-soft)}
 .mvm-speaker-count:focus-visible{outline:2px solid var(--mvm-accent);outline-offset:2px}
-.mvm-speaker-popover{position:absolute;z-index:35;top:calc(100% + 8px);left:0;width:320px;max-width:calc(100vw - 48px);overflow:hidden;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-lg);background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-float)}
-.mvm-speaker-popover-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--mvm-line);color:var(--dsw-alias-label-primary);font-size:13px;font-weight:600}
+.mvm-speaker-popover{position:absolute;z-index:35;top:calc(100% + 8px);left:0;width:320px;max-width:calc(100vw - 48px);overflow:hidden;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-lg);background:var(--mvm-surface-2);box-shadow:var(--mvm-shadow-float)}
+.mvm-speaker-popover-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--mvm-line);color:var(--mvm-ink);font-size:13px;font-weight:600}
 .mvm-speaker-list{display:flex;flex-direction:column;max-height:260px;overflow-y:auto;padding:5px}
 .mvm-speaker-person-row{display:flex;align-items:center;gap:3px;min-width:0;padding:0 3px}
 .mvm-speaker-person-row .mvm-speaker-person,.mvm-speaker-person-row .mvm-speaker-editor-row{flex:1;min-width:0}
 .mvm-speaker-play{flex:none;margin-left:2px}
 .mvm-speaker-error{padding:0 14px 10px}
-.mvm-speaker-person{display:flex;align-items:center;gap:9px;width:100%;min-height:38px;padding:7px 9px;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--dsw-alias-label-primary);font:inherit;font-size:13px;text-align:left;cursor:pointer}
-.mvm-speaker-person:hover{background:var(--mvm-surface-2)}
-.mvm-speaker-person-dot{width:8px;height:8px;flex:none;border-radius:50%;background:var(--dsw-alias-label-secondary)}
+.mvm-speaker-person{display:flex;align-items:center;gap:9px;width:100%;min-height:38px;padding:7px 9px;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--mvm-ink);font:inherit;font-size:13px;text-align:left;cursor:pointer}
+.mvm-speaker-person:hover{background:var(--mvm-hover)}
+.mvm-speaker-person-dot{width:8px;height:8px;flex:none;border-radius:50%;background:var(--mvm-ink-3)}
 .mvm-speaker-person-dot.is-named{background:var(--mvm-accent)}
 .mvm-speaker-person-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mvm-speaker-editor-row{display:flex;align-items:center;gap:6px;padding:6px}
 .mvm-speaker-name-input{flex:1;min-width:0;min-height:30px;padding:4px 8px;font-size:12px}
 .mvm-speaker-save{flex:none;min-height:30px;padding:4px 9px}
-.mvm-speaker-hint{margin:0;padding:10px 14px;border-top:1px solid var(--mvm-line);color:var(--dsw-alias-label-secondary);font-size:11px;line-height:1.55}
-.mvm-speaker-empty{padding:18px 14px;color:var(--dsw-alias-label-secondary);font-size:12px;text-align:center}
+.mvm-speaker-hint{margin:0;padding:10px 14px;border-top:1px solid var(--mvm-line);color:var(--mvm-ink-3);font-size:12px;line-height:1.6}
+.mvm-speaker-empty{padding:18px 14px;color:var(--mvm-ink-3);font-size:12px;text-align:center}
 .mvm-detail-tabs{display:flex;align-items:center;gap:8px 20px;flex-wrap:wrap;border-bottom:1px solid var(--mvm-line)}
-.mvm-detail-tab{padding:9px 0;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;cursor:pointer}
-.mvm-detail-tab.is-active{color:var(--mvm-accent-line);border-bottom-color:var(--mvm-accent-line);font-weight:600}
+.mvm-detail-tabs-spacer{flex:1}
+.mvm-detail-tab{padding:10px 0;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--mvm-ink-3);font:inherit;font-size:13px;cursor:pointer}
+.mvm-detail-tab.is-active{color:var(--mvm-accent-ink);border-bottom-color:var(--mvm-accent);font-weight:600}
 .mvm-detail-tab-content{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:16px;min-width:0}
-.mvm-edit-transcript{min-height:360px;font-family:inherit;line-height:1.65}
-.mvm-summary-hero{display:flex;flex-direction:column;gap:8px;padding:22px 20px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-2);box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
-.mvm-summary-hero h2{margin:0;font-size:18px;font-weight:600}
-.mvm-summary-hero p{margin:4px 0 0;color:var(--dsw-alias-label-secondary);line-height:1.7}
-.mvm-summary-stats{display:flex;gap:18px;margin-top:8px;color:var(--dsw-alias-label-secondary);font-size:12px}
+.mvm-edit-transcript{min-height:360px;font-family:inherit;line-height:1.6}
+.mvm-summary-hero{display:flex;flex-direction:column;gap:8px;padding:24px 22px;border:1px solid var(--mvm-accent-line);border-left-width:3px;border-left-color:var(--mvm-accent);border-radius:0 var(--dsw-radius-md) var(--dsw-radius-md) 0;background:var(--mvm-accent-soft);box-shadow:var(--mvm-shadow-card)}
+.mvm-summary-hero h2{margin:0;font-size:18px;font-weight:600;letter-spacing:-.015em;color:var(--mvm-ink)}
+.mvm-summary-hero p{margin:4px 0 0;color:var(--mvm-ink-2);line-height:1.6}
+.mvm-summary-stats{display:flex;gap:18px;margin-top:8px;color:var(--mvm-ink-3);font-size:12px}
 .mvm-outline{display:flex;flex-direction:column;gap:4px}
-.mvm-outline h3{margin:0 0 8px;font-size:16px}
+.mvm-outline h3{margin:0 0 8px;font-size:16px;font-weight:600;color:var(--mvm-ink)}
 .mvm-outline-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border:0;border-bottom:1px solid var(--mvm-line);background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
-.mvm-outline-item:hover{color:var(--mvm-accent)}
-.mvm-outline-item span{color:var(--dsw-alias-label-secondary);font-size:12px;white-space:nowrap}
-.mvm-viewpoint-tree{display:flex;flex-direction:column;gap:18px}
-.mvm-viewpoint-group{display:flex;flex-direction:column;gap:10px;padding-left:14px;border-left:2px solid var(--mvm-accent-line)}
-.mvm-viewpoint-group h3{margin:0;font-size:14px;color:var(--mvm-accent)}
-.mvm-viewpoint-cards{display:flex;flex-direction:column;gap:8px}
-.mvm-viewpoint-card{padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-2)}
-.mvm-viewpoint-card p{margin:6px 0 0;line-height:1.65}
-.mvm-viewpoint-card small{display:block;margin-top:8px;color:var(--dsw-alias-state-warn-primary)}
-.mvm-mindmap{gap:24px}
-.mvm-mindmap-group{position:relative;display:flex;flex-direction:column;gap:12px;padding-left:24px;--mind-color:var(--mvm-accent)}
-.mvm-mindmap-group::before{content:"";position:absolute;left:6px;top:12px;bottom:12px;width:2px;background:color-mix(in oklab,var(--mind-color) 42%,var(--mvm-line))}
-.mvm-mindmap-group.tone-0{--mind-color:var(--dsw-alias-state-business-primary)}
-.mvm-mindmap-group.tone-1{--mind-color:var(--dsw-alias-state-success-primary)}
-.mvm-mindmap-group.tone-2{--mind-color:var(--dsw-alias-state-warn-primary)}
-.mvm-mindmap-group.tone-3{--mind-color:var(--mvm-accent)}
-.mvm-mindmap-group.tone-4{--mind-color:var(--dsw-alias-state-error-primary)}
-.mvm-mindmap-theme{position:relative;align-self:flex-start;margin:0;padding:6px 12px;border:1px solid color-mix(in oklab,var(--mind-color) 30%,var(--mvm-line));border-radius:999px;background:color-mix(in oklab,var(--mind-color) 16%,var(--mvm-surface-1));color:color-mix(in oklab,var(--mind-color) 82%,var(--dsw-alias-label-primary));font-size:13px;font-weight:600;line-height:1.4}
-.mvm-mindmap-theme::before{content:"";position:absolute;left:-24px;top:50%;width:18px;height:2px;background:color-mix(in oklab,var(--mind-color) 46%,var(--mvm-line))}
-.mvm-mindmap-children{display:flex;flex-direction:column;gap:10px}
-.mvm-mindmap-branch{position:relative;padding:12px 14px;border:1px solid color-mix(in oklab,var(--mind-color) 24%,var(--mvm-line));border-radius:var(--dsw-radius-md);background:color-mix(in oklab,var(--mind-color) 9%,var(--mvm-surface-1));box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
-.mvm-mindmap-branch::before,.mvm-mindmap-comparison::before{content:"";position:absolute;left:-20px;top:22px;width:18px;height:2px;background:color-mix(in oklab,var(--mind-color) 42%,var(--mvm-line))}
-.mvm-mindmap-comparison{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid color-mix(in oklab,var(--mind-color) 24%,var(--mvm-line));border-radius:var(--dsw-radius-md);background:color-mix(in oklab,var(--mind-color) 9%,var(--mvm-surface-1));overflow:hidden;box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
-.mvm-mindmap-compare-item{min-width:0;padding:12px 14px}
-.mvm-mindmap-compare-item+.mvm-mindmap-compare-item{border-left:1px solid color-mix(in oklab,var(--mind-color) 22%,var(--mvm-line))}
-.mvm-mindmap-stance{display:block;color:color-mix(in oklab,var(--mind-color) 82%,var(--dsw-alias-label-primary));font-size:13px;font-weight:600;line-height:1.45}
-.mvm-mindmap-detail{margin:6px 0 0;color:var(--dsw-alias-label-primary);font-size:14px;line-height:1.65;white-space:pre-wrap}
-.mvm-mindmap-risk{display:block;margin-top:8px;color:var(--dsw-alias-state-warn-primary);font-size:12px;line-height:1.5}
-@media(max-width:900px){.mvm-mindmap-comparison{grid-template-columns:1fr}.mvm-mindmap-compare-item+.mvm-mindmap-compare-item{border-top:1px solid color-mix(in oklab,var(--mind-color) 22%,var(--mvm-line));border-left:0}}
+.mvm-outline-item:hover{color:var(--mvm-accent-ink)}
+.mvm-outline-item span{color:var(--mvm-ink-3);font-size:12px;white-space:nowrap}
+.mvm-viewpoint-tree{display:flex;flex-direction:column;gap:16px}
+.mvm-mindmap{gap:32px}
+/* The viewpoint tree answers one question: which themes of this review reached
+   a conclusion, and which are still open. So the structure carries the meaning:
+   one brass hue for the tree, and a semantic colour appears only where a line
+   really is a risk. Topic 1 and topic 2 are not different colours; they are
+   different positions.
+
+   Geometry: the number token is the root and spans x=0..24, so the spine hangs
+   from its centre at x=12. The children sit at x=36; every elbow runs the 24px
+   from the spine to its own card edge. Nothing floats in the margin. */
+.mvm-mindmap-group{position:relative;display:flex;flex-direction:column;padding-left:36px}
+/* No connectors. The structure is carried by three alignment axes that every
+   group repeats: the number column at x=0, the title and card column at x=36,
+   and the statistics column flush right against the card edge. Across groups
+   those three columns line up, which segments the page more firmly than a
+   connector ever did - and it survives a group that has no children. */
+.mvm-mindmap-theme{position:relative;display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:12px;margin:0 0 0 -36px;padding:0 0 12px}
+/* the token sits on its own tint, which lifts the background past the point
+   where the plain accent clears 4.5:1, so it uses the strong step */
+.mvm-mindmap-index{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:none;border:1px solid var(--mvm-accent-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-accent-soft);color:var(--mvm-accent-strong);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.mvm-mindmap-title{margin:0;color:var(--mvm-ink);font-size:16px;font-weight:600;line-height:1.35;letter-spacing:-.015em}
+.mvm-mindmap-meta{display:inline-flex;align-items:center;justify-self:end;gap:8px;color:var(--mvm-ink-3);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mvm-mindmap-meta-sep{width:3px;height:3px;flex:none;border-radius:50%;background:var(--mvm-idle)}
+.mvm-mindmap-meta-open{color:var(--mvm-warn-ink)}
+.mvm-mindmap-children{display:flex;flex-direction:column;gap:12px}
+/* a node is a white card with a hairline and a shadow, not a tinted block:
+   the tint was decoration competing with the text it wrapped */
+.mvm-mindmap-branch{padding:16px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-card)}
+.mvm-mindmap-comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-card);overflow:hidden}
+.mvm-mindmap-compare-item{min-width:0;padding:16px}
+.mvm-mindmap-compare-item+.mvm-mindmap-compare-item{border-left:1px solid var(--mvm-line)}
+.mvm-mindmap-stance{display:block;color:var(--mvm-ink);font-size:14px;font-weight:600;line-height:1.45;letter-spacing:-.01em}
+.mvm-mindmap-label{display:inline-flex;align-items:center;gap:4px;margin:0 0 4px;color:var(--mvm-ink-3);font-size:12px;font-weight:500;letter-spacing:.02em}
+.mvm-mindmap-label svg{color:var(--mvm-warn-ink)}
+.mvm-mindmap-detail{margin:8px 0 0;color:var(--mvm-ink-2);font-size:13px;line-height:1.6;white-space:pre-wrap}
+.mvm-mindmap-decisions{margin:8px 0 0;padding:0;list-style:none}
+.mvm-mindmap-decision{position:relative;margin:0 0 4px;padding-left:16px;color:var(--mvm-ink-2);font-size:13px;line-height:1.55}
+.mvm-mindmap-decision::before{content:"";position:absolute;left:4px;top:8px;width:5px;height:5px;border-radius:50%;background:var(--mvm-accent)}
+/* the risk is the most decision-relevant line in the card, so it stops being
+   the faintest footnote and carries colour, icon and label together */
+.mvm-mindmap-risk-block{margin-top:12px;padding:8px 12px;border-left:2px solid color-mix(in srgb,var(--mvm-warn) 62%,transparent);border-radius:0 var(--dsw-radius-sm) var(--dsw-radius-sm) 0;background:color-mix(in srgb,var(--mvm-warn) 8%,transparent)}
+.mvm-mindmap-risk-block .mvm-mindmap-label{color:var(--mvm-warn-ink)}
+.mvm-mindmap-risk{display:block;margin:0;color:var(--mvm-warn-ink);font-size:13px;line-height:1.55;white-space:pre-wrap}
+@media(max-width:900px){.mvm-mindmap-comparison{grid-template-columns:1fr}.mvm-mindmap-compare-item+.mvm-mindmap-compare-item{border-top:1px solid var(--mvm-line);border-left:0}}
 .mvm-chapter-toolbar{display:flex;justify-content:flex-start}
 .mvm-chapter-list{display:flex;flex-direction:column}
 .mvm-chapter-row{display:grid;grid-template-columns:64px minmax(0,1fr) 64px;gap:12px;align-items:center;padding:12px 0;border:0;border-bottom:1px solid var(--mvm-line);background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
-.mvm-chapter-row.is-active{color:var(--mvm-accent)}
-.mvm-chapter-detail{padding:16px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-2)}
+.mvm-chapter-row.is-active{color:var(--mvm-accent-ink)}
+.mvm-chapter-detail{padding:16px 18px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-sunken)}
 .mvm-chapter-detail h3{margin:8px 0;font-size:16px}
-.mvm-chapter-detail p{margin:0;color:var(--dsw-alias-label-secondary);line-height:1.75}
-.mvm-share-backdrop{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--dsw-alias-bg-overlay)}
-.mvm-share-dialog{width:min(560px,100%);max-height:85vh;overflow-y:auto;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-lg);background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-float)}
+.mvm-chapter-detail p{margin:0;color:var(--mvm-ink-2);line-height:1.6}
+.mvm-share-backdrop{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--mvm-scrim)}
+.mvm-share-dialog{width:min(560px,100%);max-height:85vh;overflow-y:auto;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-lg);background:var(--mvm-surface-2);box-shadow:var(--mvm-shadow-float)}
 .mvm-share-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--mvm-line)}
 .mvm-share-content{display:flex;flex-direction:column;gap:14px;padding:18px}
 .mvm-share-actions{display:flex;justify-content:flex-end}
@@ -1322,25 +1504,37 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
 .mvm-live-back{align-self:flex-start;margin-bottom:6px}
 .mvm-live-topbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 .mvm-live-language{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
-.mvm-live-language-label{color:var(--dsw-alias-label-secondary);font-size:12px;white-space:nowrap}
+.mvm-live-language-label{color:var(--mvm-ink-3);font-size:12px;white-space:nowrap}
 .mvm-live-language .mvm-live-select{height:32px;min-width:132px;padding:4px 8px;font-size:12px}
 .mvm-live-language:first-child .mvm-live-select{min-width:172px}
-.mvm-live-track-filter{display:inline-flex;align-items:center;gap:7px;color:var(--dsw-alias-label-secondary);font-size:12px;white-space:nowrap}
+.mvm-live-track-filter{display:inline-flex;align-items:center;gap:7px;color:var(--mvm-ink-3);font-size:12px;white-space:nowrap}
 .mvm-live-track-filter .mvm-live-select{height:30px;min-width:108px;padding:3px 8px;font-size:12px}
 .mvm-live-topbar .mvm-button{white-space:nowrap}
 .mvm-live-divider{width:1px;height:26px;background:var(--mvm-line)}
-.mvm-incognito-badge{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--mvm-line);border-radius:999px;background:var(--mvm-surface-2);color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;cursor:pointer}
+.mvm-incognito-badge{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--mvm-line);border-radius:999px;background:var(--mvm-sunken);color:var(--mvm-ink-2);font:inherit;font-size:12px;cursor:pointer}
 .mvm-incognito-badge.is-on{border-color:var(--mvm-accent);color:var(--mvm-accent)}
-.mvm-incognito-dot{width:7px;height:7px;border-radius:50%;background:var(--dsw-alias-label-secondary)}
+.mvm-incognito-dot{width:7px;height:7px;border-radius:50%;background:var(--mvm-ink-3)}
 .mvm-incognito-badge.is-on .mvm-incognito-dot{background:var(--mvm-accent)}
-.mvm-live-control-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:30;display:flex;align-items:center;justify-content:center;gap:10px;max-width:calc(100vw - 40px);padding:10px 16px;border:1px solid var(--mvm-line-strong);border-radius:999px;background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-float)}
-.mvm-live-workspace{padding-bottom:104px}
-.mvm-live-banner{display:flex;align-items:center;gap:10px;margin:12px 0 0;padding:10px 14px;border:1px solid var(--dsw-alias-state-success-primary);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);color:var(--dsw-alias-label-primary);font-size:12px}
-.mvm-live-banner .mvm-pulse-dot{background:var(--dsw-alias-state-success-primary)}
+/* The bar floats over the studio, but it must float over *this* column, not
+   the window: a viewport-fixed bar centres on the window and pushes itself
+   across the plugin's left edge into the host sidebar. The live container is
+   the positioned ancestor, so the bar is centred on the plugin content column
+   and can never be wider than it. */
+.mvm-live-control-bar{position:absolute;left:50%;transform:translateX(-50%);bottom:20px;z-index:30;display:flex;align-items:center;justify-content:center;gap:10px;max-width:calc(100% - 40px);padding:10px 16px;border:1px solid var(--mvm-line);border-radius:999px;background:var(--mvm-surface-2);box-shadow:var(--mvm-shadow-float)}
+/* The live view owns the full height: the workspace never scrolls as a page,
+   the two studio columns do. A zero bottom padding lets the columns reach the
+   bottom of the column; the room the floating bar needs is reserved inside
+   the scroll areas instead of as a dead band under the panels. */
+.mvm-workspace.mvm-live-workspace{position:relative;overflow:hidden;padding-bottom:0}
+.mvm-live-banner{display:flex;align-items:center;gap:10px;margin:12px 0 0;padding:10px 14px;border:1px solid var(--mvm-ok);border-radius:var(--dsw-radius-md);background:var(--mvm-ok-soft);color:var(--mvm-ink);font-size:12px}
+.mvm-live-banner .mvm-pulse-dot{background:var(--mvm-ok)}
 .mvm-live-banner-text{flex:1;min-width:0}
-.mvm-back-button{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1);color:var(--dsw-alias-label-primary);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
-.mvm-back-button:hover{border-color:var(--mvm-accent);color:var(--mvm-accent)}
+.mvm-back-button{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1);color:var(--mvm-ink);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
+.mvm-back-button:hover{border-color:var(--mvm-accent);color:var(--mvm-accent-ink);background:var(--mvm-accent-soft)}
 .mvm-back-arrow{font-size:14px;line-height:1}
+/* The detail header keeps its back control icon-only: a long meeting title
+   must never squeeze the button into a two-line text wrap. */
+.mvm-back-button-icon{width:30px;min-width:30px;height:30px;padding:0;justify-content:center;gap:0;flex:none;white-space:nowrap}
 .mvm-detail-tabs-spacer{flex:1}
 .mvm-transcript-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:6px}
 .mvm-toggle-field{flex-direction:row;align-items:flex-start;gap:10px;grid-column:1/-1}
@@ -1349,36 +1543,36 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
 .mvm-home{width:100%;max-width:1160px;margin:0 auto;display:flex;flex-direction:column;gap:18px;min-height:0}
 .mvm-home-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .mvm-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
-.mvm-stat-card{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
-.mvm-stat-card.is-live{border-color:var(--dsw-alias-state-success-primary)}
-.mvm-stat-value{font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
-.mvm-stat-label{color:var(--dsw-alias-label-secondary);font-size:12px}
+.mvm-stat-card{display:flex;flex-direction:column;gap:3px;padding:14px 16px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-card)}
+.mvm-stat-card.is-live{border-color:var(--mvm-ok);box-shadow:var(--mvm-shadow-card),inset 3px 0 0 var(--mvm-ok)}
+.mvm-stat-value{font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;color:var(--mvm-ink)}
+.mvm-stat-label{color:var(--mvm-ink-3);font-size:12px;font-weight:500;letter-spacing:.02em}
 .mvm-home-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .mvm-home-toolbar .mvm-library-search{max-width:280px}
 .mvm-view-toggle{display:flex;align-items:center;gap:2px}
-.mvm-view-toggle .mvm-icon-button{color:var(--dsw-alias-label-secondary)}
-.mvm-view-toggle .mvm-icon-button.is-active{color:var(--mvm-accent);background:var(--mvm-surface-2)}
-.mvm-icon-button.is-favorite{color:var(--dsw-alias-state-warn-primary)}
+.mvm-view-toggle .mvm-icon-button{color:var(--mvm-ink-3)}
+.mvm-view-toggle .mvm-icon-button.is-active{color:var(--mvm-accent-ink);background:var(--mvm-accent-soft)}
+.mvm-icon-button.is-favorite{color:var(--mvm-warn-ink)}
 .mvm-meeting-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
-.mvm-meeting-card{display:flex;flex-direction:column;gap:10px;min-width:0;padding:14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
-.mvm-meeting-card:hover{border-color:var(--mvm-line-strong);background:var(--mvm-surface-2)}
-.mvm-meeting-card.is-live{border-color:var(--dsw-alias-state-success-primary)}
+.mvm-meeting-card{display:flex;flex-direction:column;gap:10px;min-width:0;padding:16px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-card);transition:transform var(--mvm-dur) var(--mvm-ease),box-shadow var(--mvm-dur) var(--mvm-ease),border-color var(--mvm-dur-fast) ease}
+.mvm-meeting-card:hover{border-color:var(--mvm-accent-line);background:var(--mvm-surface-1);transform:translateY(-2px);box-shadow:var(--mvm-shadow-card-hover)}
+.mvm-meeting-card.is-live{border-color:var(--mvm-ok);box-shadow:var(--mvm-shadow-card),inset 3px 0 0 var(--mvm-ok)}
 .mvm-meeting-card-head{display:flex;align-items:flex-start;gap:10px;min-width:0}
 .mvm-meeting-card-titles{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
-.mvm-meeting-card-title{padding:0;border:0;background:transparent;color:var(--dsw-alias-label-primary);font:inherit;font-size:14px;font-weight:600;text-align:left;cursor:pointer;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.mvm-meeting-card-title{padding:0;border:0;background:transparent;color:var(--mvm-ink);font:inherit;font-size:14px;font-weight:600;text-align:left;cursor:pointer;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .mvm-meeting-card-title:hover{color:var(--mvm-accent)}
-.mvm-meeting-card-meta{color:var(--dsw-alias-label-secondary);font-size:12px}
-.mvm-meeting-card-star{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--dsw-alias-label-secondary);cursor:pointer;transition:color var(--mvm-dur-fast) ease,transform var(--mvm-dur-fast) ease}
-.mvm-meeting-card-star:hover{color:var(--dsw-alias-state-warn-primary)}
+.mvm-meeting-card-meta{color:var(--mvm-ink-3);font-size:12px}
+.mvm-meeting-card-star{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--mvm-ink-2);cursor:pointer;transition:color var(--mvm-dur-fast) ease,transform var(--mvm-dur-fast) ease}
+.mvm-meeting-card-star:hover{color:var(--mvm-warn-ink)}
 .mvm-meeting-card-star:active{transform:scale(.97)}
-.mvm-meeting-card-star.is-favorite{color:var(--dsw-alias-state-warn-primary)}
-.mvm-meeting-card-excerpt{margin:0;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.mvm-meeting-card-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:auto;font-size:12px;color:var(--dsw-alias-label-secondary)}
-.mvm-meeting-card-status{padding:2px 8px;border:1px solid var(--mvm-line);border-radius:999px;white-space:nowrap;flex:none}
+.mvm-meeting-card-star.is-favorite{color:var(--mvm-warn-ink)}
+.mvm-meeting-card-excerpt{margin:0;color:var(--mvm-ink-2);font-size:12px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mvm-meeting-card-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:auto;font-size:12px;color:var(--mvm-ink-3)}
+.mvm-meeting-card-status{padding:2px 8px;border:1px solid var(--mvm-line);border-radius:999px;white-space:nowrap;flex:none;background:var(--mvm-sunken);color:var(--mvm-ink-2)}
 .mvm-meeting-card-source{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:0 1 auto}
-.mvm-home-empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:48px 20px;border:1px dashed var(--mvm-line-strong);border-radius:var(--dsw-radius-lg);text-align:center}
-.mvm-drawer-backdrop{position:fixed;inset:0;z-index:40;background:color-mix(in srgb,var(--dsw-alias-bg-overlay) 45%,transparent)}
-.mvm-assistant-drawer{position:fixed;top:0;right:0;bottom:0;z-index:41;display:flex;flex-direction:column;width:min(420px,100vw);border-left:1px solid var(--mvm-line);background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-drawer)}
+.mvm-home-empty{display:flex;flex-direction:column;align-items:center;gap:12px;padding:56px 24px;border:1px dashed var(--mvm-line-strong);border-radius:var(--dsw-radius-lg);text-align:center;background:var(--mvm-surface-1)}
+.mvm-drawer-backdrop{position:fixed;inset:0;z-index:40;background:var(--mvm-scrim)}
+.mvm-assistant-drawer{position:fixed;top:0;right:0;bottom:0;z-index:41;display:flex;flex-direction:column;width:min(420px,100vw);border-left:1px solid var(--mvm-line);background:var(--mvm-surface-2);box-shadow:var(--mvm-shadow-drawer)}
 .mvm-detail-reader{display:flex;flex-direction:column;gap:16px;width:100%;max-width:1040px;margin:0 auto;min-height:0;flex:1;overflow-y:auto;padding-right:2px}
 .mvm-summary-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .mvm-template-picker{display:flex;align-items:center;gap:6px}
@@ -1386,143 +1580,115 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
 .mvm-template-select{max-width:220px;min-height:30px;padding:4px 8px;font-size:12px}
 .mvm-library-progress-pill.is-inline{margin-left:8px;padding:2px 9px;gap:5px;font-size:12px;font-weight:600;vertical-align:middle}
 .mvm-pulse-dot{width:7px;height:7px;flex:none;border-radius:50%;background:var(--mvm-accent);animation:mvm-live-pulse 1.6s infinite}
-.mvm-library-live-link{margin-top:4px;padding:0;border:0;background:transparent;color:var(--mvm-accent);font:inherit;font-size:12px;text-decoration:underline;cursor:pointer;white-space:nowrap;flex:none}
+.mvm-library-live-link{margin-top:4px;padding:0;border:0;background:transparent;color:var(--mvm-accent-ink);font:inherit;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;flex:none}
 .mvm-library-title-row{display:flex;align-items:center;gap:4px;min-width:0;flex-wrap:wrap}
 .mvm-voice-item.is-unnamed{opacity:.9}
-.mvm-voice-play{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:none;border:1px solid var(--mvm-line);border-radius:50%;background:transparent;color:var(--dsw-alias-label-secondary);cursor:pointer}
-.mvm-voice-play:hover{color:var(--mvm-accent);border-color:var(--mvm-accent)}
+.mvm-voice-play{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:none;border:1px solid var(--mvm-line);border-radius:50%;background:transparent;color:var(--mvm-ink-2);cursor:pointer}
+.mvm-voice-play:hover{color:var(--mvm-accent-ink);border-color:var(--mvm-accent);background:var(--mvm-accent-soft)}
 .mvm-voice-row{display:flex;align-items:center;gap:8px;width:100%;padding:8px 13px}
-.mvm-voice-group-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 13px;border-top:1px solid var(--mvm-line);color:var(--dsw-alias-label-secondary);font-size:12px;cursor:pointer;background:transparent;border-left:0;border-right:0;border-bottom:0;width:100%;font-family:inherit;text-align:left}
+.mvm-voice-group-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 13px;border-top:1px solid var(--mvm-line);color:var(--mvm-ink-3);font-size:12px;cursor:pointer;background:transparent;border-left:0;border-right:0;border-bottom:0;width:100%;font-family:inherit;text-align:left}
 .mvm-voicebook-trigger-wrap{position:relative;display:inline-flex}
-.mvm-voicebook-trigger{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 10px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1);color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
-.mvm-voicebook-trigger:hover,.mvm-voicebook-trigger[aria-expanded="true"]{border-color:var(--mvm-accent);color:var(--mvm-accent);background:var(--mvm-surface-2)}
-.mvm-voicebook-trigger-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--mvm-surface-2);color:var(--dsw-alias-label-secondary);font-size:11px;font-variant-numeric:tabular-nums}
-.mvm-voicebook-panel{position:absolute;z-index:36;top:calc(100% + 8px);right:0;width:360px;max-width:calc(100vw - 48px);max-height:min(560px,72vh);overflow-y:auto;display:flex;flex-direction:column;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-lg);background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-float)}
-.mvm-voicebook-panel-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--mvm-line);background:var(--mvm-surface-1)}
-.mvm-voicebook-panel-title{display:flex;align-items:center;gap:7px;flex:1;min-width:0;color:var(--dsw-alias-label-primary);font-size:13px;font-weight:600}
+.mvm-voicebook-trigger{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 11px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1);color:var(--mvm-ink-2);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
+.mvm-voicebook-trigger:hover,.mvm-voicebook-trigger[aria-expanded="true"]{border-color:var(--mvm-accent);color:var(--mvm-accent-ink);background:var(--mvm-accent-soft)}
+.mvm-voicebook-trigger-count{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--mvm-sunken);color:var(--mvm-ink-2);font-size:11px;font-variant-numeric:tabular-nums}
+.mvm-voicebook-panel{position:absolute;z-index:36;top:calc(100% + 8px);right:0;width:360px;max-width:calc(100vw - 48px);max-height:min(560px,72vh);overflow-y:auto;display:flex;flex-direction:column;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-lg);background:var(--mvm-surface-2);box-shadow:var(--mvm-shadow-float)}
+.mvm-voicebook-panel-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--mvm-line);background:var(--mvm-surface-2)}
+.mvm-voicebook-panel-title{display:flex;align-items:center;gap:7px;flex:1;min-width:0;color:var(--mvm-ink);font-size:13px;font-weight:600}
 .mvm-voicebook-panel-title>svg{flex:none;color:var(--mvm-accent)}
-.mvm-voicebook-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;padding:0 7px;border:1px solid var(--mvm-line);border-radius:999px;background:var(--mvm-surface-2);color:var(--dsw-alias-label-secondary);font-size:11px;font-weight:500;font-variant-numeric:tabular-nums}
-.mvm-voicebook-empty-state{display:flex;flex-direction:column;align-items:center;gap:6px;padding:24px 18px;text-align:center;color:var(--dsw-alias-label-secondary)}
+.mvm-voicebook-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;padding:0 7px;border:1px solid var(--mvm-line);border-radius:999px;background:var(--mvm-sunken);color:var(--mvm-ink-2);font-size:11px;font-weight:500;font-variant-numeric:tabular-nums}
+.mvm-voicebook-empty-state{display:flex;flex-direction:column;align-items:center;gap:6px;padding:24px 18px;text-align:center;color:var(--mvm-ink-3)}
 .mvm-voicebook-empty-state>svg{color:var(--mvm-accent);opacity:.85}
-.mvm-voicebook-empty-state strong{color:var(--dsw-alias-label-primary);font-size:13px;font-weight:600}
+.mvm-voicebook-empty-state strong{color:var(--mvm-ink);font-size:13px;font-weight:600}
 .mvm-voicebook-empty-state span{font-size:12px;line-height:1.6}
-.mvm-voicebook-note{display:flex;align-items:flex-start;gap:6px;margin:0;padding:9px 12px;border-top:1px solid var(--mvm-line);color:var(--dsw-alias-label-secondary);font-size:11.5px;line-height:1.5}
+.mvm-voicebook-note{display:flex;align-items:flex-start;gap:6px;margin:0;padding:9px 12px;border-top:1px solid var(--mvm-line);color:var(--mvm-ink-3);font-size:12px;line-height:1.5}
 .mvm-voicebook-note>svg{flex:none;margin-top:1px;color:var(--mvm-accent)}
 .mvm-voicebook-group svg{flex:none;transition:transform var(--mvm-dur-fast) ease}
 .mvm-voicebook-group svg.is-open{transform:rotate(180deg)}
-.mvm-voicebook-tools{padding:10px 12px;border-top:1px solid var(--mvm-line);border-bottom:1px solid var(--mvm-line);background:var(--mvm-surface-2)}
-.mvm-voicebook-search-input{width:100%;min-height:32px;padding:5px 9px;font-size:12px;background:var(--mvm-surface-1)}
+.mvm-voicebook-tools{padding:10px 12px;border-top:1px solid var(--mvm-line);border-bottom:1px solid var(--mvm-line);background:var(--mvm-sunken)}
+.mvm-voicebook-search-input{width:100%;min-height:32px;padding:5px 9px;font-size:12px;background:var(--mvm-surface-1);border-color:var(--mvm-line-strong)}
 .mvm-voicebook-filters{display:flex;align-items:center;gap:4px;margin-top:8px;padding:3px;border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1)}
-.mvm-voicebook-filter{flex:1;min-width:0;min-height:26px;padding:3px 6px;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
-.mvm-voicebook-filter:hover{color:var(--dsw-alias-label-primary)}
-.mvm-voicebook-filter.is-active{background:var(--mvm-surface-2);color:var(--mvm-accent);box-shadow:var(--mvm-shadow-card),var(--mvm-edge)}
+.mvm-voicebook-filter{flex:1;min-width:0;min-height:26px;padding:3px 6px;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--mvm-ink-3);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
+.mvm-voicebook-filter:hover{color:var(--mvm-ink)}
+.mvm-voicebook-filter.is-active{background:var(--mvm-accent-soft);color:var(--mvm-accent-ink);box-shadow:inset 0 0 0 1px var(--mvm-accent-line)}
 .mvm-voicebook-list{flex:none;max-height:280px;padding:4px;gap:4px}
 .mvm-voicebook-row{gap:8px;padding:6px 8px;border-radius:var(--dsw-radius-sm)}
-.mvm-voicebook-row:hover{background:var(--mvm-surface-2)}
-.mvm-voicebook-play{width:28px;height:28px;border:0;background:color-mix(in oklab,var(--mvm-accent) 12%,var(--mvm-surface-1));color:var(--mvm-accent)}
+.mvm-voicebook-row:hover{background:var(--mvm-hover)}
+.mvm-voicebook-play{width:28px;height:28px;border:1px solid var(--mvm-accent-line);background:var(--mvm-accent-soft);color:var(--mvm-accent-ink)}
 .mvm-voicebook-play:hover{background:color-mix(in oklab,var(--mvm-accent) 20%,var(--mvm-surface-1))}
 .mvm-voice-name-button{flex:1;min-width:0;gap:10px;padding:2px 4px}
 .mvm-voice-name-button:hover{background:transparent}
 .mvm-voice-name-block{display:flex;flex:1;min-width:0;flex-direction:column;align-items:flex-start;gap:1px}
-.mvm-voice-name{font-size:13px;font-weight:600}
-.mvm-voice-meta{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.45}
-.mvm-voice-edit-icon{flex:none;color:var(--dsw-alias-label-secondary)}
+.mvm-voice-name{font-size:13px;font-weight:600;color:var(--mvm-ink)}
+.mvm-voice-meta{color:var(--mvm-ink-3);font-size:12px;line-height:1.45}
+.mvm-voice-edit-icon{flex:none;color:var(--mvm-ink-3)}
 .mvm-voicebook-group{margin-top:4px;padding:8px 10px;font-weight:500}
-.mvm-voicebook-rename{margin:4px 8px;padding:8px;border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-2)}
-.mvm-voicebook-empty{padding:20px 12px;color:var(--dsw-alias-label-secondary);font-size:12px;text-align:center}
+.mvm-voicebook-rename{margin:4px 8px;padding:8px;border-radius:var(--dsw-radius-sm);background:var(--mvm-sunken)}
+.mvm-voicebook-empty{padding:20px 12px;color:var(--mvm-ink-3);font-size:12px;text-align:center}
 .mvm-voicebook-trigger:focus-visible,.mvm-voicebook-filter:focus-visible,.mvm-voicebook-play:focus-visible,.mvm-voice-name-button:focus-visible,.mvm-voicebook-group:focus-visible{outline:2px solid var(--mvm-accent);outline-offset:2px}
 .mvm-live-recording-dots{display:inline-flex;align-items:center;gap:4px}
-.mvm-live-recording-dots span{width:6px;height:6px;border-radius:50%;background:var(--dsw-alias-label-secondary)}
-.mvm-live-recording-dots.is-live span{background:var(--dsw-alias-state-error-primary);animation:mvm-live-pulse 1.2s infinite}
+.mvm-live-recording-dots span{width:6px;height:6px;border-radius:50%;background:var(--mvm-ink-3)}
+.mvm-live-recording-dots.is-live span{background:var(--mvm-err);animation:mvm-live-pulse 1.2s infinite}
 .mvm-live-recording-dots.is-live span:nth-child(2){animation-delay:.2s}
 .mvm-live-recording-dots.is-live span:nth-child(3){animation-delay:.4s}
 @keyframes mvm-live-pulse{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.1)}}
-.mvm-live-timer{min-width:48px;font-variant-numeric:tabular-nums;font-size:13px;color:var(--dsw-alias-label-primary)}
-.mvm-live-control-button{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--mvm-line);border-radius:50%;background:transparent;color:var(--dsw-alias-label-secondary);cursor:pointer}
-.mvm-live-control-button:hover{color:var(--mvm-accent);border-color:var(--mvm-accent)}
+.mvm-live-timer{min-width:48px;font-variant-numeric:tabular-nums;font-size:13px;font-weight:600;color:var(--mvm-ink)}
+.mvm-live-control-button{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--mvm-line-strong);border-radius:50%;background:var(--mvm-surface-1);color:var(--mvm-ink-2);cursor:pointer}
+.mvm-live-control-button:hover{color:var(--mvm-accent-ink);border-color:var(--mvm-accent);background:var(--mvm-accent-soft)}
 .mvm-live-topic{display:flex;flex-direction:column;gap:10px;padding:12px 14px}
-.mvm-live-topic-chip{align-self:flex-start;padding:6px 14px;border-radius:999px;background:var(--dsw-alias-state-success-primary);color:var(--mvm-surface-1);font-size:12px;font-weight:600}
+.mvm-live-topic-chip{align-self:flex-start;padding:6px 14px;border-radius:999px;background:var(--mvm-ok-fill);color:var(--mvm-on-semantic);font-size:12px;font-weight:600}
 .mvm-live-topic-children{display:flex;flex-direction:column;gap:10px;margin-left:18px;padding-left:14px;border-left:1px solid var(--mvm-line)}
-.mvm-live-topic-card{padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-2)}
+.mvm-live-topic-card{padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-sunken)}
 .mvm-live-skeletons{display:flex;flex-direction:column;gap:10px;margin-left:18px}
-.mvm-live-skeleton{display:block;height:14px;border-radius:var(--dsw-radius-sm);background:linear-gradient(90deg,var(--mvm-surface-2),color-mix(in srgb,var(--mvm-line) 45%,var(--mvm-surface-2)),var(--mvm-surface-2));background-size:200% 100%;animation:mvm-shimmer 1.4s infinite}
+.mvm-live-skeleton{display:block;height:14px;border-radius:var(--dsw-radius-sm);background:linear-gradient(90deg,var(--mvm-sunken),color-mix(in srgb,var(--mvm-line) 55%,var(--mvm-sunken)),var(--mvm-sunken));background-size:200% 100%;animation:mvm-shimmer 1.4s infinite}
 .mvm-live-skeleton:nth-child(2){width:80%}
 .mvm-live-skeleton:nth-child(3){width:62%}
-.mvm-live-summary-footer{margin:12px 14px;padding:9px 12px;border-radius:var(--dsw-radius-md);background:var(--mvm-surface-2);color:var(--dsw-alias-label-secondary);font-size:12px}
-.mvm-live-event.is-provisional .mvm-live-text{color:var(--dsw-alias-label-secondary)}
+.mvm-live-summary-footer{margin:12px 14px;padding:9px 12px;border-radius:var(--dsw-radius-md);background:var(--mvm-sunken);color:var(--mvm-ink-3);font-size:12px}
+.mvm-live-event.is-provisional .mvm-live-text{color:var(--mvm-ink-2)}
 .mvm-live-event.is-provisional{opacity:.92}
-.mvm-live-event.is-corrected .mvm-live-text{color:var(--dsw-alias-label-primary)}
+.mvm-live-event.is-corrected .mvm-live-text{color:var(--mvm-ink)}
 .mvm-pass-badge{display:inline-flex;align-items:center;gap:5px;padding:1px 7px;border-radius:999px;font-size:12px;line-height:1.6;font-weight:500}
-.mvm-pass-badge.is-provisional{border:1px dashed var(--mvm-line-strong);color:var(--dsw-alias-label-secondary)}
-.mvm-pass-dot{width:5px;height:5px;border-radius:50%;background:var(--dsw-alias-label-secondary);animation:mvm-live-pulse 1.6s infinite}
-.mvm-pass-badge.is-corrected{border:1px solid var(--mvm-line);color:var(--dsw-alias-label-secondary)}
+.mvm-pass-badge.is-provisional{border:1px dashed var(--mvm-line-strong);color:var(--mvm-ink-2)}
+.mvm-pass-dot{width:5px;height:5px;border-radius:50%;background:var(--mvm-ink-2);animation:mvm-live-pulse 1.6s infinite}
+.mvm-pass-badge.is-corrected{border:1px solid var(--mvm-line);color:var(--mvm-ink-2)}
 .mvm-live-hotwords{max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mvm-live-marker{display:flex;align-items:center;gap:8px;margin:6px 0;padding:6px 10px;border-left:2px solid var(--mvm-accent-line);border-radius:0 var(--dsw-radius-sm) var(--dsw-radius-sm) 0;background:var(--mvm-surface-2);color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.6}
-.mvm-live-marker-kind{flex:none;color:var(--mvm-accent);font-weight:600}
-.mvm-live-marker.is-flag{border-left-color:var(--dsw-alias-state-warn-primary)}
-.mvm-live-marker.is-flag .mvm-live-marker-kind{color:var(--dsw-alias-state-warn-primary)}
+.mvm-live-marker{display:flex;align-items:center;gap:8px;margin:6px 0;padding:7px 10px;border-left:2px solid var(--mvm-accent);border-radius:0 var(--dsw-radius-sm) var(--dsw-radius-sm) 0;background:var(--mvm-accent-soft);color:var(--mvm-ink-2);font-size:12px;line-height:1.6}
+.mvm-live-marker-kind{flex:none;color:var(--mvm-accent-ink);font-weight:600}
+.mvm-live-marker.is-flag{border-left-color:var(--mvm-warn);background:var(--mvm-warn-soft)}
+.mvm-live-marker.is-flag .mvm-live-marker-kind{color:var(--mvm-warn-ink)}
 .mvm-live-alert-body{display:flex;flex-direction:column;gap:4px}
 .mvm-live-alert-actions{display:flex;align-items:center;gap:8px}
-/* library */
-.mvm-library-shell{display:grid;grid-template-columns:minmax(0,1fr) clamp(320px,26vw,400px);gap:18px;flex:1;min-height:0}
-.mvm-library-main{display:flex;flex-direction:column;gap:16px;min-width:0;min-height:0;overflow-y:auto}
-.mvm-library-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:relative}
-.mvm-library-overflow{position:absolute;z-index:20;top:calc(100% + 6px);right:0;display:flex;flex-direction:column;min-width:170px;padding:6px;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-lg);background:var(--dsw-alias-bg-overlay);box-shadow:var(--mvm-shadow-float)}
-.mvm-library-overflow button{padding:7px 10px;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--dsw-alias-label-primary);font:inherit;font-size:12px;text-align:left;cursor:pointer}
-.mvm-library-overflow button:hover{background:var(--mvm-surface-2)}
 .mvm-library-search{flex:1;min-width:220px}
-.mvm-library-progress-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;background:var(--dsw-alias-state-success-primary);color:var(--mvm-surface-1);font-size:12px;font-weight:600}
-.mvm-template-section{display:flex;flex-direction:column;gap:10px}
-.mvm-template-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
-.mvm-template-card{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);color:inherit;font:inherit;text-align:left;cursor:pointer}
-.mvm-template-card:hover{border-color:var(--mvm-accent)}
-.mvm-template-card.is-active{border-color:var(--mvm-accent-line);box-shadow:inset 0 0 0 1px var(--mvm-accent)}
-.mvm-template-name{font-size:13px;font-weight:600}
-.mvm-template-desc{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.5}
-.mvm-template-more{padding:12px;border:1px dashed var(--mvm-line-strong);border-radius:var(--dsw-radius-md);background:transparent;color:var(--mvm-accent);font:inherit;font-size:12px;cursor:pointer}
+.mvm-library-progress-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;background:var(--mvm-ok-fill);color:var(--mvm-on-semantic);font-size:12px;font-weight:600}
 .mvm-library-filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.mvm-library-filter{padding:6px 12px;border:0;border-radius:999px;background:transparent;color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;cursor:pointer}
-.mvm-library-filter.is-active{background:var(--mvm-surface-2);color:var(--dsw-alias-label-primary);font-weight:600}
+.mvm-library-filter{padding:6px 12px;border:0;border-radius:999px;background:transparent;color:var(--mvm-ink-3);font:inherit;font-size:12px;cursor:pointer}
+.mvm-library-filter.is-active{background:var(--mvm-accent-soft);color:var(--mvm-accent-ink);font-weight:600}
 .mvm-library-select-cell{display:flex;align-items:center;justify-content:center}
-.mvm-library-progress{display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:3px 9px;border-radius:999px;background:var(--dsw-alias-state-success-primary);color:var(--mvm-surface-1);font-size:12px;font-weight:600;animation:mvm-live-pulse 1.8s infinite}
-.mvm-library-live-link{align-self:flex-start;margin-top:6px;padding:0;border:0;background:transparent;color:var(--mvm-accent);font:inherit;font-size:12px;cursor:pointer}
-.mvm-library-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
-.mvm-library-grid .mvm-library-row{grid-template-columns:32px minmax(0,1fr) 40px;grid-template-rows:auto;align-items:start;gap:8px 12px;min-width:0;padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-2)}
-.mvm-library-grid .mvm-library-title-cell{grid-column:2 / -1;grid-row:1}
-.mvm-library-grid .mvm-library-select-cell{grid-column:1;grid-row:1}
-.mvm-library-grid .mvm-library-actions{grid-column:3;grid-row:1;justify-content:flex-end}
-.mvm-library-grid .mvm-library-row>span:not(.mvm-library-select-cell):not(.mvm-library-title-cell):not(.mvm-library-actions){grid-column:2 / -1;text-align:left}
+.mvm-library-live-link{align-self:flex-start;margin-top:6px;padding:0;border:0;background:transparent;color:var(--mvm-accent-ink);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
 
 /* one focus ring for every control the page owns */
-.mvm-page button:focus-visible,.mvm-page input:focus-visible,.mvm-page select:focus-visible,.mvm-page textarea:focus-visible,.mvm-page summary:focus-visible,.mvm-page [tabindex]:focus-visible{outline:2px solid var(--mvm-accent);outline-offset:2px}
-
-/* motion — only transform and opacity move */
-.mvm-button,.mvm-icon-button,.mvm-quick-button,.mvm-view-tab,.mvm-settings-tab,.mvm-detail-tab,.mvm-studio-tab,.mvm-library-filter,.mvm-model-option,.mvm-translation-options button,.mvm-library-overflow button,.mvm-rail-tile,.mvm-rail-suggestion,.mvm-chat-chip,.mvm-chat-source,.mvm-speaker-chip,.mvm-template-card,.mvm-back-button,.mvm-incognito-badge,.mvm-library-item,.mvm-library-open{transition:background-color var(--mvm-dur-fast) ease,border-color var(--mvm-dur-fast) ease,color var(--mvm-dur-fast) ease,box-shadow var(--mvm-dur) var(--mvm-ease),transform var(--mvm-dur-fast) ease}
-.mvm-button:active:not(:disabled),.mvm-icon-button:active:not(:disabled),.mvm-quick-button:active:not(:disabled),.mvm-view-tab:active:not(:disabled),.mvm-settings-tab:active:not(:disabled),.mvm-detail-tab:active:not(:disabled),.mvm-studio-tab:active:not(:disabled),.mvm-library-filter:active:not(:disabled),.mvm-rail-tile:active:not(:disabled),.mvm-rail-suggestion:active:not(:disabled),.mvm-chat-chip:active:not(:disabled),.mvm-chat-source:active:not(:disabled),.mvm-speaker-chip:active:not(:disabled),.mvm-template-card:active:not(:disabled),.mvm-back-button:active:not(:disabled),.mvm-incognito-badge:active:not(:disabled){transform:scale(.97)}
-.mvm-model-menu,.mvm-translation-options,.mvm-library-overflow,.mvm-settings-modal,.mvm-share-dialog{animation:mvm-float-in var(--mvm-dur) var(--mvm-ease)}
+.mvm-page button:focus-visible,.mvm-page input:focus-visible,.mvm-page select:focus-visible,.mvm-page textarea:focus-visible,.mvm-page summary:focus-visible,.mvm-page [tabindex]:focus-visible{outline:2px solid var(--mvm-accent);outline-offset:2px}.mvm-button,.mvm-icon-button,.mvm-quick-button,.mvm-view-tab,.mvm-settings-tab,.mvm-detail-tab,.mvm-studio-tab,.mvm-library-filter,.mvm-model-option,.mvm-translation-options button,.mvm-rail-tile,.mvm-rail-suggestion,.mvm-chat-source,.mvm-speaker-chip,.mvm-back-button,.mvm-incognito-badge,.mvm-library-open{transition:background-color var(--mvm-dur-fast) ease,border-color var(--mvm-dur-fast) ease,color var(--mvm-dur-fast) ease,box-shadow var(--mvm-dur) var(--mvm-ease),transform var(--mvm-dur-fast) ease}.mvm-button:active:not(:disabled),.mvm-icon-button:active:not(:disabled),.mvm-quick-button:active:not(:disabled),.mvm-view-tab:active:not(:disabled),.mvm-settings-tab:active:not(:disabled),.mvm-detail-tab:active:not(:disabled),.mvm-studio-tab:active:not(:disabled),.mvm-library-filter:active:not(:disabled),.mvm-rail-tile:active:not(:disabled),.mvm-rail-suggestion:active:not(:disabled),.mvm-chat-source:active:not(:disabled),.mvm-speaker-chip:active:not(:disabled),.mvm-back-button:active:not(:disabled),.mvm-incognito-badge:active:not(:disabled){transform:scale(.97)}.mvm-model-menu,.mvm-translation-options,.mvm-settings-modal,.mvm-share-dialog{animation:mvm-float-in var(--mvm-dur) var(--mvm-ease)}
 .mvm-assistant-drawer{animation:mvm-fade-in var(--mvm-dur) var(--mvm-ease)}
 @keyframes mvm-float-in{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
 @keyframes mvm-fade-in{from{opacity:0}to{opacity:1}}
 
 /* the live ribbon — the plugin's signature device */
-.mvm-ribbon{display:flex;align-items:center;gap:10px;min-width:220px}
-.mvm-ribbon-track{position:relative;display:flex;align-items:center;justify-content:space-between;gap:2px;width:196px;height:28px;padding-bottom:6px}
-.mvm-ribbon-bars{position:absolute;left:0;top:0;right:0;bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:2px;overflow:hidden}
-.mvm-ribbon-bar{width:3px;height:100%;border-radius:var(--dsw-radius-xs);background:var(--mvm-accent-line);transform:scaleY(.08);transform-origin:center;transition:transform 120ms var(--mvm-ease),background-color var(--mvm-dur-fast) ease}
+.mvm-ribbon{display:flex;align-items:center;gap:8px;margin-left:auto}
+.mvm-ribbon-track{position:relative;width:110px;height:24px}
+.mvm-ribbon-bars{position:absolute;left:0;right:0;top:0;bottom:3px;display:flex;align-items:flex-end;justify-content:space-between;gap:2px;overflow:hidden}
+.mvm-ribbon-bar{width:2px;height:100%;border-radius:999px;background:color-mix(in srgb,var(--mvm-accent) 34%,transparent);transform:scaleY(.28);transform-origin:bottom;transition:transform 120ms var(--mvm-ease),background-color var(--mvm-dur-fast) ease}
 .mvm-ribbon.is-live .mvm-ribbon-bar{background:var(--mvm-accent)}
-.mvm-ribbon-rule{position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:999px;background:var(--mvm-accent);transform-origin:left center;transform:scaleX(.35);opacity:.55;animation:mvm-ribbon-breathe 2.4s var(--mvm-ease) infinite}
-@keyframes mvm-ribbon-breathe{0%,100%{transform:scaleX(.35);opacity:.45}50%{transform:scaleX(1);opacity:.95}}
-.mvm-ribbon-label{color:var(--dsw-alias-label-tertiary);font-size:12px;white-space:nowrap}
-@media(max-width:1400px){.mvm-library-shell{grid-template-columns:1fr}}
-@media(max-width:1240px){.mvm-detail-body{grid-template-columns:1fr}.mvm-detail-rail{overflow:visible}}
+.mvm-ribbon-rule{position:absolute;left:0;right:0;bottom:0;height:1px;border-radius:999px;background:var(--mvm-line-strong)}
+.mvm-ribbon-label{color:var(--mvm-ink-3);font-size:12px;white-space:nowrap}
+
+
 @media(max-width:1100px){.mvm-live-header{align-items:flex-start;flex-direction:column;gap:10px}.mvm-live-topbar{justify-content:flex-start}}
-@media(max-width:960px){.mvm-studio-grid{grid-template-columns:1fr}.mvm-detail-header{grid-template-columns:1fr}.mvm-detail-actions{justify-content:flex-start}.mvm-library-page-head{flex-direction:column}}
-@media(max-width:760px){.mvm-live-controls,.mvm-live-pair{grid-template-columns:1fr}.mvm-playback-bar{flex-wrap:wrap}}
-@media(max-width:900px){.mvm-header{padding:18px;flex-direction:column}.mvm-header-actions{justify-content:flex-start}.mvm-settings{margin:12px 18px 0}.mvm-settings-grid{grid-template-columns:1fr}.mvm-body{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}.mvm-library{max-height:220px;border-right:0;border-bottom:1px solid var(--mvm-line)}.mvm-workspace{padding:18px}.mvm-import{align-items:flex-start;flex-wrap:wrap}.mvm-segment{grid-template-columns:54px max-content minmax(0,1fr);gap:6px}.mvm-alert{margin:10px 18px 0}}
-@media(prefers-reduced-motion:reduce){.mvm-page *,.mvm-page *::before,.mvm-page *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}.mvm-ribbon-rule{animation:none;transform:scaleX(1);opacity:.9}}
+@media(max-width:960px){.mvm-studio-grid{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr)}.mvm-detail-header{grid-template-columns:1fr}.mvm-detail-actions{justify-content:flex-start}}
+@media(max-width:760px){.mvm-live-pair{grid-template-columns:1fr}.mvm-playback-bar{flex-wrap:wrap}}
+@media(max-width:900px){.mvm-header{padding:18px;flex-direction:column}.mvm-header-actions{justify-content:flex-start}.mvm-settings{margin:12px 18px 0}.mvm-settings-grid{grid-template-columns:1fr}.mvm-workspace{padding:18px}.mvm-import{align-items:flex-start;flex-wrap:wrap}.mvm-alert{margin:10px 18px 0}}
+@media(prefers-reduced-motion:reduce){.mvm-page *,.mvm-page *::before,.mvm-page *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}.mvm-ribbon-rule{animation:none}}
 `;
 
-    function Icon({ name, size = 16, fill = 'none' }) {
+    function Icon({ name, size = 16, fill = 'none', className }) {
       const paths = {
         mic: 'M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm-7-3a7 7 0 0 0 14 0M12 19v3m-4 0h8',
         plus: 'M12 5v14M5 12h14',
@@ -1549,9 +1715,10 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
         'arrow-left': 'M19 12H5m7 7-7-7 7-7',
         'arrow-right': 'M5 12h14m-7-7 7 7-7 7',
         caret: 'm6 9 6 6 6-6',
+        alert: 'M12 3.2 2.8 19.4h18.4L12 3.2Zm0 6.2v4.4m0 3.1h.01',
       };
       return h('svg', {
-        width: size, height: size, viewBox: '0 0 24 24', fill,
+        width: size, height: size, viewBox: '0 0 24 24', fill, className,
         stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round',
         strokeLinejoin: 'round', 'aria-hidden': 'true',
       }, h('path', { d: paths[name] || paths.file }));
@@ -1880,7 +2047,7 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
         const levels = levelsRef.current;
         for (let index = 0; index < bars.children.length; index += 1) {
           const value = Math.min(1, Math.max(0, Number(levels[index]) || 0));
-          bars.children[index].style.transform = 'scaleY(' + (0.08 + value * 0.92).toFixed(3) + ')';
+          bars.children[index].style.transform = 'scaleY(' + (0.28 + value * 0.72).toFixed(3) + ')';
         }
       }, []);
       React.useEffect(() => {
@@ -1914,11 +2081,11 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
         className: `mvm-ribbon${live ? ' is-live' : ''}`,
         role: 'img', 'aria-label': t('live.level'),
       },
+        h('span', { className: 'mvm-ribbon-label', 'aria-hidden': 'true' }, t('live.level')),
         h('div', { className: 'mvm-ribbon-track' },
           h('div', { className: 'mvm-ribbon-bars', ref: barsRef, 'aria-hidden': 'true' },
             Array.from({ length: RIBBON_BARS }, (unused, index) => h('span', { className: 'mvm-ribbon-bar', key: index }))),
-          h('span', { className: 'mvm-ribbon-rule', 'aria-hidden': 'true' })),
-        h('span', { className: 'mvm-ribbon-label', 'aria-hidden': 'true' }, t('live.level')));
+          h('span', { className: 'mvm-ribbon-rule', 'aria-hidden': 'true' })));
     }
 
     function Button({ icon, children, primary = false, danger = false, className = '', ...props }) {
@@ -1927,8 +2094,10 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
         icon ? h(Icon, { name: icon, size: 15 }) : null, children);
     }
 
-    function EmptyState({ title, children }) {
+    function EmptyState({ title, children, icon = 'mic' }) {
       return h('div', { className: 'mvm-empty' },
+        h('span', { className: 'mvm-empty-mark', 'aria-hidden': 'true' },
+          h(Icon, { name: icon, size: 22 })),
         h('div', { className: 'mvm-empty-title' }, title),
         h('div', { className: 'mvm-empty-text' }, children));
     }
@@ -2037,6 +2206,7 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
       const [playbackRate, setPlaybackRate] = React.useState(1);
       const detailAudioRef = React.useRef(null);
       const [asrStatus, setAsrStatus] = React.useState(null);
+      const [localModels, setLocalModels] = React.useState(null);
       const [availableModels, setAvailableModels] = React.useState([]);
       const [compareResults, setCompareResults] = React.useState(null);
       const [compareBusy, setCompareBusy] = React.useState(false);
@@ -2047,6 +2217,11 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
       const [audioFiles, setAudioFiles] = React.useState([]);
       const [selectedAudioId, setSelectedAudioId] = React.useState('');
       const [audioBusy, setAudioBusy] = React.useState('');
+      // The host lists the audio files that still exist. Until that list
+      // answers, the page does not know whether there is a recording at all.
+      const [audioListLoaded, setAudioListLoaded] = React.useState(false);
+      // The media failed to load: a soft state, not a page level failure.
+      const [audioUnavailable, setAudioUnavailable] = React.useState(false);
 
       const refreshHealth = React.useCallback(async () => {
         setHealthBusy(true);
@@ -2095,11 +2270,28 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
         }
       }, []);
 
+      const refreshLocalModels = React.useCallback(async () => {
+        try {
+          setLocalModels(await callHost('local-models-status'));
+        } catch {
+          setLocalModels(null);
+        }
+      }, []);
+
       React.useEffect(() => {
         void refreshHealth();
         void refreshMeetings();
         void refreshAsrStatus();
-      }, [refreshHealth, refreshMeetings, refreshAsrStatus]);
+        void refreshLocalModels();
+      }, [refreshHealth, refreshMeetings, refreshAsrStatus, refreshLocalModels]);
+
+      // The boot hook starts the services a few seconds after the page opens, so
+      // the panel reads the state again instead of showing a stale "not ready".
+      React.useEffect(() => {
+        if (!localModels || localModels.ready || localModels.installed === false) return undefined;
+        const timer = setTimeout(() => { void refreshLocalModels(); }, 4000);
+        return () => clearTimeout(timer);
+      }, [localModels, refreshLocalModels]);
 
       React.useEffect(() => {
         if (!assistantOpen) return undefined;
@@ -2459,6 +2651,20 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
         }
       };
 
+      /** Open the meeting as soon as the host has written it, without blocking. */
+      const openWhenSaved = async (id) => {
+        for (let attempt = 0; attempt < 40; attempt += 1) {
+          const result = await callHost('get', { id }).catch(() => null);
+          if (result?.meeting) {
+            await onOpen(id);
+            return true;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 400));
+        }
+        await refreshMeetings();
+        return false;
+      };
+
       const onLiveStop = async () => {
         const id = liveSession?.id;
         if (!id || liveBusy) return;
@@ -2466,18 +2672,16 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
         setLiveBusy('stop');
         setLiveError('');
         try {
+          // Ending a meeting returns as soon as the capture is asked to stop.
+          // Saving, speaker clustering, the final pass and the minutes happen
+          // behind the page, so the reader can keep working.
           const result = await callHost('live-stop', { id });
-          if (liveMountedRef.current) {
-            setLiveSession(result.session || null);
-            if (result.meeting?.id) {
-              await refreshMeetings();
-              await onOpen(result.meeting.id);
-              setView('minutes');
-              if (result.meeting.transcript && !result.meeting.minutes) {
-                void autoSummarize(result.meeting);
-              }
-            }
-          }
+          if (!liveMountedRef.current) return;
+          setLiveSession(result.session || null);
+          setLiveBusy('');
+          setView('minutes');
+          setNotice(t('live.stoppedSaving'));
+          void openWhenSaved(result.meeting?.id || id);
         } catch (cause) {
           if (liveMountedRef.current) setLiveError(liveErrorMessage(cause));
         } finally {
@@ -2808,6 +3012,11 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
 
       const onOpen = async (id) => {
         setShowImport(true);
+        // The meeting that opens brings its own audio files; the previous
+        // meeting's list must never answer for it.
+        setAudioFiles([]);
+        setAudioListLoaded(false);
+        setAudioUnavailable(false);
         setSpeakerListOpen(false);
         setLabelingSpeaker(''); setLabelingUtteranceIndex(null);
         setLabelDraft('');
@@ -3065,6 +3274,25 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
         await onSettingsSave({ ...settings, asrAutoStart: checked });
       };
 
+      const onLlmAutoStartToggle = async (checked) => {
+        await onSettingsSave({ ...settings, llmAutoStart: checked });
+      };
+
+      const onStartLocalModels = async () => {
+        setAsrBusy('local-models');
+        setError('');
+        try {
+          await callHost('local-models-start');
+          await refreshLocalModels();
+          await refreshAsrStatus();
+          await refreshHealth();
+        } catch (cause) {
+          setError(t('error.asrActionFailed') + '：' + (cause instanceof Error ? cause.message : String(cause)));
+        } finally {
+          setAsrBusy('');
+        }
+      };
+
       const updateSetting = (key, value) => setSettings((current) => ({ ...current, [key]: value }));
       const isBusy = busy !== '';
 
@@ -3139,6 +3367,10 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
           : meetingId.startsWith('realtime-')
             ? `/api/ai-minutes/live-audio?id=${encodeURIComponent(meetingId)}&track=mic`
             : '';
+      // The host lists the audio files that still exist. An empty list means
+      // the recording is gone, so the page says so quietly instead of
+      // offering a player that cannot play anything.
+      const audioMissing = audioListLoaded && !audioFiles.length;
 
       // React owns the audio src. Removing the attribute here left the element
       // with no source, so play() failed with "the media was removed from the
@@ -3171,6 +3403,7 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
         if (!target) {
           setAudioFiles([]);
           setSelectedAudioId('');
+          setAudioListLoaded(true);
           return;
         }
         try {
@@ -3178,7 +3411,12 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
           const files = Array.isArray(result?.files) ? result.files : [];
           setAudioFiles(files);
           setSelectedAudioId((current) => (files.some((file) => file.id === current) ? current : files[0]?.id || ''));
+          setAudioListLoaded(true);
+          setAudioUnavailable(false);
         } catch (cause) {
+          // The list itself failed: the page keeps the player it has and
+          // reports the host failure, because nothing is known about the
+          // recording yet.
           setError(cause instanceof Error ? cause.message : String(cause));
         }
       };
@@ -3186,6 +3424,7 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
       /** Play one of the meeting's audio files. */
       const onSelectAudio = (file) => {
         if (!file?.id) return;
+        setAudioUnavailable(false);
         setSelectedAudioId(file.id);
       };
 
@@ -3461,8 +3700,11 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
       const onExport = () => {
         const safeTitle = (title || 'meeting').replace(/[\\/:*?"<>|]/g, '-');
         if (exportFormat === 'WAV') {
-          if (!detailAudioSrc) {
-            setError(t('detail.noAudio'));
+          if (audioMissing || !detailAudioSrc) {
+            // A recording that is not there is a state of the meeting, not a
+            // failure of the page: it is reported quietly, not as an alert.
+            setNotice(t('detail.noAudio'));
+            setShareOpen(false);
             return;
           }
           const anchor = document.createElement('a');
@@ -3574,55 +3816,72 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
             h('audio', { ref: speakerSampleRef, preload: 'none', className: 'mvm-live-audio' })) : null);
       };
 
-      const renderAudioPlayer = () => h('div', { className: 'mvm-player' },
-        // The element is only mounted once it has a real source: an empty src
-        // resolves to the page URL, which fails and leaves the media without a
-        // length, so the timeline would show Infinity.
-        detailAudioSrc ? h('audio', {
-          ref: detailAudioRef, src: detailAudioSrc, preload: 'metadata', className: 'mvm-live-audio',
-          onLoadedMetadata: (event) => {
-            const value = Number(event.target.duration);
-            setDetailDuration(Number.isFinite(value) && value > 0 ? value : Number(duration) || 0);
-          },
-          onTimeUpdate: (event) => setDetailTime(event.target.currentTime || 0),
-          onPlay: () => setDetailPlaying(true),
-          onPause: () => setDetailPlaying(false),
-          onEnded: () => setDetailPlaying(false),
-          onError: () => { if (detailAudioSrc) setError(t('detail.noAudio')); },
-        }) : null,
-        h('div', { className: 'mvm-player-timeline' },
-          h(Button, {
-            icon: detailPlaying ? 'pause' : 'play', primary: true, className: 'mvm-player-play',
-            onClick: onDetailPlayPause, disabled: !detailAudioSrc,
-          }, detailPlaying ? t('detail.pause') : t('detail.play')),
-          h('span', null, formatTime(detailTime)),
-          h('input', {
-            type: 'range', min: 0, max: playerDuration, step: 1,
-            value: Math.min(detailTime, playerDuration),
-            disabled: !detailAudioSrc, onChange: onDetailSeek,
-            'aria-label': t('detail.play'),
-          }),
-          h('span', null, formatTime(playerDuration))),
-        renderAudioFiles(),
-        h('div', { className: 'mvm-player-controls' },
-          renderSpeakerList(),
-          h('div', { className: 'mvm-skip-group', role: 'group', 'aria-label': t('detail.playbackSpeed') },
-            h('button', {
-              type: 'button', className: 'mvm-skip-button mvm-skip-back', onClick: () => skip(-15),
-              title: t('detail.skipBack'), 'aria-label': t('detail.skipBack'),
-            }, h(Icon, { name: 'rewind', size: 13 }), h('span', null, '15')),
-            h('button', {
-              type: 'button', className: 'mvm-skip-button mvm-skip-forward', onClick: () => skip(15),
-              title: t('detail.skipForward'), 'aria-label': t('detail.skipForward'),
-            }, h(Icon, { name: 'forward', size: 13 }), h('span', null, '15'))),
-          h('span', { className: 'mvm-playback-spacer' }),
-          h('label', { className: 'mvm-rate-control' },
-            h('span', null, t('detail.playbackSpeed')),
-            h('select', {
-              className: 'mvm-rate-select', value: String(playbackRate),
-              'aria-label': t('detail.playbackSpeed'),
-              onChange: (event) => changePlaybackRate(event.target.value),
-            }, [0.75, 1, 1.25, 1.5, 2].map((rate) => h('option', { value: String(rate), key: rate }, `${rate}×`))))));
+      /**
+       * The player with its controls, or the quiet note that stands in for it
+       * when the meeting has no recording to play.
+       */
+      const renderAudioPlayer = () => {
+        // The host lists the audio files that still exist. An empty list means
+        // the recording is gone, and a media that will not load means the same
+        // thing: the controls that could not work are dropped and one quiet
+        // line stands in for them. The speaker list stays, because naming a
+        // speaker does not need the recording.
+        const playable = !audioMissing && !audioUnavailable && Boolean(detailAudioSrc);
+        return h('div', { className: 'mvm-player' },
+          // The element is only mounted once it has a real source: an empty src
+          // resolves to the page URL, which fails and leaves the media without a
+          // length, so the timeline would show Infinity.
+          detailAudioSrc ? h('audio', {
+            ref: detailAudioRef, src: detailAudioSrc, preload: 'metadata', className: 'mvm-live-audio',
+            onLoadedMetadata: (event) => {
+              const value = Number(event.target.duration);
+              setDetailDuration(Number.isFinite(value) && value > 0 ? value : Number(duration) || 0);
+            },
+            onTimeUpdate: (event) => setDetailTime(event.target.currentTime || 0),
+            onPlay: () => setDetailPlaying(true),
+            onPause: () => setDetailPlaying(false),
+            onEnded: () => setDetailPlaying(false),
+            // A recording that will not load is a state of the page, not a
+            // failure of the meeting: it is reported softly, not as an alert.
+            onError: () => { if (detailAudioSrc) setAudioUnavailable(true); },
+          }) : null,
+          playable
+            ? h('div', { className: 'mvm-player-timeline' },
+              h(Button, {
+                icon: detailPlaying ? 'pause' : 'play', primary: true, className: 'mvm-player-play',
+                onClick: onDetailPlayPause, disabled: !detailAudioSrc,
+              }, detailPlaying ? t('detail.pause') : t('detail.play')),
+              h('span', null, formatTime(detailTime)),
+              h('input', {
+                type: 'range', min: 0, max: playerDuration, step: 1,
+                value: Math.min(detailTime, playerDuration),
+                disabled: !detailAudioSrc, onChange: onDetailSeek,
+                'aria-label': t('detail.play'),
+              }),
+              h('span', null, formatTime(playerDuration)))
+            : h('p', { className: 'mvm-detail-audio-empty' }, t('detail.noRecording')),
+          renderAudioFiles(),
+          h('div', { className: 'mvm-player-controls' },
+            renderSpeakerList(),
+            playable ? h(React.Fragment, null,
+              h('div', { className: 'mvm-skip-group', role: 'group', 'aria-label': t('detail.playbackSpeed') },
+                h('button', {
+                  type: 'button', className: 'mvm-skip-button mvm-skip-back', onClick: () => skip(-15),
+                  title: t('detail.skipBack'), 'aria-label': t('detail.skipBack'),
+                }, h(Icon, { name: 'rewind', size: 13 }), h('span', null, '15')),
+                h('button', {
+                  type: 'button', className: 'mvm-skip-button mvm-skip-forward', onClick: () => skip(15),
+                  title: t('detail.skipForward'), 'aria-label': t('detail.skipForward'),
+                }, h(Icon, { name: 'forward', size: 13 }), h('span', null, '15'))),
+              h('span', { className: 'mvm-playback-spacer' }),
+              h('label', { className: 'mvm-rate-control' },
+                h('span', null, t('detail.playbackSpeed')),
+                h('select', {
+                  className: 'mvm-rate-select', value: String(playbackRate),
+                  'aria-label': t('detail.playbackSpeed'),
+                  onChange: (event) => changePlaybackRate(event.target.value),
+                }, [0.75, 1, 1.25, 1.5, 2].map((rate) => h('option', { value: String(rate), key: rate }, `${rate}×`))))) : null));
+      };
 
       /** The audio files of this meeting, as a compact row inside the player. */
       const renderAudioFiles = () => {
@@ -4006,6 +4265,9 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
       const filteredMeetings = () => {
         const query = librarySearch.trim().toLowerCase();
         const list = meetings.filter((meeting) => {
+          // Archived meetings live in their own scope: seeing them mixed into
+          // Recent is what makes an archive useless.
+          if (libraryFilter === 'archived' ? !meeting.archived : meeting.archived) return false;
           if (libraryFilter === 'favorite' && !meeting.favorite) return false;
           if (libraryFilter === 'shared' && !meeting.shared) return false;
           if (query) {
@@ -4023,10 +4285,69 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
         ));
       };
 
+      /** Select every meeting the current filter shows, or none of them. */
+      const toggleSelectAll = (ids, checked) => {
+        setLibrarySelection((current) => (
+          checked ? [...new Set([...current, ...ids])] : current.filter((value) => !ids.includes(value))
+        ));
+      };
+
+      const runBatch = async (method, payload, noticeKey) => {
+        if (!librarySelection.length || busy) return;
+        setBusy(method);
+        setError('');
+        try {
+          const result = await callHost(method, { ids: librarySelection, ...payload });
+          const done = Array.isArray(result?.done) ? result.done.length : 0;
+          const failed = Array.isArray(result?.failed) ? result.failed.length : 0;
+          setNotice(t(noticeKey).replace('{count}', String(done)));
+          if (failed) setError(t('library.batchPartial').replace('{failed}', String(failed)));
+          setLibrarySelection([]);
+          await refreshMeetings();
+        } catch (cause) {
+          setError(cause instanceof Error ? cause.message : String(cause));
+        } finally {
+          setBusy('');
+        }
+      };
+
+      const onArchiveSelected = (archived) => {
+        const question = archived ? t('library.archiveConfirm') : t('library.unarchiveConfirm');
+        if (!window.confirm(question.replace('{count}', String(librarySelection.length)))) return;
+        void runBatch('archive-meetings', { archived }, archived ? 'library.archivedDone' : 'library.unarchivedDone');
+      };
+
+      const onArchiveMeeting = async (meeting) => {
+        if (!meeting?.id || busy) return;
+        setBusy(`archive:${meeting.id}`);
+        setError('');
+        try {
+          await callHost('archive-meetings', { ids: [meeting.id], archived: !meeting.archived });
+          await refreshMeetings();
+        } catch (cause) {
+          setError(cause instanceof Error ? cause.message : String(cause));
+        } finally {
+          setBusy('');
+        }
+      };
+
+      const onDeleteSelected = () => {
+        if (!window.confirm(t('library.deleteSelectedConfirm').replace('{count}', String(librarySelection.length)))) return;
+        void runBatch('delete-meetings', {}, 'library.deletedDone');
+      };
+
       const renderMeetingCard = (meeting) => h('article', {
-        className: `mvm-meeting-card${meeting.inProgress ? ' is-live' : ''}`, key: meeting.id,
+        className: `mvm-meeting-card${meeting.inProgress ? ' is-live' : ''}${librarySelection.includes(meeting.id) ? ' is-selected' : ''}`, key: meeting.id,
       },
         h('div', { className: 'mvm-meeting-card-head' },
+          // Selection works in both views: a reader who switched to cards
+          // should not lose the batch action.
+          h('input', {
+            type: 'checkbox', className: 'mvm-check mvm-meeting-card-check',
+            checked: librarySelection.includes(meeting.id),
+            'aria-label': t('library.selectRow'),
+            onChange: (event) => toggleLibrarySelection(meeting.id, event.target.checked),
+          }),
           h('span', { className: 'mvm-meeting-thumb' }, String(meeting.title || 'M').slice(0, 2)),
           h('div', { className: 'mvm-meeting-card-titles' },
             h('button', {
@@ -4095,6 +4416,80 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
         }, h(Icon, { name: 'refresh', size: 16 })),
         renderVoicebookTrigger());
 
+      /** The header owns select-all, so it is a component of the selection. */
+      const renderLibraryHeader = (filtered) => {
+        const shownIds = filtered.map((meeting) => meeting.id);
+        const chosen = shownIds.filter((id) => librarySelection.includes(id));
+        const all = shownIds.length > 0 && chosen.length === shownIds.length;
+        const some = chosen.length > 0 && !all;
+        return h('div', { className: 'mvm-library-row mvm-library-head', role: 'row' },
+          h('span', { className: 'mvm-library-check-cell' },
+            h('input', {
+              type: 'checkbox', className: 'mvm-check',
+              checked: all,
+              'aria-label': t('library.selectAll'),
+              // The middle state has to be set on the node: it is a property,
+              // not an attribute React can render.
+              ref: (node) => { if (node) node.indeterminate = some; },
+              onChange: (event) => toggleSelectAll(shownIds, event.target.checked),
+            })),
+          h('span', null, t('library.titleColumn')),
+          h('span', null, t('detail.createdAt')),
+          h('span', null, t('detail.duration')),
+          h('span', null, t('detail.creator')),
+          h('span', null, t('detail.source')),
+          h('span', { className: 'mvm-library-size-cell' }, t('detail.size')),
+          h('span', null, ''));
+      };
+
+      const renderLibraryRow = (meeting) => {
+        const selected = librarySelection.includes(meeting.id);
+        const archived = Boolean(meeting.archived);
+        return h('div', {
+          className: `mvm-library-row${selected ? ' is-selected' : ''}${meeting.inProgress ? ' is-live' : ''}`,
+          key: meeting.id, role: 'row', 'aria-selected': selected,
+        },
+          h('span', { className: 'mvm-library-check-cell' },
+            h('input', {
+              type: 'checkbox', className: 'mvm-check',
+              checked: selected,
+              'aria-label': t('library.selectRow'),
+              onChange: (event) => toggleLibrarySelection(meeting.id, event.target.checked),
+            })),
+          h('span', { className: 'mvm-library-title-cell' },
+            h('button', {
+              type: 'button', className: 'mvm-library-open',
+              onClick: () => onOpenMeeting(meeting), disabled: isBusy,
+            },
+              h('span', { className: 'mvm-meeting-thumb', 'aria-hidden': 'true' },
+                String(meeting.title || 'M').trim().slice(0, 1)),
+              h('span', { className: 'mvm-library-title-copy' },
+                h('span', { className: 'mvm-library-title-row' },
+                  h('strong', null, meeting.title || t('meeting.untitled')),
+                  meeting.inProgress
+                    ? h('span', { className: 'mvm-library-progress-pill is-inline' },
+                      h('span', { className: 'mvm-pulse-dot' }), t('library.inProgress'))
+                    : null,
+                  archived ? h('span', { className: 'mvm-library-archived-pill' }, t('library.archivedTag')) : null),
+                h('small', null, meeting.excerpt || meeting.summary || '')))),
+          h('span', { className: 'mvm-library-when' }, formatDate(meeting.createdAt)),
+          h('span', null, formatClock(meeting.duration)),
+          h('span', null, meeting.creator || 'You'),
+          h('span', null, meeting.source || (meeting.realtime ? 'AI Minutes' : 'Import')),
+          h('span', { className: 'mvm-library-size-cell' }, meeting.size ? formatBytes(meeting.size) : '—'),
+          h('span', { className: 'mvm-library-actions' },
+            h('button', {
+              type: 'button', className: 'mvm-icon-button',
+              title: archived ? t('action.unarchive') : t('action.archive'),
+              'aria-label': archived ? t('action.unarchive') : t('action.archive'),
+              onClick: () => onArchiveMeeting(meeting), disabled: isBusy,
+            }, h(Icon, { name: 'folder', size: 14 })),
+            h('button', {
+              type: 'button', className: 'mvm-icon-button', title: t('action.delete'),
+              'aria-label': t('action.delete'), onClick: () => onDelete(meeting.id), disabled: isBusy,
+            }, h(Icon, { name: 'trash', size: 14 }))));
+      };
+
       const renderLibraryTable = () => {
         const filtered = filteredMeetings();
         const stats = libraryStats();
@@ -4134,6 +4529,7 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
                 [
                   ['recent', 'library.filter.recent'], ['created', 'library.filter.created'],
                   ['shared', 'library.filter.shared'], ['favorite', 'library.filter.favorite'],
+                  ['archived', 'library.filter.archived'],
                 ].map(([value, labelKey]) => h('button', {
                   type: 'button', role: 'tab', key: value,
                   className: `mvm-library-filter ${libraryFilter === value ? 'is-active' : ''}`,
@@ -4141,7 +4537,7 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
                   onClick: () => setLibraryFilter(value),
                 }, t(labelKey)))),
               h('span', { className: 'mvm-playback-spacer' }),
-              librarySelection.length ? h('span', { className: 'mvm-hint' }, t('library.selected').replace('{count}', String(librarySelection.length))) : null,
+
               h('div', { className: 'mvm-view-toggle' },
                 h('button', {
                   type: 'button', className: `mvm-icon-button ${libraryView === 'grid' ? 'is-active' : ''}`,
@@ -4153,45 +4549,22 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
                   'aria-label': t('library.view.list'), 'aria-pressed': libraryView === 'list',
                   onClick: () => setLibraryView('list'),
                 }, h(Icon, { name: 'list', size: 14 })))),
+            // A batch bar, only while something is selected: selection is a
+            // mode, and the toolbar is how the reader leaves it.
+            librarySelection.length ? h('div', { className: 'mvm-batch-bar', role: 'region', 'aria-label': t('library.batchBar') },
+              h('span', { className: 'mvm-batch-count' }, t('library.selected').replace('{count}', String(librarySelection.length))),
+              h('span', { className: 'mvm-batch-actions' },
+                libraryFilter === 'archived'
+                  ? h(Button, { icon: 'refresh', onClick: () => onArchiveSelected(false), disabled: busy !== '' }, t('action.unarchive'))
+                  : h(Button, { icon: 'folder', onClick: () => onArchiveSelected(true), disabled: busy !== '' }, t('action.archive')),
+                h(Button, { icon: 'trash', danger: true, onClick: onDeleteSelected, disabled: busy !== '' }, t('action.delete')),
+                h(Button, { onClick: () => setLibrarySelection([]), disabled: busy !== '' }, t('library.clearSelection')))) : null,
             filtered.length
               ? (libraryView === 'grid'
                 ? h('div', { className: 'mvm-meeting-grid' }, filtered.map(renderMeetingCard))
                 : h('div', { className: 'mvm-library-table', role: 'table' },
-                  h('div', { className: 'mvm-library-row mvm-library-head', role: 'row' },
-                    h('span', null, ''),
-                    h('span', null, 'All'),
-                    h('span', null, t('detail.createdAt')),
-                    h('span', null, t('detail.duration')),
-                    h('span', null, t('detail.creator')),
-                    h('span', null, t('detail.source')),
-                    h('span', null, t('detail.size')),
-                    h('span', null, '')),
-                  filtered.map((meeting) => h('div', { className: 'mvm-library-row', key: meeting.id },
-                    h('span', { className: 'mvm-library-select-cell' }),
-                    h('span', { className: 'mvm-library-title-cell' },
-                      h('button', {
-                        type: 'button', className: 'mvm-library-open', onClick: () => onOpenMeeting(meeting), disabled: isBusy,
-                      },
-                        h('span', { className: 'mvm-meeting-thumb' }, String(meeting.title || 'M').slice(0, 2)),
-                        h('span', { className: 'mvm-library-title-copy' },
-                          h('span', { className: 'mvm-library-title-row' },
-                            h('strong', null, meeting.title || t('meeting.untitled')),
-                            meeting.inProgress
-                              ? h('span', { className: 'mvm-library-progress-pill is-inline' },
-                                h('span', { className: 'mvm-pulse-dot' }), t('library.inProgress'))
-                              : null),
-                          h('small', null, meeting.excerpt || meeting.summary || '')))),
-                    h('span', null, formatDate(meeting.createdAt)),
-                    h('span', null, formatClock(meeting.duration)),
-                    h('span', null, meeting.creator || 'You'),
-                    h('span', null, meeting.source || (meeting.realtime ? 'AI Minutes' : 'Import')),
-                    h('span', { className: 'mvm-library-size-cell' },
-                      meeting.size ? formatBytes(meeting.size) : '—'),
-                    h('span', { className: 'mvm-library-actions' },
-                      h('button', {
-                        type: 'button', className: 'mvm-icon-button', title: t('action.delete'),
-                        'aria-label': t('action.delete'), onClick: () => onDelete(meeting.id), disabled: isBusy,
-                      }, h(Icon, { name: 'trash', size: 14 })))))))
+                  renderLibraryHeader(filtered),
+                  filtered.map(renderLibraryRow)))
               : h('div', { className: 'mvm-home-empty' },
                 h('div', { className: 'mvm-empty-title' }, libraryBusy ? t('state.loading') : t('library.empty')),
                 h('p', { className: 'mvm-empty-text' }, t('library.hint'))),
@@ -4227,10 +4600,15 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
 
       const renderDetailHeader = () => h('div', { className: 'mvm-detail-header' },
         h('div', { className: 'mvm-breadcrumb' },
-          h('button', { type: 'button', className: 'mvm-back-button', onClick: onBackToLibrary },
+          // Icon-only: a long meeting title must never squeeze this button
+          // into a two-line text wrap. The name stays on the button.
+          h('button', {
+            type: 'button', className: 'mvm-back-button mvm-back-button-icon',
+            title: t('detail.back'), 'aria-label': t('detail.back'),
+            onClick: onBackToLibrary,
+          },
             h('span', { className: 'mvm-back-arrow', 'aria-hidden': 'true' },
-              h(Icon, { name: 'arrow-left', size: 15 })),
-            t('detail.back')),
+              h(Icon, { name: 'arrow-left', size: 15 }))),
           editing ? h('input', {
             className: 'mvm-title-input', value: title, placeholder: t('meeting.titlePlaceholder'),
             'aria-label': t('meeting.title'), onChange: (event) => setTitle(event.target.value),
@@ -4434,26 +4812,58 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
 
       const renderViewpointTab = () => {
         const mins = minutes || liveSummary || null;
+        // Topics are the fallback when the model returned no viewpoints. They
+        // carry a summary and a list of decisions, not a claim and a risk, so
+        // they are mapped to the fields that actually exist instead of dressing
+        // a decision up as a risk.
         const groups = (mins?.viewpoints?.length ? mins.viewpoints : (mins?.topics || []).map((topic) => ({
           theme: topic.title,
-          cards: [{ stance: 'Summary', detail: topic.summary || '', risk: (topic.decisions || []).join('; ') }],
+          cards: [{
+            stance: '',
+            detail: topic.summary || '',
+            risk: '',
+            decisions: Array.isArray(topic.decisions) ? topic.decisions : [],
+          }],
         }))).filter((group) => matchesSearch(group.theme) || (group.cards || []).some((card) => matchesSearch(card.detail)));
-        const renderMindmapCard = (card) => h(React.Fragment, null,
+        const count = (key, value) => t(key).replace('{n}', String(value));
+        const renderNode = (card) => h(React.Fragment, null,
           card.stance ? h('strong', { className: 'mvm-mindmap-stance' }, card.stance) : null,
+          // The bold claim and the regular paragraph already read as claim and
+          // support, so the paragraph carries no label; a label would be a
+          // fourth text level inside a three-level card.
           card.detail ? h('p', { className: 'mvm-mindmap-detail' }, card.detail) : null,
-          card.risk ? h('small', { className: 'mvm-mindmap-risk' }, card.risk) : null);
+          Array.isArray(card.decisions) && card.decisions.length
+            ? h('ul', { className: 'mvm-mindmap-decisions' },
+              h('li', { className: 'mvm-mindmap-label' }, t('mindmap.decisions')),
+              card.decisions.map((item, itemIndex) => h('li', { className: 'mvm-mindmap-decision', key: itemIndex }, item)))
+            : null,
+          card.risk ? h('div', { className: 'mvm-mindmap-risk-block' },
+            h('span', { className: 'mvm-mindmap-label' },
+              h(Icon, { name: 'alert', size: 13 }),
+              t('mindmap.risk')),
+            h('small', { className: 'mvm-mindmap-risk' }, card.risk)) : null);
         return h('section', { className: 'mvm-detail-tab-content mvm-viewpoint-tree mvm-mindmap' },
           groups.length ? groups.map((group, index) => {
             const cards = group.cards || [];
-            return h('article', { className: `mvm-mindmap-group tone-${index % 5}`, key: index },
-              h('h3', { className: 'mvm-mindmap-theme' }, group.theme || ''),
+            // The theme header states what the reader needs to judge the theme
+            // before reading a word of it: how many claims, how many risks.
+            const risks = cards.filter((card) => card.risk).length;
+            return h('article', { className: 'mvm-mindmap-group', key: index },
+              h('header', { className: 'mvm-mindmap-theme' },
+                h('span', { className: 'mvm-mindmap-index' }, String(index + 1).padStart(2, '0')),
+                h('h3', { className: 'mvm-mindmap-title' }, group.theme || ''),
+                h('span', { className: 'mvm-mindmap-meta' },
+                  count('mindmap.views', cards.length),
+                  risks ? h('span', { className: 'mvm-mindmap-meta-sep' }) : null,
+                  risks ? h('span', { className: 'mvm-mindmap-meta-open' }, count('mindmap.risks', risks)) : null)),
               cards.length === 2
-                ? h('div', { className: 'mvm-mindmap-comparison' },
-                  cards.map((card, cardIndex) => h('div', { className: 'mvm-mindmap-compare-item', key: cardIndex },
-                    renderMindmapCard(card))))
+                ? h('div', { className: 'mvm-mindmap-children' },
+                  h('div', { className: 'mvm-mindmap-comparison' },
+                    cards.map((card, cardIndex) => h('div', { className: 'mvm-mindmap-compare-item', key: cardIndex },
+                      renderNode(card)))))
                 : h('div', { className: 'mvm-mindmap-children' },
                   cards.map((card, cardIndex) => h('div', { className: 'mvm-mindmap-branch', key: cardIndex },
-                    renderMindmapCard(card)))));
+                    renderNode(card)))));
           })
             : h(EmptyState, { title: t('detail.viewpoints') }, t('minutes.empty')));
       };
@@ -4505,8 +4915,9 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
                 h('select', { className: 'mvm-input', value: exportFormat, 'aria-label': t('detail.format'), onChange: (event) => setExportFormat(event.target.value) },
                   h('option', { value: 'Markdown' }, 'Markdown'),
                   h('option', { value: 'JSON' }, 'JSON'),
-                  h('option', { value: 'WAV' }, 'WAV'))),
+                  h('option', { value: 'WAV', disabled: audioMissing }, 'WAV'))),
               h('div', { className: 'mvm-hint' }, t('detail.audioFiles')),
+              audioMissing ? h('p', { className: 'mvm-detail-audio-empty' }, t('detail.noRecording')) : null,
               h('div', { className: 'mvm-share-actions' },
                 h(Button, { icon: 'save', primary: true, onClick: onExport }, t('detail.export')))))) : null;
 
@@ -4940,11 +5351,10 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
               ? settingField('siliconflowApiKey', 'settings.siliconflowApiKey', { type: 'password', placeholderKey: 'settings.apiKeyPlaceholder' })
               : null,
             settings?.asrProvider !== 'siliconflow'
-              ? settingSelect('asrBackend', 'settings.asrBackend', [
-                ['whispercpp', 'settings.backend.whispercpp'],
+              ? settingSelect('asrBackend', 'settings.asrBackendLive', [
                 ['sensevoice', 'settings.backend.sensevoice'],
-                ['funasr', 'settings.backend.funasr'],
-              ], 'whispercpp')
+                ['whispercpp', 'settings.backend.whispercpp'],
+              ], 'sensevoice')
               : null,
             settings?.asrProvider !== 'siliconflow'
               ? h('div', { className: 'mvm-hint mvm-field-wide' }, t(`settings.backendHint.${settings?.asrBackend || 'whispercpp'}`))
@@ -4966,7 +5376,7 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
                 h(Button, { icon: 'play', onClick: () => onAsrAction('asr-start'), disabled: asrBusy !== '' }, t('settings.asr.start')),
                 h(Button, { icon: 'close', onClick: () => onAsrAction('asr-stop'), disabled: asrBusy !== '' }, t('settings.asr.stop')),
                 h(Button, { icon: 'refresh', onClick: () => onAsrAction('asr-restart'), disabled: asrBusy !== '' }, t('settings.asr.restart'))),
-              asrStatus?.catalog?.entries?.length ? h('div', { className: 'mvm-model-picker' },
+              (asrStatus?.catalog?.entries || []).some((entry) => entry.capability === 'live') ? h('div', { className: 'mvm-model-picker' },
                 h('div', { className: 'mvm-model-list-head' },
                   h('span', { className: 'mvm-label' }, t('settings.asr.modelList')),
                   h('span', { className: 'mvm-hint' }, `${t('settings.asr.activeModel')}: ${asrStatus.catalog.activeId || '—'}`)),
@@ -4981,7 +5391,7 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
                   h('span', { className: 'mvm-model-caret' },
                     h(Icon, { name: 'caret', size: 14 }))),
                 asrModelOpen ? h('div', { className: 'mvm-model-menu', role: 'listbox' },
-                  asrStatus.catalog.entries.map((entry) => h('div', {
+                  asrStatus.catalog.entries.filter((entry) => entry.capability === 'live').map((entry) => h('div', {
                     className: `mvm-model-option ${entry.active ? 'is-active' : ''}`, key: entry.id, role: 'option',
                     'aria-selected': entry.active,
                   },
@@ -4992,8 +5402,10 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
                       h('span', { className: 'mvm-model-option-name' }, entry.label || entry.id),
                       h('span', { className: 'mvm-model-option-size' }, entry.actualSize ? formatBytes(entry.actualSize) : entry.sizeLabel),
                       h('span', {
-                        className: `mvm-model-badge ${entry.active ? 'is-active' : entry.downloaded ? 'is-ready' : 'is-missing'}`,
-                      }, entry.active ? t('settings.asr.inUse') : entry.downloaded ? t('settings.asr.downloaded') : t('settings.asr.notDownloaded'))),
+                        className: `mvm-model-badge ${entry.refine ? 'is-refine' : entry.active ? 'is-active' : entry.downloaded ? 'is-ready' : 'is-missing'}`,
+                      }, entry.refine
+                        ? t('settings.asr.refiner')
+                        : entry.active ? t('settings.asr.inUse') : entry.downloaded ? t('settings.asr.downloaded') : t('settings.asr.notDownloaded'))),
                     h('span', { className: 'mvm-model-option-actions' },
                       !entry.downloaded
                         ? h(Button, {
@@ -5011,6 +5423,46 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
               h('label', { className: 'mvm-bilingual-toggle' },
                 h('input', { type: 'checkbox', checked: Boolean(settings?.asrAutoStart), onChange: (event) => onAsrAutoStartToggle(event.target.checked) }),
                 t('settings.asr.autoStart')),
+              h('label', { className: 'mvm-bilingual-toggle' },
+                h('input', { type: 'checkbox', checked: settings?.llmAutoStart !== false, onChange: (event) => onLlmAutoStartToggle(event.target.checked) }),
+                t('settings.llm.autoStart')),
+              h('div', { className: 'mvm-local-models' },
+                h('span', { className: 'mvm-local-models-state' },
+                  h('span', { className: `mvm-local-models-dot ${localModels?.ready ? 'is-ready' : localModels?.installed === false ? 'is-missing' : 'is-pending'}` }),
+                  localModels?.installed === false
+                    ? t('settings.llm.missing')
+                    : localModels?.ready ? t('settings.llm.ready') : t('settings.llm.pending'),
+                  (localModels?.targets || []).length
+                    ? h('span', { className: 'mvm-hint' }, localModels.targets.map((target) => target.model).join('、'))
+                    : null),
+                h(Button, {
+                  icon: 'refresh', title: t('settings.llm.start'),
+                  onClick: onStartLocalModels, disabled: asrBusy !== '',
+                }, t('settings.llm.start'))),
+              h('p', { className: 'mvm-hint mvm-local-models-hint' }, t('settings.llm.hint')),
+              h('p', { className: 'mvm-hint mvm-local-models-hint' }, t('settings.asr.backendHint')),
+              // The refinement model is its own block: it never serves a live
+              // caption, so mixing it into the caption picker made "switch the
+              // model" mean two unrelated things.
+              asrStatus?.refine ? h('div', { className: 'mvm-role-block' },
+                h('div', { className: 'mvm-model-list-head' },
+                  h('span', { className: 'mvm-label' }, t('settings.asr.refineModel')),
+                  h('span', {
+                    className: `mvm-model-badge ${asrStatus.refine.ready ? 'is-ready' : 'is-missing'}`,
+                  }, asrStatus.refine.ready ? t('settings.asr.ready') : t('settings.asr.notDownloaded'))),
+                h('div', { className: 'mvm-role-row' },
+                  h('span', { className: 'mvm-role-name' }, asrStatus.refine.label || asrStatus.refine.id),
+                  h('span', { className: 'mvm-hint' }, asrStatus.refine.size ? formatBytes(asrStatus.refine.size) : ''),
+                  asrStatus.refine.ready
+                    ? h(Button, {
+                      icon: 'refresh', title: t('settings.asr.refineNow'),
+                      onClick: () => onAsrAction('asr-refine-warmup'), disabled: asrBusy !== '',
+                    }, t('settings.asr.refineNow'))
+                    : h(Button, {
+                      icon: 'save', title: t('settings.asr.downloadModel'),
+                      onClick: () => onAsrAction('asr-download-model', { id: asrStatus.refine.id }), disabled: asrBusy !== '',
+                    }, t('settings.asr.downloadModel'))),
+                h('p', { className: 'mvm-hint' }, t('settings.asr.refineHint'))) : null,
               asrStatus ? h('div', { className: 'mvm-path-row' },
                 h('span', { className: 'mvm-hint' }, `${t('settings.asr.modelDir')}: ${asrStatus.modelDir}`),
                 h(Button, {
@@ -5128,7 +5580,9 @@ button.mvm-library-row:hover{background:var(--mvm-surface-2)}
             settingsTab === 'overlay' ? h('div', { className: 'mvm-settings-grid' },
             settingField('overlayBackground', 'settings.overlayBackground', { type: 'color' }),
             settingField('overlayText', 'settings.overlayText', { type: 'color' }),
-            settingField('overlayOpacity', 'settings.overlayOpacity', { type: 'number', min: 0.2, max: 1, step: 0.05, number: true }),
+            // Below 0.85 the desktop reads through the caption text, so the
+            // control cannot go there; the window clamps to the same floor.
+            settingField('overlayOpacity', 'settings.overlayOpacity', { type: 'number', min: 0.85, max: 1, step: 0.05, number: true }),
             settingToggle('overlayCompact', 'settings.overlayCompact', { defaultValue: true }),
             h('div', { className: 'mvm-hint mvm-field-wide' }, t('settings.overlayHint'))) : null)),
           // The page level alerts sit behind the modal backdrop, so the modal

@@ -24,7 +24,7 @@ test('each model in the dropdown has its own download button', () => {
 
 test('model directory and launcher have quick open buttons', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-open-path-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const opened = [];
   let route;
   apply({

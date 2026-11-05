@@ -51,7 +51,7 @@ async function fixture(t) {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-voice-minutes-switch-'));
   const modelDir = join(dataDir, 'models');
   await mkdir(modelDir, { recursive: true });
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const captured = capturePlugin();
   captured.service.config.dataDir = dataDir;
   captured.service.config.asrModelDir = modelDir;

@@ -38,7 +38,7 @@ test('translation has an independent key, endpoint, model, and inference setting
   t.after(() => run('security', ['delete-generic-password', '-s', 'translation-api-key']).catch(() => {}));
 
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-provider-test-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   await writeFile(join(dataDir, 'settings.json'), JSON.stringify({

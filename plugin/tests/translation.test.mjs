@@ -33,7 +33,7 @@ test('translation uses its own LM Studio endpoint and disables reasoning', async
   t.after(() => new Promise((resolve) => server.close(resolve)));
 
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-translation-test-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   await writeFile(join(dataDir, 'settings.json'), JSON.stringify({
     llmBaseUrl: 'http://127.0.0.1:9/v1',
     llmModel: 'unrelated-minutes-model',

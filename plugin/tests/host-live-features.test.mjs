@@ -65,7 +65,7 @@ test('summarize shapes the prompt from the chosen template', async (t) => {
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   t.after(() => new Promise((resolve) => server.close(resolve)));
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-template-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   service.config.llmBaseUrl = `http://127.0.0.1:${server.address().port}/v1`;
@@ -77,7 +77,7 @@ test('summarize shapes the prompt from the chosen template', async (t) => {
 
 test('the library marks a running session as in progress', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-inprogress-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   let route;
   let service;
   const manager = new RealtimeManager({
@@ -113,7 +113,7 @@ test('the library marks a running session as in progress', async (t) => {
 
 test('an incognito session never writes into the meeting library', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-incognito-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const manager = new RealtimeManager({
     dataDir,
     retryDelay: 0,
@@ -129,7 +129,7 @@ test('an incognito session never writes into the meeting library', async (t) => 
 
 test('markers are written into the session journal', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-marker-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const manager = new RealtimeManager({
     dataDir,
     retryDelay: 0,
@@ -162,7 +162,7 @@ test('a failing translation endpoint reports the host and retries', async (t) =>
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   t.after(() => new Promise((resolve) => server.close(resolve)));
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-retry-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = createService();
   service.config.dataDir = dataDir;
   service.config.translationBaseUrl = `http://127.0.0.1:${server.address().port}/v1`;

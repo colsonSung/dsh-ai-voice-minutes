@@ -51,8 +51,24 @@ function levelOf(bytes) {
 }
 
 export async function * createCaptureStream(input, options = {}) {
-  const chunkMs = Math.max(10, Math.floor(options.chunkMs ?? 10000));
-  const chunkBytes = Math.max(2, Math.floor(16000 * 2 * chunkMs / 1000));
+  const baseChunkMs = Math.max(10, Math.floor(options.chunkMs ?? 10000));
+  const maxChunkMs = Math.max(baseChunkMs, Math.floor(options.maxChunkMs ?? 20000));
+  const chunkBudget = typeof options.chunkBudget === 'function' ? options.chunkBudget : null;
+  /**
+   * The chunk length is the throttle of the whole live pipeline. A short
+   * chunk shows the text sooner but asks the transcription service for more
+   * requests; a long chunk asks for fewer. The budget lets the service ask
+   * for a longer chunk when the machine is behind, so the captions slow down
+   * instead of falling off the end of the queue.
+   */
+  const targetBytes = () => {
+    const asked = chunkBudget ? Number(chunkBudget()) : 0;
+    const ms = Math.min(
+      maxChunkMs,
+      Math.max(baseChunkMs, Number.isFinite(asked) && asked > 0 ? asked : baseChunkMs),
+    );
+    return Math.max(2, Math.floor(16000 * 2 * ms / 1000));
+  };
   const decoder = new StringDecoder('utf8');
   const states = new Map();
   const levels = new Map();
@@ -90,13 +106,14 @@ export async function * createCaptureStream(input, options = {}) {
       let state = states.get(event.source) || emptyState(Number(event.timestamp) || 0);
       state.parts.push(bytes);
       state.length += bytes.length;
-      while (state.length >= chunkBytes) {
+      while (state.length >= targetBytes()) {
+        const wanted = targetBytes();
         const joined = Buffer.concat(state.parts);
-        const output = joined.subarray(0, chunkBytes);
-        const remainder = joined.subarray(chunkBytes);
+        const output = joined.subarray(0, wanted);
+        const remainder = joined.subarray(wanted);
         yield JSON.stringify({ ...event, timestamp: state.timestamp, pcmBase64: output.toString('base64') }) + '\n';
         state = {
-          timestamp: state.timestamp + chunkMs,
+          timestamp: state.timestamp + Math.round((wanted / (16000 * 2)) * 1000),
           parts: remainder.length ? [remainder] : [],
           length: remainder.length,
         };
@@ -188,6 +205,8 @@ function startNativeCapture(service, options = {}) {
       // sooner; the final transcript is refined by the pass two model anyway.
       stdout: createCaptureStream(child.stdout, {
         chunkMs: Number(options.chunkMs) || Number(service.config.liveChunkSeconds) * 1000 || 5000,
+        maxChunkMs: Number(options.maxChunkMs) || 20000,
+        chunkBudget: typeof captureOptions.chunkBudget === 'function' ? captureOptions.chunkBudget : null,
       }),
       stop,
     };
@@ -208,6 +227,10 @@ export function createLiveManager(service, options = {}) {
           language: context.sourceLanguage && context.sourceLanguage !== 'auto' ? context.sourceLanguage : undefined,
           hotwords: context.hotwords || undefined,
           itn: context.itn !== false,
+          // Live captions never need speaker clusters: they are resolved from
+          // the whole track when the meeting ends, and running ECAPA on every
+          // three-second chunk only delays the text.
+          live: true,
         },
       );
     },
@@ -215,10 +238,14 @@ export function createLiveManager(service, options = {}) {
     translateStream: (text, context, onDelta) => service.translateStream(text, context, onDelta),
     onEvent: options.onEvent,
     onLevel: options.onLevel,
-    maxQueue: options.maxQueue ?? 24,
+    maxQueue: options.maxQueue ?? 64,
     maxRetries: options.maxRetries ?? 2,
     retryDelay: options.retryDelay ?? 250,
     energyThreshold: options.energyThreshold ?? 350,
+    // The chunk length the capture starts with. It grows on its own when the
+    // transcription service falls behind.
+    chunkMs: Number(options.chunkMs) || Number(service.config.liveChunkSeconds) * 1000 || 5000,
+    maxChunkMs: options.maxChunkMs ?? 20000,
   });
 }
 

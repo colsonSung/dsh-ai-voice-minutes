@@ -20,7 +20,7 @@ function createService() {
 
 test('offline meeting audio streams the original file with its media type', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-offline-audio-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   await mkdir(join(dataDir, 'audio'), { recursive: true });
   const bytes = Buffer.from([1, 2, 3, 4]);
   await writeFile(join(dataDir, 'audio', 'audio-123.m4a'), bytes);
@@ -56,7 +56,7 @@ test('translation supports all reference target languages', async (t) => {
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   t.after(() => new Promise((resolve) => server.close(resolve)));
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-language-test-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   // A model name that is not Hy-MT, so the generic target language prompt is used.
   await writeFile(join(dataDir, 'settings.json'), JSON.stringify({
     translationBaseUrl: `http://127.0.0.1:${server.address().port}/v1`,

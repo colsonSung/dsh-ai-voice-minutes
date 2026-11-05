@@ -499,9 +499,13 @@ test('Live polling runs only while visible and active, and stop, view changes, a
   await runtime.flush();
   renderer.render();
   assert.deepEqual(requests.find((request) => request.method === 'live-stop').payload, { id: 'live-1' });
-  assert.equal(stopTimer.cleared, true);
-  assert.equal(runtime.pendingTimers().length, 0);
+  assert.equal(stopTimer.cleared, true, 'the poll timer stops with the recording');
+  // Ending a meeting hands the page back immediately: saving and the minutes
+  // run behind it, so the reader is already in the library.
+  assert.match(renderer.text(), /正在后台保存|Recording ended/);
 
+  await renderer.click('Live');
+  renderer.render();
   await renderer.click('Start live');
   await runtime.flush();
   renderer.render();
@@ -1287,6 +1291,9 @@ test('playback toggles play and pause and cleans up on stop, view change, and un
   assert.ok(audio.loadCalls >= 1, 'stop releases the current audio request');
   assert.equal(audio.currentTime, 0);
 
+  // The stop moved the page to the library and ended the session, so the
+  // view-change and unmount checks start from a fresh recording.
+  await startLive(runtime);
   await renderer.click('Play recording');
   await renderer.click('Minutes');
   assert.ok(audio.pauseCalls >= 3, 'view change pauses playback');

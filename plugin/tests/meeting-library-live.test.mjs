@@ -213,12 +213,16 @@ test('live studio exposes a floating control bar with markers, timer and incogni
 
 test('meeting library shows templates, filter tabs and an in-progress row', () => {
   assert.match(source, /callHost\('templates'/);
-  assert.match(source, /mvm-template-card/);
+  // The template wall was removed from the library on purpose ("no template
+  // wall"); the picker now lives in the detail tab header as a select.
+  assert.match(source, /mvm-template-picker/);
+  assert.match(source, /mvm-template-select/);
   assert.match(source, /library\.filter\.recent/);
   assert.match(source, /library\.filter\.favorite/);
   assert.match(source, /library\.view\.grid/);
   assert.match(source, /meeting\.inProgress/);
-  assert.match(source, /mvm-library-progress/);
+  // The in-progress marker is a small inline pill, not the old full bar.
+  assert.match(source, /mvm-library-progress-pill/);
   assert.match(source, /library\.search/);
 });
 

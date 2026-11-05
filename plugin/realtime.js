@@ -20,6 +20,7 @@ function freshMetrics() {
     receivedChunks: 0,
     queuedChunks: 0,
     droppedChunks: 0,
+    abandonedChunks: 0,
     transcribedChunks: 0,
     translatedChunks: 0,
     skippedChunks: 0,
@@ -88,6 +89,14 @@ export class RealtimeManager {
     this.retryDelay = Math.max(0, options.retryDelay ?? 100);
     this.energyThreshold = Math.max(0, options.energyThreshold ?? 0);
     this.maxChunkBytes = Math.max(2, options.maxChunkBytes ?? 8 * 1024 * 1024);
+    // How long a full queue waits for room before the chunk is skipped. The
+    // raw PCM is already on disk, so waiting costs latency, never audio.
+    this.queueWaitMs = Math.max(0, Math.floor(options.queueWaitMs ?? 5000));
+    // The capture layer asks how long the next chunk should be. A machine
+    // that cannot transcribe in real time gets longer chunks instead of a
+    // queue that grows until it breaks.
+    this.chunkMs = Math.max(0, Math.floor(options.chunkMs ?? 0));
+    this.maxChunkMs = Math.max(this.chunkMs, Math.floor(options.maxChunkMs ?? 20000));
     this._session = null;
     this._sessionDir = null;
     this._capture = null;
@@ -96,6 +105,7 @@ export class RealtimeManager {
     this._abortController = null;
     this._queue = [];
     this._worker = null;
+    this._inFlight = 0;
     this._sequence = 0;
     this._chunkSequence = 0;
     this._trackOffsets = new Map();
@@ -103,6 +113,7 @@ export class RealtimeManager {
     this._queueWarning = false;
     this._doneReceived = false;
     this._finalized = false;
+    this._stopping = false;
     this._lastLevelAt = 0;
     this._translationQueue = [];
     this._activeTranslations = 0;
@@ -155,6 +166,7 @@ export class RealtimeManager {
     this._queueWarning = false;
     this._doneReceived = false;
     this._finalized = false;
+    this._stopping = false;
     this._captionLines = new Map();
     this._eventChain = Promise.resolve();
     this._checkpointChain = Promise.resolve();
@@ -166,6 +178,10 @@ export class RealtimeManager {
         ...options,
         sessionId: id,
         signal: this._abortController.signal,
+        // The capture layer asks how long the next chunk should be, so a
+        // machine that cannot keep up slows the captions down instead of
+        // dropping them.
+        chunkBudget: () => this._chunkBudget(),
       });
       const stream = capture?.stdout || capture;
       if (!stream || typeof stream[Symbol.asyncIterator] !== 'function') {
@@ -286,8 +302,15 @@ export class RealtimeManager {
     const path = this._checkpointPath();
     const temporary = path + '.tmp';
     this._checkpointChain = this._checkpointChain.catch(() => {}).then(async () => {
-      await writeFile(temporary, JSON.stringify(snapshot, null, 2), 'utf8');
-      await rename(temporary, path);
+      try {
+        await writeFile(temporary, JSON.stringify(snapshot, null, 2), 'utf8');
+        await rename(temporary, path);
+      } catch (error) {
+        // The session directory can be gone: the meeting was deleted while the
+        // stop was still finishing, or an incognito session was cleaned up. A
+        // checkpoint nobody can write is not an error worth crashing over.
+        if (error?.code !== 'ENOENT') throw error;
+      }
     });
     return this._checkpointChain;
   }
@@ -304,7 +327,13 @@ export class RealtimeManager {
       ...fields,
     };
     this._eventChain = this._eventChain.catch(() => {}).then(async () => {
-      await appendFile(this._eventsPath(), JSON.stringify(event) + '\n', 'utf8');
+      try {
+        await appendFile(this._eventsPath(), JSON.stringify(event) + '\n', 'utf8');
+      } catch (error) {
+        // Same case as the checkpoint: the journal directory is gone, so there
+        // is nowhere to record the event. Keep the in-memory listener working.
+        if (error?.code !== 'ENOENT') throw error;
+      }
       if (this.onEvent) await this.onEvent(event);
       await this._checkpoint();
     });
@@ -313,6 +342,11 @@ export class RealtimeManager {
 
   async _stopCapture() {
     this._session.status = 'stopping';
+    // From here on the meeting is closing: no new work is accepted, and the
+    // backlog is not transcribed. The raw PCM of every skipped chunk is on
+    // disk, so the final pass can still recover the text. Waiting for the
+    // whole backlog here is what kept the UI on "Stopping…" for minutes.
+    this._stopping = true;
     const statusEmitted = this._emit('status', { detail: 'stopping' });
     const capture = this._capture;
     const stopped = (async () => {
@@ -466,21 +500,33 @@ export class RealtimeManager {
       offset,
       length: bytes.length,
     };
-    if (this._queue.length >= this.maxQueue) {
-      this._session.metrics.droppedChunks += 1;
-      this._session.degraded = true;
-      if (!this._queueWarning) {
-        this._queueWarning = true;
-        await this._emit('error', {
-          code: 'queue-overflow',
-          source: event.source,
-          timestamp: event.timestamp ?? new Date().toISOString(),
-          detail: 'Transcription queue full; raw PCM was persisted and the chunk was dropped from live transcription',
-        });
-      } else {
-        await this._checkpoint();
-      }
+    if (this._stopping) {
+      // The meeting is closing. The audio is on disk, so it is not lost; it is
+      // simply not transcribed live any more.
+      this._session.metrics.abandonedChunks += 1;
+      await this._checkpoint();
       return;
+    }
+    if (this._queue.length >= this.maxQueue) {
+      // The queue is full. Wait for room first: the raw PCM is already on
+      // disk, so a short wait costs latency and never costs audio.
+      const freed = await this._waitForQueueRoom();
+      if (!freed) {
+        this._session.metrics.droppedChunks += 1;
+        this._session.degraded = true;
+        if (!this._queueWarning) {
+          this._queueWarning = true;
+          await this._emit('error', {
+            code: 'queue-overflow',
+            source: event.source,
+            timestamp: event.timestamp ?? new Date().toISOString(),
+            detail: 'Transcription is falling behind: this machine cannot keep up with the live audio rate, so a few live captions were skipped. The audio was saved, and the full text comes back when the meeting is refined.',
+          });
+        } else {
+          await this._checkpoint();
+        }
+        return;
+      }
     }
     this._queue.push(descriptor);
     this._session.metrics.queuedChunks += 1;
@@ -490,12 +536,43 @@ export class RealtimeManager {
     await this._checkpoint();
   }
 
+  /**
+   * Wait until the queue has room again. Returns false when the wait ran out
+   * or the meeting closed while waiting.
+   */
+  async _waitForQueueRoom() {
+    if (this.maxQueue <= 0) return false;
+    if (!this.queueWaitMs) return this._queue.length < this.maxQueue;
+    const deadline = Date.now() + this.queueWaitMs;
+    while (Date.now() < deadline) {
+      if (this._stopping) return false;
+      if (this._queue.length < this.maxQueue) return true;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    return this._queue.length < this.maxQueue;
+  }
+
   _ensureWorker() {
-    if (this._worker || this._finalized || this._session?.transcriptionPaused) return;
+    if (this._worker || this._finalized || this._stopping || this._session?.transcriptionPaused) return;
     this._worker = this._runWorker().finally(() => {
       this._worker = null;
       if (this._queue.length && !this._finalized) this._ensureWorker();
     });
+  }
+
+  /**
+   * How long the next captured chunk should be, in milliseconds.
+   *
+   * The chunk length is the throttle of the whole live pipeline: shorter
+   * chunks show text sooner but ask the transcription service for more
+   * requests. When the queue grows, the machine is behind, so the chunks get
+   * longer until the request rate matches what the machine can do.
+   */
+  _chunkBudget() {
+    const depth = this._queue.length + this._inFlight;
+    if (!depth || !this.chunkMs) return this.chunkMs;
+    const grown = this.chunkMs * (1 + Math.min(depth, 8) * 0.75);
+    return Math.min(this.maxChunkMs, Math.round(grown));
   }
 
   async _runWorker() {
@@ -505,9 +582,24 @@ export class RealtimeManager {
         await this._checkpoint();
         return;
       }
+      if (this._stopping) {
+        // The meeting is over. The chunks that were not transcribed yet stay
+        // on disk and are recovered by the final pass, so the meeting can
+        // close now instead of minutes later.
+        this._session.metrics.abandonedChunks += this._queue.length;
+        this._queue.length = 0;
+        this._session.metrics.queueDepth = 0;
+        await this._checkpoint();
+        return;
+      }
       const descriptor = this._queue.shift();
       this._session.metrics.queueDepth = this._queue.length;
-      await this._processChunk(descriptor);
+      this._inFlight = 1;
+      try {
+        await this._processChunk(descriptor);
+      } finally {
+        this._inFlight = 0;
+      }
     }
     this._queueWarning = false;
     this._session.metrics.queueDepth = 0;

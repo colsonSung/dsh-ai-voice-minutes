@@ -31,7 +31,7 @@ async function call(route, method, payload = {}) {
 
 test('live-active returns the session that is still recording', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-active-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const routeRef = {};
   const session = { id: 'realtime-live-1', status: 'recording', startedAt: '2026-10-29T08:00:00.000Z', metrics: {}, transcriptionPaused: false };
   const service = applyWith(routeRef, {
@@ -57,7 +57,7 @@ test('the overlay status reflects whether the floating window is open', async ()
 
 test('saved meetings carry a simplified transcript when the source is traditional', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-t2s-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = applyWith({});
   service.config.dataDir = dataDir;
   const saved = await service.saveMeeting({
@@ -73,7 +73,7 @@ test('saved meetings carry a simplified transcript when the source is traditiona
 
 test('a partial save never wipes stored segments or minutes', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-merge-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = applyWith({});
   service.config.dataDir = dataDir;
   await service.saveMeeting({
@@ -89,7 +89,7 @@ test('a partial save never wipes stored segments or minutes', async (t) => {
 
 test('a labelled voice keeps a playable sample and has no deletion operation', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-sample-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const service = applyWith({});
   service.config.dataDir = dataDir;
   await service.saveMeeting({
@@ -123,7 +123,7 @@ test('live-summary produces progressive minutes from the transcript so far', asy
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   t.after(() => new Promise((resolve) => server.close(resolve)));
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-live-summary-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   const routeRef = {};
   const session = { id: 'realtime-live-2', status: 'recording', startedAt: '2026-10-29T08:00:00.000Z', metrics: {} };
   const service = applyWith(routeRef, {

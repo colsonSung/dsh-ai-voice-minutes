@@ -20,7 +20,7 @@ function createService() {
 
 test('library entries include excerpt, audio size, and creator', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-metadata-test-'));
-  t.after(() => rm(dataDir, { recursive: true, force: true }));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
   await mkdir(join(dataDir, 'audio'), { recursive: true });
   await writeFile(join(dataDir, 'audio', 'audio-123.m4a'), Buffer.alloc(1234));
   const service = createService();

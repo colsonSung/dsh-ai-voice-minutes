@@ -318,6 +318,11 @@ class FunAsrWorker:
         self.process = None
         self.log_handle = None
         self.lock = __import__("threading").Lock()
+        # The model stays loaded between requests. Reloading it costs about
+        # thirteen seconds, which is longer than a live caption may take, so a
+        # warm worker is the difference between keeping up and falling behind.
+        self.recycle = False
+        self.crashes = 0
 
     def start(self):
         if self.process is not None and self.process.poll() is None:
@@ -340,10 +345,21 @@ class FunAsrWorker:
             text=True, bufsize=1, env=env,
         )
 
-    def request(self, audio_path, hotwords=None, language=None, itn=True):
+    def _exchange(self, payload):
+        """Send one request and read one answer. An empty line means the worker died."""
         import select
-        import subprocess
 
+        try:
+            self.process.stdin.write(__import__("json").dumps(payload, ensure_ascii=False) + "\n")
+            self.process.stdin.flush()
+            ready, _, _ = select.select([self.process.stdout], [], [], STATE["timeout"])
+            if not ready:
+                raise HTTPException(status_code=504, detail="Fun-ASR 推理超时")
+            return self.process.stdout.readline()
+        except (BrokenPipeError, ValueError):
+            return ""
+
+    def request(self, audio_path, hotwords=None, language=None, itn=True):
         with self.lock:
             self.start()
             payload = {
@@ -352,40 +368,30 @@ class FunAsrWorker:
                 "language": language,
                 "itn": bool(itn),
             }
-            try:
-                self.process.stdin.write(__import__("json").dumps(payload, ensure_ascii=False) + "\n")
-                self.process.stdin.flush()
-                ready, _, _ = select.select([self.process.stdout], [], [], STATE["timeout"])
-                if not ready:
-                    raise HTTPException(status_code=504, detail="Fun-ASR 推理超时")
-                line = self.process.stdout.readline()
-            except (BrokenPipeError, ValueError) as exc:
-                self.close()
-                raise HTTPException(status_code=500, detail="Fun-ASR worker 已停止：%s" % exc) from exc
+            line = self._exchange(payload)
             if not line:
                 # worker 意外退出（例如 MPS 内存压力）：重启后重试一次
+                self.crashes += 1
+                if self.crashes >= 2:
+                    # 它总是崩：退回「每个请求都换一个新 worker」的保底模式。
+                    self.recycle = True
                 self.close()
                 self.start()
-                try:
-                    self.process.stdin.write(__import__("json").dumps(payload, ensure_ascii=False) + "\n")
-                    self.process.stdin.flush()
-                    ready, _, _ = select.select([self.process.stdout], [], [], STATE["timeout"])
-                    if not ready:
-                        raise HTTPException(status_code=504, detail="Fun-ASR 推理超时")
-                    line = self.process.stdout.readline()
-                except (BrokenPipeError, ValueError) as exc:
-                    raise HTTPException(status_code=500, detail="Fun-ASR worker 重启后仍失败：%s" % exc) from exc
+                line = self._exchange(payload)
                 if not line:
+                    self.close()
                     raise HTTPException(status_code=500, detail="Fun-ASR worker 未返回结果，请查看 fun-asr-worker.log")
+            else:
+                self.crashes = 0
             try:
                 response = __import__("json").loads(line)
             except ValueError as exc:
                 raise HTTPException(status_code=500, detail="Fun-ASR worker 返回了无效 JSON") from exc
             if not response.get("ok"):
                 raise HTTPException(status_code=500, detail=response.get("error") or "Fun-ASR 推理失败")
-            # Fun-ASR-Nano 在同一进程里做第二次推理会崩溃（SIGTRAP），
-            # 因此每个请求用完就结束 worker，下次请求重新加载模型。
-            self.close()
+            if self.recycle:
+                # 保底模式：每个请求用完就结束 worker，下次请求重新加载模型。
+                self.close()
             return response.get("result") or {}
 
     def close(self):
@@ -731,7 +737,14 @@ async def transcriptions(
     prompt: str = Form(""),
     hotwords: str = Form(""),
     itn: str = Form("true"),
+    diarize: str = Form(""),
 ):
+    """Pass-1 transcription: this is the live-caption path.
+
+    说话人分离默认跟随服务设置（导入整段音频时有用），但**实时字幕必须关掉**：
+    每个 3 秒分段都跑一遍 ECAPA 是在给字幕加延迟，而实时字幕本来就不显示说话人
+    —— 说话人是在会议结束后由 /diarize 拿整条音轨聚类出来的。
+    """
     # prompt 按请求传递：写进进程级状态会让并发请求互相覆盖热词
     effective_prompt = prompt or STATE["prompt"]
     whisper_prompt = ",".join(part for part in [effective_prompt, hotwords] if part)
@@ -743,7 +756,8 @@ async def transcriptions(
         handle.write(payload)
     try:
         speaker_chunks = []
-        if STATE["diarize"]:
+        want_diarize = STATE["diarize"] if not diarize else diarize.lower() not in {"false", "0", "no", "off"}
+        if want_diarize:
             try:
                 speaker_chunks = diarize_speakers(temp_path)
             except HTTPException:
@@ -759,14 +773,14 @@ async def transcriptions(
         elif STATE["backend"] == "sensevoice":
             rows = transcribe_sense_voice(
                 temp_path, language or STATE["language"] or "zh",
-                prompt=effective_prompt, speaker_chunks=speaker_chunks if STATE["diarize"] else None,
+                prompt=effective_prompt, speaker_chunks=speaker_chunks if want_diarize else None,
             )
             info = {"language": language or STATE["language"] or "zh", "duration": 0.0}
         elif STATE["backend"] == "funasr":
             rows = transcribe_fun_asr(
                 temp_path, language or STATE["language"] or "auto",
                 hotwords=hotwords or effective_prompt, itn=parse_itn(itn),
-                speaker_chunks=speaker_chunks if STATE["diarize"] else None,
+                speaker_chunks=speaker_chunks if want_diarize else None,
             )
             info = {"language": language or STATE["language"] or "auto", "duration": 0.0}
         else:
@@ -845,6 +859,8 @@ async def finalize(
                 # The track label remains authoritative even if ECAPA is unavailable.
                 print("Fun-ASR 说话人区间不可用，按整块解码：%s" % exc)
         rows = transcribe_fun_asr(
+            # The refinement pass keeps inline diarization: the speaker spans it
+            # returns are what the meeting re-labels from.
             temp_path, language=language, hotwords=hotwords, itn=parse_itn(itn),
             speaker_chunks=speaker_chunks if STATE["diarize"] else None,
             track=track,
