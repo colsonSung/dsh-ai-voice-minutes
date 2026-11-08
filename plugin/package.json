@@ -18,6 +18,7 @@
     "realtime.js",
     "overlay.js",
     "asr-admin.js",
+    "llm-admin.js",
     "cordis.patch.yml",
     "locale/*.json",
     "data/*.json",
