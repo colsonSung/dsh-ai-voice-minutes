@@ -64,6 +64,58 @@ test('an unknown voice becomes a nameless profile and can be named later', async
   assert.equal(later.labels['发言人 1'], '李四');
 });
 
+test('deleting a voice removes the profile and drops the meeting pointers', async (t) => {
+  const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-delete-'));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
+  const service = createService();
+  service.config.dataDir = dataDir;
+  const vector = embedding(5);
+  await service.saveMeeting({
+    id: 'meeting-voice-3', title: '删除会议', transcript: 'B',
+    voiceprints: { '发言人 1': vector },
+  });
+  const labelled = await service.labelVoice({ meetingId: 'meeting-voice-3', speaker: '发言人 1', name: '钱七' });
+  assert.equal(labelled.ok, true);
+  const profileId = labelled.result.profiles[0].id;
+
+  const deleted = await service.deleteVoice({ profileId });
+  assert.equal(deleted.ok, true);
+  assert.equal(deleted.result.deletedId, profileId);
+  assert.deepEqual(deleted.result.profiles, []);
+  assert.deepEqual(await service.loadVoiceProfiles(), []);
+
+  const stored = JSON.parse(await readFile(join(dataDir, 'meetings', 'meeting-voice-3.json'), 'utf8'));
+  assert.equal(stored.speakerProfiles?.['发言人 1'], undefined,
+    'the meeting no longer points at the deleted identity');
+  assert.equal(stored.speakerLabels['发言人 1'], '钱七',
+    'the transcript keeps the speaker name it was recorded with');
+
+  // The same voice may be clustered again from a later recording, but it comes
+  // back nameless: the deleted identity and its name are not revived.
+  const later = await service.resolveVoiceLabels({ '发言人 1': vector });
+  const recreated = later.known.find((profile) => profile.id === later.profiles['发言人 1']);
+  assert.ok(recreated, 'the voice is clustered again');
+  assert.equal(recreated.name, '');
+  assert.equal(later.labels['发言人 1'], undefined, 'the deleted name is not applied again');
+});
+
+test('deleting an unknown voice fails without touching the book', async (t) => {
+  const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-delete-missing-'));
+  t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));
+  const service = createService();
+  service.config.dataDir = dataDir;
+  await service.saveVoiceProfiles([{ id: 'voice-keep', name: '保留', embedding: [1], createdAt: '', updatedAt: '' }]);
+
+  const missing = await service.deleteVoice({ profileId: 'voice-not-there' });
+  assert.equal(missing.ok, false);
+  assert.equal(missing.error.code, 'minutes/not-found');
+  assert.equal((await service.loadVoiceProfiles()).length, 1, 'the book is untouched');
+
+  const noId = await service.deleteVoice({});
+  assert.equal(noId.ok, false);
+  assert.equal(noId.error.code, 'minutes/voice-missing');
+});
+
 test('renaming a voice updates every meeting that uses it', async (t) => {
   const dataDir = await mkdtemp(join(tmpdir(), 'ai-minutes-voice-rename-'));
   t.after(() => rm(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 }));

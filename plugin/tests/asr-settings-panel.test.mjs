@@ -26,8 +26,11 @@ test('a model switch updates the form state so saving settings cannot revert it'
   assert.match(select[0], /result\?\.settings/);
 });
 
-test('the diarization model is not offered as a transcription model', () => {
-  assert.match(source, /entry\.selectable === false/);
+test('the diarization and refinement models are not offered as caption models', () => {
+  // The picker only lists live-capable entries, so ECAPA (diarization) and
+  // Fun-ASR-Nano (refinement) cannot be chosen as the caption model.
+  assert.match(source, /capability === 'live'/);
+  assert.match(source, /settings\.asr\.refineModel/);
 });
 
 test('the settings dialog shows its own error and notice instead of hiding them behind the backdrop', () => {

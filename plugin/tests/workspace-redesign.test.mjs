@@ -251,6 +251,36 @@ test('homepage presents a compact card grid with one primary action and no templ
   assert.equal(primary.length, 1, 'exactly one primary action on the homepage');
 });
 
+test('a meeting card header has one favourite control and a single-line meta', async () => {
+  const runtime = createRuntime();
+  const { renderer } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+  const card = renderer.findAll((node) => node.type === 'article'
+    && String(node.props.className || '').includes('mvm-meeting-card'))[0];
+  assert.ok(card, 'the meeting renders as a card');
+  const favourite = renderer.findAll((node) => node.type === 'button'
+    && node.props['aria-label'] === 'Favorite');
+  assert.equal(favourite.length, 1, 'the star is drawn once, in the card foot');
+  const head = renderer.findAll((node) => String(node.props.className || '').split(' ').includes('mvm-meeting-card-head'))[0];
+  assert.ok(head, 'the card keeps one header row');
+  assert.equal(renderer.findAll((node) => String(node.props.className || '').split(' ').includes('mvm-meeting-card-star')).length, 0,
+    'the header no longer repeats the star');
+  assert.equal(renderer.findAll((node) => String(node.props.className || '').split(' ').includes('mvm-meeting-card-checkhit')).length, 0,
+    'the header carries no checkbox');
+  assert.equal(renderer.findAll((node) => String(node.props.className || '').split(' ').includes('mvm-meeting-thumb')).length, 0,
+    'the header carries no avatar');
+  assert.match(source, /\.mvm-meeting-card-meta\{[^}]*white-space:nowrap/);
+  const dateSpan = renderer.findAll((node) => String(node.props.className || '').split(' ').includes('mvm-meeting-card-date'))[0];
+  assert.ok(dateSpan, 'the meta line names its date part');
+  const dateText = String(dateSpan.props.children);
+  assert.doesNotMatch(dateText, /:\d{2}:\d{2}/, 'the card date drops seconds');
+  assert.match(dateText, /10\/28/, 'the card date keeps the day');
+  const meta = renderer.findAll((node) => String(node.props.className || '').split(' ').includes('mvm-meeting-card-meta'))[0];
+  assert.ok(meta, 'date and duration share one meta line');
+});
+
 test('homepage removes the redundant meeting workspace hero', async () => {
   const runtime = createRuntime();
   const { renderer } = runtime;

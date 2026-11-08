@@ -192,6 +192,7 @@ function createRuntime(runtimeOptions = {}) {
     'settings.section.asr': 'ASR', 'settings.section.llm': 'Minutes LLM',
     'settings.section.translation': 'Realtime Translation',
     'settings.section.overlay': 'Live transcript overlay',
+    'settings.section.services': 'Local services',
     'settings.overlayBackground': 'Overlay background',
     'settings.overlayText': 'Overlay text colour',
     'settings.overlayOpacity': 'Overlay opacity',
@@ -326,7 +327,7 @@ test('settings use category tabs instead of one long form', async () => {
   renderer.render();
   const tabs = renderer.findAll((node) => node.props?.role === 'tab'
     && String(node.props.className || '').includes('mvm-settings-tab'));
-  assert.deepEqual(tabs.map((node) => node.props.children), ['ASR', 'Minutes LLM', 'Realtime Translation', 'Live transcript overlay']);
+  assert.deepEqual(tabs.map((node) => node.props.children), ['ASR', 'Minutes LLM', 'Realtime Translation', 'Live transcript overlay', 'Local services']);
   assert.equal(renderer.findAll((node) => node.props?.['aria-label'] === 'Translation provider').length, 0,
     'translation fields are hidden while ASR is selected');
   await renderer.click('Realtime Translation');

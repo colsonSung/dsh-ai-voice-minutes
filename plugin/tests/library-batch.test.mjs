@@ -136,7 +136,9 @@ test('the archive scope is a filter of its own and archived rows say so', () => 
   assert.match(clientSource, /onArchiveMeeting/, 'a single row can be archived too');
 });
 
-test('selection works in the card view as well as the list', () => {
-  assert.match(clientSource, /mvm-meeting-card-check/, 'cards carry a checkbox');
-  assert.match(clientSource, /mvm-meeting-card\.is-selected/, 'a selected card is marked');
+test('cards show a selection made in the list instead of carrying their own checkbox', () => {
+  assert.doesNotMatch(clientSource, /mvm-meeting-card-check/, 'the card header does not carry a checkbox');
+  // A meeting selected in the list keeps its tinted card when the reader
+  // switches to the grid, so the batch bar and the selection stay in sync.
+  assert.match(clientSource, /mvm-meeting-card\.is-selected/, 'a selected card is still marked');
 });

@@ -292,11 +292,15 @@ window.__ModuleLoader__.load({
         'voice.noMatch': '没有匹配的声纹',
         'voice.sampleReady': '可播放样本',
         'voice.sampleMissing': '无样本',
+        'voice.delete': '删除这条声音',
+        'voice.deleteConfirm': '删除后不再自动识别它，历史会议文字保留。',
+        'voice.deleteCancel': '取消',
+        'voice.deleteFailed': '删除失败',
         'voice.speakersTitle': '本场说话人',
         'voice.speakersHint': '点击说话人即可标注或修正姓名；声纹会永久保存并用于后续会议自动识别。',
         'voice.emptySpeakers': '暂无可标注的说话人',
         'voice.emptyTitle': '还没有声音标签',
-        'voice.persistentHint': '声纹永久保存并自动备份，不可删除，但可以修正标注。',
+        'voice.persistentHint': '声纹自动备份，可重命名或删除；删除只移除声纹库里的这条声音，历史会议文字保留。',
         'notice.voiceSaved': '说话人标注已保存',
 
         'detail.transcribe': '转写',
@@ -426,27 +430,21 @@ window.__ModuleLoader__.load({
         'settings.translationFallbackModel': '兜底模型',
         'settings.translationFallbackBaseUrl': '兜底服务地址',
         'settings.provider.minimaxDefault': 'MiniMax（默认）',
-        'settings.asrBackend': '识别后端',
-        'settings.backend.whispercpp': 'whisper.cpp（本地离线）',
-        'settings.backend.sensevoice': 'SenseVoice（实时字幕）',
-        'settings.backend.funasr': 'Fun-ASR-Nano（精修）',
-        'settings.backendHint.whispercpp': '本地 whisper.cpp：离线精度最高，适合会后整理与逐字稿归档。',
-        'settings.backendHint.sensevoice': 'sherpa-onnx SenseVoiceSmall：实时字幕最快，中文标点更好，适合边开会边看字幕。',
-        'settings.backendHint.funasr': 'Fun-ASR-Nano：负责 pass2 精修，支持术语热词，会议结束后自动校正临时字幕。',
-        'settings.asr.serviceTitle': '本地 ASR 服务管理',
+        'settings.backend.whispercpp': 'whisper.cpp',
+        'settings.backend.sensevoice': 'SenseVoice',
+        'settings.asr.serviceTitle': '本地 ASR 服务',
         'settings.asr.start': '启动服务',
         'settings.asr.stop': '停止服务',
         'settings.asr.restart': '重启服务',
         'settings.asr.autoStart': '插件启动时自动启动 ASR',
-        'settings.asr.refiner': '精修模型',
-        'settings.asr.asrBackendLive': '实时字幕模型',
+        'settings.asr.liveModel': '实时字幕模型',
+        'settings.asr.liveModelHint': '只影响实时字幕和导入音频的初稿：换模型会重启 ASR 服务，当前录音会中断，请在没有会议时切换。',
+        'settings.asr.noLiveModel': '本地还没有可用的实时字幕模型，先在「本地服务」的模型库里下载一个。',
+        'settings.asr.offlineHint': 'ASR 服务没有在运行，实时字幕和导入音频都不可用；去「本地服务」里启动它。',
         'settings.asr.refineModel': '会后精修模型',
         'settings.asr.ready': '已就绪',
         'settings.asr.refineNow': '预热',
-        'settings.asr.refineHint': '会议结束整理终稿、Refine 按钮、以及发言稿的说话人区间都靠它。换实时字幕模型不影响它，删掉它只影响终稿质量，不影响实时字幕。',
-        'settings.asr.liveHint': '只影响实时字幕和导入音频的初稿：换模型会重启 ASR 服务，当前录音会中断，请在没有会议时切换。',
-        'settings.asr.refineWarmed': '精修模型已加载，下一场会议的终稿会更快。',
-        'settings.asr.backendHint': '实时字幕用快后端；Fun-ASR 只做会后精修，每段要重载约 15 秒，不能拿来做实时字幕。',
+        'settings.asr.refineHint': '会议结束整理终稿、Refine 按钮、以及发言稿的说话人区间都靠它。换实时字幕模型不影响它，删掉它只影响终稿质量，不影响实时字幕；它每段要重载约 15 秒，所以只做会后精修，不做实时字幕。',
         'settings.llm.autoStart': '启动时自动拉起本地翻译模型（LM Studio）',
         'settings.llm.hint': '只会加载设置里实际指向本机的模型；用云端翻译时不会启动任何本地服务。',
         'settings.llm.start': '现在启动',
@@ -456,15 +454,12 @@ window.__ModuleLoader__.load({
         'settings.asr.openModelDir': '打开文件夹',
         'settings.asr.openLauncher': '打开脚本',
         'settings.asr.modelList': '本地模型库',
-        'settings.asr.activeModel': '正在使用',
+        'settings.asr.activeModel': '当前模型',
         'settings.asr.noModel': '未选择模型',
         'settings.asr.inUse': '使用中',
         'settings.asr.downloaded': '已下载',
         'settings.asr.notDownloaded': '未下载',
         'settings.asr.downloadModel': '下载',
-        'settings.asr.useModel': '设为使用',
-        'settings.asr.selectModel': '选择本地 GGML 模型',
-        'settings.asr.defaultModel': '使用默认模型',
         'settings.asr.modelDir': '模型目录',
         'settings.asr.launcher': '服务启动脚本',
         'settings.provider.minimax': 'MiniMax',
@@ -473,12 +468,18 @@ window.__ModuleLoader__.load({
         'settings.section.llm': 'Minutes LLM 纪要与问答',
         'settings.section.translation': 'Realtime Translation 实时翻译',
         'settings.section.overlay': '实时字幕浮窗',
+        'settings.section.services': '本地服务',
+        'settings.services.running': '运行中',
+        'settings.services.stopped': '已停止',
+        'settings.services.startup': '启动行为',
+        'settings.services.localLlm': '本地翻译模型（LM Studio）',
+        'settings.services.noLocalModel': '没有指向本机的模型',
+        'settings.services.switchHint': '切换模型在「ASR 转写服务」里进行；这里只负责下载与删除。',
         'settings.overlayBackground': '浮窗背景色',
         'settings.overlayText': '浮窗文字颜色',
         'settings.overlayOpacity': '浮窗不透明度（低于 0.85 会看不清字幕）',
         'settings.overlayCompact': '默认只显示最新一句',
         'settings.overlayHint': '浮窗默认只显示最新一句和译文；点右上角展开可以回看之前的对话。窗口的大小和位置会被记住。',
-        'settings.asrModel': 'ASR 模型 ID',
         'settings.liveChunkSeconds': '实时字幕分段',
         'settings.chunk.3': '3 秒 · 推荐',
         'settings.chunk.5': '5 秒 · 更快',
@@ -646,9 +647,9 @@ window.__ModuleLoader__.load({
         'action.unarchive': 'Unarchive',
         'library.view.list': 'List view',
         'library.view.grid': 'Grid view',
-        'library.template.intelligentSlicing': '智能切片',
+        'library.template.intelligentSlicing': 'Intelligent Slicing',
         'library.template.intelligentSlicingHint': 'Split the meeting into topics and extract conclusions',
-        'library.template.visualSummary': '可视化摘要',
+        'library.template.visualSummary': 'Visual Summary',
         'library.template.visualSummaryHint': 'Structured highlights and visual summary',
         'library.template.classic': 'Classic minutes',
         'library.template.classicHint': 'Standard meeting minutes structure',
@@ -750,11 +751,15 @@ window.__ModuleLoader__.load({
         'voice.noMatch': 'No matching voices',
         'voice.sampleReady': 'Sample available',
         'voice.sampleMissing': 'No sample',
+        'voice.delete': 'Delete this voice',
+        'voice.deleteConfirm': 'It will stop being recognised. Past transcripts keep their text.',
+        'voice.deleteCancel': 'Cancel',
+        'voice.deleteFailed': 'Delete failed',
         'voice.speakersTitle': 'Speakers in this meeting',
         'voice.speakersHint': 'Select a speaker to add or correct their name. Voiceprints are kept permanently and recognised in later meetings.',
         'voice.emptySpeakers': 'No speakers available for annotation',
         'voice.emptyTitle': 'No voice labels yet',
-        'voice.persistentHint': 'Voiceprints are kept permanently with backups and can be corrected, never deleted.',
+        'voice.persistentHint': 'Voiceprints are backed up automatically and can be renamed or deleted. Deleting removes the voice from the book; past transcripts keep their text.',
         'notice.voiceSaved': 'Speaker annotation saved',
 
         'detail.transcribe': 'Transcribe',
@@ -884,27 +889,21 @@ window.__ModuleLoader__.load({
         'settings.translationFallbackModel': 'Fallback model',
         'settings.translationFallbackBaseUrl': 'Fallback endpoint',
         'settings.provider.minimaxDefault': 'MiniMax (default)',
-        'settings.asrBackend': 'Recognition backend',
-        'settings.backend.whispercpp': 'whisper.cpp (local offline)',
-        'settings.backend.sensevoice': 'SenseVoice (realtime captions)',
-        'settings.backend.funasr': 'Fun-ASR-Nano (refinement)',
-        'settings.backendHint.whispercpp': 'Local whisper.cpp: highest offline accuracy, best for archived transcripts.',
-        'settings.backendHint.sensevoice': 'sherpa-onnx SenseVoiceSmall: fastest realtime captions with better Chinese punctuation.',
-        'settings.backendHint.funasr': 'Fun-ASR-Nano: runs pass 2 refinement and honours hotwords to correct provisional captions.',
-        'settings.asr.serviceTitle': 'Local ASR service management',
+        'settings.backend.whispercpp': 'whisper.cpp',
+        'settings.backend.sensevoice': 'SenseVoice',
+        'settings.asr.serviceTitle': 'Local ASR service',
         'settings.asr.start': 'Start service',
         'settings.asr.stop': 'Stop service',
         'settings.asr.restart': 'Restart service',
         'settings.asr.autoStart': 'Start ASR when the plugin starts',
-        'settings.asr.refiner': 'Refinement model',
-        'settings.asr.asrBackendLive': 'Live caption model',
+        'settings.asr.liveModel': 'Live caption model',
+        'settings.asr.liveModelHint': 'Affects live captions and the first draft of imported audio only: switching restarts the ASR service, so do it outside a meeting.',
+        'settings.asr.noLiveModel': 'No live caption model is available locally yet. Download one from the model library under Local services.',
+        'settings.asr.offlineHint': 'The ASR service is not running, so live captions and imported audio cannot work. Start it under Local services.',
         'settings.asr.refineModel': 'Meeting refinement model',
         'settings.asr.ready': 'Ready',
         'settings.asr.refineNow': 'Warm up',
-        'settings.asr.refineHint': 'The final transcript, the Refine button and the speaker spans all come from it. Changing the caption model does not touch it, and removing it only affects the final text.',
-        'settings.asr.liveHint': 'Affects live captions and the first draft of imported audio only: switching restarts the ASR service, so do it outside a meeting.',
-        'settings.asr.refineWarmed': 'The refinement model is warm, so the next meeting finalises faster.',
-        'settings.asr.backendHint': 'Live captions need a fast backend; Fun-ASR only refines the meeting afterwards, and its weights take about 15s to reload.',
+        'settings.asr.refineHint': 'The final transcript, the Refine button and the speaker spans all come from it. Changing the caption model does not touch it, and removing it only affects the final text. It reloads its weights for about 15s per pass, so it only refines after the meeting.',
         'settings.llm.autoStart': 'Load the local translation model on start (LM Studio)',
         'settings.llm.hint': 'Only models the settings point at locally are loaded; a cloud translation provider starts nothing.',
         'settings.llm.start': 'Start now',
@@ -914,15 +913,12 @@ window.__ModuleLoader__.load({
         'settings.asr.openModelDir': 'Open folder',
         'settings.asr.openLauncher': 'Open script',
         'settings.asr.modelList': 'Local model library',
-        'settings.asr.activeModel': 'In use',
+        'settings.asr.activeModel': 'Current model',
         'settings.asr.noModel': 'No model selected',
         'settings.asr.inUse': 'In use',
         'settings.asr.downloaded': 'Downloaded',
         'settings.asr.notDownloaded': 'Not downloaded',
         'settings.asr.downloadModel': 'Download',
-        'settings.asr.useModel': 'Use this model',
-        'settings.asr.selectModel': 'Local GGML model',
-        'settings.asr.defaultModel': 'Use default model',
         'settings.asr.modelDir': 'Model directory',
         'settings.asr.launcher': 'Service launcher',
         'settings.provider.minimax': 'MiniMax',
@@ -931,12 +927,18 @@ window.__ModuleLoader__.load({
         'settings.section.llm': 'Minutes LLM for minutes and Q&A',
         'settings.section.translation': 'Realtime Translation service',
         'settings.section.overlay': 'Live transcript overlay',
+        'settings.section.services': 'Local services',
+        'settings.services.running': 'Running',
+        'settings.services.stopped': 'Stopped',
+        'settings.services.startup': 'Startup',
+        'settings.services.localLlm': 'Local translation model (LM Studio)',
+        'settings.services.noLocalModel': 'No local model configured',
+        'settings.services.switchHint': 'Switching happens under ASR transcription service; this library only downloads and deletes.',
         'settings.overlayBackground': 'Overlay background',
         'settings.overlayText': 'Overlay text colour',
         'settings.overlayOpacity': 'Overlay opacity (below 0.85 the captions lose contrast)',
         'settings.overlayCompact': 'Show only the newest line by default',
         'settings.overlayHint': 'The overlay shows the newest line and its translation; the button at the top right expands the earlier conversation. Its size and place are remembered.',
-        'settings.asrModel': 'ASR model ID',
         'settings.liveChunkSeconds': 'Live caption chunk',
         'settings.chunk.3': '3 seconds · recommended',
         'settings.chunk.5': '5 seconds · faster',
@@ -1103,53 +1105,56 @@ body[data-ds-dark-theme] .mvm-page{
 .mvm-icon-button{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--mvm-ink-2);cursor:pointer}
 .mvm-icon-button:hover:not(:disabled){background:var(--mvm-hover);color:var(--mvm-ink)}
 .mvm-settings-backdrop{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--mvm-scrim);backdrop-filter:blur(3px)}
-.mvm-settings-modal{width:min(1100px,100%);max-height:88vh;overflow-y:auto;margin:0;box-shadow:var(--mvm-shadow-float)}
-.mvm-settings{margin:16px 28px 0;padding:16px 18px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-lg);background:var(--mvm-surface-2);flex:none}
-.mvm-settings-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.mvm-settings-layout{display:grid;grid-template-columns:168px minmax(0,1fr);gap:18px;align-items:start}
-.mvm-settings-nav{display:flex;flex-direction:column;gap:4px;padding:5px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-sunken)}
+.mvm-settings-modal{display:flex;flex-direction:column;width:min(1100px,100%);max-height:88vh;margin:0;overflow:hidden;box-shadow:var(--mvm-shadow-float)}
+.mvm-settings{border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-lg);background:var(--mvm-surface-2);flex:none}
+.mvm-settings-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 18px 12px;flex:none}
+.mvm-settings-layout{display:grid;grid-template-columns:168px minmax(0,1fr);gap:18px;flex:1;min-height:0;padding:0 18px}
+.mvm-settings-nav{display:flex;flex-direction:column;gap:4px;align-self:start;max-height:100%;overflow-y:auto;scrollbar-width:none;padding:5px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-sunken)}
+.mvm-settings-nav::-webkit-scrollbar{display:none}
 .mvm-settings-tab{padding:9px 11px;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--mvm-ink-2);font:inherit;font-size:12px;text-align:left;cursor:pointer}
 .mvm-settings-tab:hover{background:var(--mvm-hover);color:var(--mvm-ink)}
 .mvm-settings-tab.is-active{background:var(--mvm-accent-soft);color:var(--mvm-accent-ink);font-weight:600;box-shadow:inset 0 0 0 1px var(--mvm-accent-line)}
+/* A form inside a floating dialog keeps a visible thin scrollbar: it is the
+   only cue that the tab continues below the fold. */
+.mvm-settings-body{min-width:0;min-height:0;overflow-y:auto;padding:2px 10px 16px 2px;scrollbar-width:thin}
 .mvm-settings-content{min-width:0}
-@media(max-width:760px){.mvm-settings-layout{grid-template-columns:1fr}.mvm-settings-nav{flex-direction:row;overflow-x:auto}.mvm-settings-tab{white-space:nowrap}}
-.mvm-settings-actions{position:sticky;bottom:0;display:flex;justify-content:flex-end;margin-top:16px;padding-top:12px;background:var(--mvm-surface-2);border-top:1px solid var(--mvm-line)}
+.mvm-settings-foot{display:flex;flex-direction:column;gap:10px;flex:none;padding:12px 18px 16px;border-top:1px solid var(--mvm-line);background:var(--mvm-surface-2)}
+.mvm-settings-actions{display:flex;justify-content:flex-end}
+.mvm-settings-foot .mvm-settings-alert{margin:0}
+@media(max-width:760px){.mvm-settings-layout{grid-template-columns:1fr;padding:0 14px}.mvm-settings-nav{flex-direction:row;overflow-x:auto}.mvm-settings-tab{white-space:nowrap}.mvm-settings-head{padding:14px 14px 10px}.mvm-settings-foot{padding:10px 14px 14px}}
 .mvm-section-title{margin:0;font-size:14px;font-weight:600;letter-spacing:-.01em}
 .mvm-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .mvm-settings-section-title{grid-column:1/-1;margin-top:10px;padding-top:12px;border-top:1px solid var(--mvm-line);font-size:12px;font-weight:600;color:var(--mvm-ink)}
 .mvm-settings-row{grid-column:1/-1;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .mvm-settings-row .mvm-input{max-width:320px}
-.mvm-asr-admin{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-sunken)}
-.mvm-asr-status-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.mvm-model-picker{display:flex;flex-direction:column;gap:8px;position:relative}
-.mvm-model-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:8px 10px;border:1px solid var(--mvm-line-strong);border-radius:var(--dsw-radius-sm);background:var(--mvm-surface-1);color:var(--mvm-ink);font:inherit;font-size:12px;text-align:left;cursor:pointer}
-.mvm-model-trigger:hover{border-color:var(--mvm-accent)}
-.mvm-model-trigger-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mvm-model-caret{flex:none;color:var(--mvm-ink-3)}
-.mvm-model-menu{position:absolute;z-index:20;top:calc(100% + 4px);left:0;right:0;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;padding:6px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-lg);background:var(--mvm-surface-2);box-shadow:var(--mvm-shadow-float)}
+/* One settings block answers one question (a service, a startup policy, the
+   model library). The sheet never nests a block inside a block. */
+.mvm-settings-block{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-sunken)}
+.mvm-settings-block-title{font-size:12px;font-weight:600;color:var(--mvm-ink)}
+.mvm-settings-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.mvm-hint-inline{margin:0}
+.mvm-model-library{display:flex;flex-direction:column;gap:2px}
+.mvm-model-library .mvm-model-option{justify-content:flex-start}
+.mvm-model-library .mvm-model-option-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .mvm-model-option{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 8px;border-radius:var(--dsw-radius-sm)}
 .mvm-model-option:hover{background:var(--mvm-hover)}
 .mvm-model-option.is-active{background:var(--mvm-accent-soft)}
-.mvm-model-option-main{display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding:0;border:0;background:transparent;color:inherit;font:inherit;font-size:12px;text-align:left;cursor:pointer}
 .mvm-model-option.is-active .mvm-model-option-name{color:var(--mvm-accent-ink)}
 .mvm-model-option-name{font-weight:500;white-space:nowrap}
 .mvm-model-option-size{color:var(--mvm-ink-3);font-size:12px;font-variant-numeric:tabular-nums}
-.mvm-model-option-actions{display:flex;align-items:center;gap:6px;flex:none}
+/* Every row reserves the same action slot, so the state badges line up whether or not the row has a button. */
+.mvm-model-option-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex:none;min-width:104px}
 .mvm-model-badge{flex:none;padding:2px 8px;border-radius:999px;background:var(--mvm-sunken);color:var(--mvm-ink-2);font-size:12px}
 .mvm-model-badge.is-active{background:var(--mvm-accent);color:var(--mvm-on-accent)}
 .mvm-model-badge.is-ready{background:var(--mvm-ok-soft);color:var(--mvm-ok-ink)}
 .mvm-model-badge.is-missing{border:1px dashed var(--mvm-line-strong);background:transparent;color:var(--mvm-ink-3)}
-.mvm-role-block{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-sunken)}
 .mvm-role-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .mvm-role-name{font-size:13px;font-weight:600;color:var(--mvm-ink)}
-.mvm-model-badge.is-refine{border-color:var(--mvm-accent-line);background:var(--mvm-accent-soft);color:var(--mvm-accent-strong)}
-.mvm-local-models{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 12px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-sm);background:var(--mvm-sunken)}
 .mvm-local-models-state{display:inline-flex;align-items:center;gap:8px;color:var(--mvm-ink-2);font-size:12px;min-width:0}
 .mvm-local-models-dot{width:6px;height:6px;flex:none;border-radius:50%;background:var(--mvm-idle)}
 .mvm-local-models-dot.is-ready{background:var(--mvm-ok)}
 .mvm-local-models-dot.is-pending{background:var(--mvm-warn)}
 .mvm-local-models-dot.is-missing{background:var(--mvm-err)}
-.mvm-local-models-hint{margin:0}
 .mvm-path-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .mvm-model-list-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .mvm-field{display:flex;flex-direction:column;gap:5px;min-width:0}
@@ -1266,7 +1271,6 @@ body[data-ds-dark-theme] .mvm-page{
 .mvm-playback-spacer{flex:1}
 .mvm-live-audio{display:none}
 .mvm-library-page{display:flex;flex-direction:column;gap:18px;width:100%;max-width:none;margin:0}
-.mvm-meeting-card-check{flex:none;margin-right:2px}
 .mvm-meeting-card.is-selected{border-color:var(--mvm-accent);background:var(--mvm-accent-soft)}
 /* Row actions stay quiet until the row is touched: the list is for reading
    meetings, not for aiming at icons. */
@@ -1435,11 +1439,18 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
 .mvm-summary-hero h2{margin:0;font-size:18px;font-weight:600;letter-spacing:-.015em;color:var(--mvm-ink)}
 .mvm-summary-hero p{margin:4px 0 0;color:var(--mvm-ink-2);line-height:1.6}
 .mvm-summary-stats{display:flex;gap:18px;margin-top:8px;color:var(--mvm-ink-3);font-size:12px}
-.mvm-outline{display:flex;flex-direction:column;gap:4px}
-.mvm-outline h3{margin:0 0 8px;font-size:16px;font-weight:600;color:var(--mvm-ink)}
-.mvm-outline-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border:0;border-bottom:1px solid var(--mvm-line);background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+/* The outline is a bordered section, not a bare list: the time ranges used to
+   sit flush with the reader's right edge (and under the scrollbar), which read
+   as content escaping the page. Inside the card they keep the same 18px
+   padding as every other section, and the title truncates instead of pushing
+   the time column out at narrow widths. */
+.mvm-outline{display:flex;flex-direction:column;gap:0;padding:14px 18px 4px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-card)}
+.mvm-outline h3{margin:0 0 6px;font-size:14px;font-weight:600;color:var(--mvm-ink)}
+.mvm-outline-item{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;width:100%;padding:10px 0;border:0;border-bottom:1px solid var(--mvm-line);background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.mvm-outline-item:last-child{border-bottom:0}
 .mvm-outline-item:hover{color:var(--mvm-accent-ink)}
-.mvm-outline-item span{color:var(--mvm-ink-3);font-size:12px;white-space:nowrap}
+.mvm-outline-item strong{min-width:0;font-weight:600;line-height:1.5}
+.mvm-outline-item span{flex:none;padding-top:1px;color:var(--mvm-ink-3);font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .mvm-viewpoint-tree{display:flex;flex-direction:column;gap:16px}
 .mvm-mindmap{gap:32px}
 /* The viewpoint tree answers one question: which themes of this review reached
@@ -1557,15 +1568,20 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
 .mvm-meeting-card{display:flex;flex-direction:column;gap:10px;min-width:0;padding:16px;border:1px solid var(--mvm-line);border-radius:var(--dsw-radius-md);background:var(--mvm-surface-1);box-shadow:var(--mvm-shadow-card);transition:transform var(--mvm-dur) var(--mvm-ease),box-shadow var(--mvm-dur) var(--mvm-ease),border-color var(--mvm-dur-fast) ease}
 .mvm-meeting-card:hover{border-color:var(--mvm-accent-line);background:var(--mvm-surface-1);transform:translateY(-2px);box-shadow:var(--mvm-shadow-card-hover)}
 .mvm-meeting-card.is-live{border-color:var(--mvm-ok);box-shadow:var(--mvm-shadow-card),inset 3px 0 0 var(--mvm-ok)}
+/* The card header is the meeting and nothing else: title, then when and how
+   long. No avatar (it only repeated the first two title characters) and no
+   checkbox (selection belongs to the list view, which has a column for it).
+   The meta line never wraps — a wrapped "date · duration" used to leave its
+   separator alone at the end of the first line. Favourite and delete live
+   together in the card foot, so the star is not drawn twice. */
 .mvm-meeting-card-head{display:flex;align-items:flex-start;gap:10px;min-width:0}
 .mvm-meeting-card-titles{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
-.mvm-meeting-card-title{padding:0;border:0;background:transparent;color:var(--mvm-ink);font:inherit;font-size:14px;font-weight:600;text-align:left;cursor:pointer;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.mvm-meeting-card-title{padding:0;border:0;background:transparent;color:var(--mvm-ink);font:inherit;font-size:14px;font-weight:600;line-height:1.35;letter-spacing:-.01em;text-align:left;cursor:pointer;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .mvm-meeting-card-title:hover{color:var(--mvm-accent)}
-.mvm-meeting-card-meta{color:var(--mvm-ink-3);font-size:12px}
-.mvm-meeting-card-star{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;padding:0;border:0;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--mvm-ink-2);cursor:pointer;transition:color var(--mvm-dur-fast) ease,transform var(--mvm-dur-fast) ease}
-.mvm-meeting-card-star:hover{color:var(--mvm-warn-ink)}
-.mvm-meeting-card-star:active{transform:scale(.97)}
-.mvm-meeting-card-star.is-favorite{color:var(--mvm-warn-ink)}
+.mvm-meeting-card-meta{display:flex;align-items:center;gap:6px;min-width:0;color:var(--mvm-ink-3);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mvm-meeting-card-date{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.mvm-meeting-card-sep{flex:none;opacity:.7}
+.mvm-meeting-card-duration{flex:none}
 .mvm-meeting-card-excerpt{margin:0;color:var(--mvm-ink-2);font-size:12px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .mvm-meeting-card-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:auto;font-size:12px;color:var(--mvm-ink-3)}
 .mvm-meeting-card-status{padding:2px 8px;border:1px solid var(--mvm-line);border-radius:999px;white-space:nowrap;flex:none;background:var(--mvm-sunken);color:var(--mvm-ink-2)}
@@ -1573,7 +1589,7 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
 .mvm-home-empty{display:flex;flex-direction:column;align-items:center;gap:12px;padding:56px 24px;border:1px dashed var(--mvm-line-strong);border-radius:var(--dsw-radius-lg);text-align:center;background:var(--mvm-surface-1)}
 .mvm-drawer-backdrop{position:fixed;inset:0;z-index:40;background:var(--mvm-scrim)}
 .mvm-assistant-drawer{position:fixed;top:0;right:0;bottom:0;z-index:41;display:flex;flex-direction:column;width:min(420px,100vw);border-left:1px solid var(--mvm-line);background:var(--mvm-surface-2);box-shadow:var(--mvm-shadow-drawer)}
-.mvm-detail-reader{display:flex;flex-direction:column;gap:16px;width:100%;max-width:1040px;margin:0 auto;min-height:0;flex:1;overflow-y:auto;padding-right:2px}
+.mvm-detail-reader{display:flex;flex-direction:column;gap:16px;width:100%;max-width:1040px;margin:0 auto;min-height:0;flex:1;overflow-y:auto;padding-right:8px}
 .mvm-summary-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .mvm-template-picker{display:flex;align-items:center;gap:6px}
 .mvm-template-picker .mvm-label{margin:0;white-space:nowrap}
@@ -1613,6 +1629,11 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
 .mvm-voicebook-list{flex:none;max-height:280px;padding:4px;gap:4px}
 .mvm-voicebook-row{gap:8px;padding:6px 8px;border-radius:var(--dsw-radius-sm)}
 .mvm-voicebook-row:hover{background:var(--mvm-hover)}
+.mvm-voicebook-row .mvm-voice-name-button{flex:1;width:auto;min-width:0}
+.mvm-voicebook-delete{display:inline-flex;align-items:center;justify-content:center;flex:none;width:26px;height:26px;border:1px solid transparent;border-radius:var(--dsw-radius-sm);background:transparent;color:var(--mvm-ink-3);cursor:pointer}
+.mvm-voicebook-delete:hover{color:var(--mvm-err-ink);border-color:var(--mvm-err);background:var(--mvm-err-soft)}
+.mvm-voicebook-confirm{display:flex;align-items:center;gap:6px;margin:4px 6px;padding:7px 8px;border:1px solid var(--mvm-err);border-radius:var(--dsw-radius-sm);background:var(--mvm-err-soft)}
+.mvm-voicebook-confirm-text{flex:1;min-width:0;color:var(--mvm-err-ink);font-size:12px;line-height:1.45}
 .mvm-voicebook-play{width:28px;height:28px;border:1px solid var(--mvm-accent-line);background:var(--mvm-accent-soft);color:var(--mvm-accent-ink)}
 .mvm-voicebook-play:hover{background:color-mix(in oklab,var(--mvm-accent) 20%,var(--mvm-surface-1))}
 .mvm-voice-name-button{flex:1;min-width:0;gap:10px;padding:2px 4px}
@@ -1624,7 +1645,7 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
 .mvm-voicebook-group{margin-top:4px;padding:8px 10px;font-weight:500}
 .mvm-voicebook-rename{margin:4px 8px;padding:8px;border-radius:var(--dsw-radius-sm);background:var(--mvm-sunken)}
 .mvm-voicebook-empty{padding:20px 12px;color:var(--mvm-ink-3);font-size:12px;text-align:center}
-.mvm-voicebook-trigger:focus-visible,.mvm-voicebook-filter:focus-visible,.mvm-voicebook-play:focus-visible,.mvm-voice-name-button:focus-visible,.mvm-voicebook-group:focus-visible{outline:2px solid var(--mvm-accent);outline-offset:2px}
+.mvm-voicebook-trigger:focus-visible,.mvm-voicebook-filter:focus-visible,.mvm-voicebook-play:focus-visible,.mvm-voice-name-button:focus-visible,.mvm-voicebook-group:focus-visible,.mvm-voicebook-delete:focus-visible{outline:2px solid var(--mvm-accent);outline-offset:2px}
 .mvm-live-recording-dots{display:inline-flex;align-items:center;gap:4px}
 .mvm-live-recording-dots span{width:6px;height:6px;border-radius:50%;background:var(--mvm-ink-3)}
 .mvm-live-recording-dots.is-live span{background:var(--mvm-err);animation:mvm-live-pulse 1.2s infinite}
@@ -1666,7 +1687,7 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
 .mvm-library-live-link{align-self:flex-start;margin-top:6px;padding:0;border:0;background:transparent;color:var(--mvm-accent-ink);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
 
 /* one focus ring for every control the page owns */
-.mvm-page button:focus-visible,.mvm-page input:focus-visible,.mvm-page select:focus-visible,.mvm-page textarea:focus-visible,.mvm-page summary:focus-visible,.mvm-page [tabindex]:focus-visible{outline:2px solid var(--mvm-accent);outline-offset:2px}.mvm-button,.mvm-icon-button,.mvm-quick-button,.mvm-view-tab,.mvm-settings-tab,.mvm-detail-tab,.mvm-studio-tab,.mvm-library-filter,.mvm-model-option,.mvm-translation-options button,.mvm-rail-tile,.mvm-rail-suggestion,.mvm-chat-source,.mvm-speaker-chip,.mvm-back-button,.mvm-incognito-badge,.mvm-library-open{transition:background-color var(--mvm-dur-fast) ease,border-color var(--mvm-dur-fast) ease,color var(--mvm-dur-fast) ease,box-shadow var(--mvm-dur) var(--mvm-ease),transform var(--mvm-dur-fast) ease}.mvm-button:active:not(:disabled),.mvm-icon-button:active:not(:disabled),.mvm-quick-button:active:not(:disabled),.mvm-view-tab:active:not(:disabled),.mvm-settings-tab:active:not(:disabled),.mvm-detail-tab:active:not(:disabled),.mvm-studio-tab:active:not(:disabled),.mvm-library-filter:active:not(:disabled),.mvm-rail-tile:active:not(:disabled),.mvm-rail-suggestion:active:not(:disabled),.mvm-chat-source:active:not(:disabled),.mvm-speaker-chip:active:not(:disabled),.mvm-back-button:active:not(:disabled),.mvm-incognito-badge:active:not(:disabled){transform:scale(.97)}.mvm-model-menu,.mvm-translation-options,.mvm-settings-modal,.mvm-share-dialog{animation:mvm-float-in var(--mvm-dur) var(--mvm-ease)}
+.mvm-page button:focus-visible,.mvm-page input:focus-visible,.mvm-page select:focus-visible,.mvm-page textarea:focus-visible,.mvm-page summary:focus-visible,.mvm-page [tabindex]:focus-visible{outline:2px solid var(--mvm-accent);outline-offset:2px}.mvm-button,.mvm-icon-button,.mvm-quick-button,.mvm-view-tab,.mvm-settings-tab,.mvm-detail-tab,.mvm-studio-tab,.mvm-library-filter,.mvm-model-option,.mvm-translation-options button,.mvm-rail-tile,.mvm-rail-suggestion,.mvm-chat-source,.mvm-speaker-chip,.mvm-back-button,.mvm-incognito-badge,.mvm-library-open{transition:background-color var(--mvm-dur-fast) ease,border-color var(--mvm-dur-fast) ease,color var(--mvm-dur-fast) ease,box-shadow var(--mvm-dur) var(--mvm-ease),transform var(--mvm-dur-fast) ease}.mvm-button:active:not(:disabled),.mvm-icon-button:active:not(:disabled),.mvm-quick-button:active:not(:disabled),.mvm-view-tab:active:not(:disabled),.mvm-settings-tab:active:not(:disabled),.mvm-detail-tab:active:not(:disabled),.mvm-studio-tab:active:not(:disabled),.mvm-library-filter:active:not(:disabled),.mvm-rail-tile:active:not(:disabled),.mvm-rail-suggestion:active:not(:disabled),.mvm-chat-source:active:not(:disabled),.mvm-speaker-chip:active:not(:disabled),.mvm-back-button:active:not(:disabled),.mvm-incognito-badge:active:not(:disabled){transform:scale(.97)}.mvm-translation-options,.mvm-settings-modal,.mvm-share-dialog{animation:mvm-float-in var(--mvm-dur) var(--mvm-ease)}
 .mvm-assistant-drawer{animation:mvm-fade-in var(--mvm-dur) var(--mvm-ease)}
 @keyframes mvm-float-in{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
 @keyframes mvm-fade-in{from{opacity:0}to{opacity:1}}
@@ -1684,7 +1705,7 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
 @media(max-width:1100px){.mvm-live-header{align-items:flex-start;flex-direction:column;gap:10px}.mvm-live-topbar{justify-content:flex-start}}
 @media(max-width:960px){.mvm-studio-grid{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr)}.mvm-detail-header{grid-template-columns:1fr}.mvm-detail-actions{justify-content:flex-start}}
 @media(max-width:760px){.mvm-live-pair{grid-template-columns:1fr}.mvm-playback-bar{flex-wrap:wrap}}
-@media(max-width:900px){.mvm-header{padding:18px;flex-direction:column}.mvm-header-actions{justify-content:flex-start}.mvm-settings{margin:12px 18px 0}.mvm-settings-grid{grid-template-columns:1fr}.mvm-workspace{padding:18px}.mvm-import{align-items:flex-start;flex-wrap:wrap}.mvm-alert{margin:10px 18px 0}}
+@media(max-width:900px){.mvm-header{padding:18px;flex-direction:column}.mvm-header-actions{justify-content:flex-start}.mvm-settings-grid{grid-template-columns:1fr}.mvm-workspace{padding:18px}.mvm-import{align-items:flex-start;flex-wrap:wrap}.mvm-alert{margin:10px 18px 0}}
 @media(prefers-reduced-motion:reduce){.mvm-page *,.mvm-page *::before,.mvm-page *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}.mvm-ribbon-rule{animation:none}}
 `;
 
@@ -1695,6 +1716,8 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
         settings: 'M12.22 2h-.44a2 2 0 0 0-2 1.72l-.12.85a2 2 0 0 1-1.18 1.52l-.2.09a2 2 0 0 1-1.9 0l-.69-.34a2 2 0 0 0-2.61.77l-.22.38a2 2 0 0 0 .73 2.62l.6.44a2 2 0 0 1 .72 1.64v.22a2 2 0 0 1-.72 1.64l-.6.44a2 2 0 0 0-.73 2.62l.22.38a2 2 0 0 0 2.61.77l.69-.34a2 2 0 0 1 1.9 0l.2.09a2 2 0 0 1 1.18 1.52l.12.85a2 2 0 0 0 2 1.72h.44a2 2 0 0 0 2-1.72l.12-.85a2 2 0 0 1 1.18-1.52l.2-.09a2 2 0 0 1 1.9 0l.69.34a2 2 0 0 0 2.61-.77l.22-.39a2 2 0 0 0-.73-2.61l-.6-.44a2 2 0 0 1-.72-1.64v-.22a2 2 0 0 1 .72-1.64l.6-.44a2 2 0 0 0 .73-2.61l-.22-.39a2 2 0 0 0-2.61-.77l-.69.34a2 2 0 0 1-1.9 0l-.2-.09a2 2 0 0 1-1.18-1.52l-.12-.85a2 2 0 0 0-2-1.72ZM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',
         window: 'M3.5 5.5A1.5 1.5 0 0 1 5 4h14a1.5 1.5 0 0 1 1.5 1.5v13A1.5 1.5 0 0 1 19 20H5a1.5 1.5 0 0 1-1.5-1.5v-13Zm10 2h6v5h-6V7.5Z',
         refresh: 'M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7',
+        restart: 'M3.5 12a8.5 8.5 0 1 0 2.6-6.1M3.5 4.5V10h5.5',
+        stop: 'M7 7h10v10H7z',
         rewind: 'M11 19 2 12l9-7v14Zm11 0-9-7 9-7v14Z',
         forward: 'm13 5 9 7-9 7V5ZM2 5l9 7-9 7V5Z',
         users: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
@@ -1938,13 +1961,32 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
     function formatBytes(value) {
       const bytes = Number(value) || 0;
       if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
-      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+      const megabytes = bytes / (1024 * 1024);
+      // A 1.6 GB model should read as 1.6 GB, not 1624.3 MB.
+      if (megabytes < 1024) return `${megabytes.toFixed(1)} MB`;
+      return `${(megabytes / 1024).toFixed(1)} GB`;
     }
 
     function formatDate(value) {
       if (!value) return '';
       const date = new Date(value);
       return Number.isNaN(date.getTime()) ? '' : date.toLocaleString();
+    }
+
+    /**
+     * A library card only needs the day and the start time. The full
+     * toLocaleString() output ("11/6/2026, 9:42:23 PM") is wide enough to wrap
+     * the card meta line and leave its separator dangling at the end, so the
+     * card asks for a shorter shape and only keeps the year when it is not the
+     * current one.
+     */
+    function formatCardDate(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      const options = { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+      if (date.getFullYear() !== new Date().getFullYear()) options.year = 'numeric';
+      return date.toLocaleString(undefined, options);
     }
 
     function formatLiveTimestamp(value) {
@@ -2193,6 +2235,11 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
       const [labelingUtteranceIndex, setLabelingUtteranceIndex] = React.useState(null);
       const [labelDraft, setLabelDraft] = React.useState('');
       const [renamingProfile, setRenamingProfile] = React.useState('');
+      // Which voice is waiting for the delete confirmation, and which one is
+      // being deleted right now. Deletion is destructive, so it takes a second
+      // click instead of firing from a single icon press.
+      const [deletingProfile, setDeletingProfile] = React.useState('');
+      const [voiceDeleteBusy, setVoiceDeleteBusy] = React.useState('');
       const [searchOpen, setSearchOpen] = React.useState(false);
       const [searchQuery, setSearchQuery] = React.useState('');
       const [editing, setEditing] = React.useState(false);
@@ -2211,8 +2258,6 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
       const [compareResults, setCompareResults] = React.useState(null);
       const [compareBusy, setCompareBusy] = React.useState(false);
       const [asrBusy, setAsrBusy] = React.useState('');
-      const [asrModelChoice, setAsrModelChoice] = React.useState('');
-      const [asrModelOpen, setAsrModelOpen] = React.useState(false);
       const [voiceSampleError, setVoiceSampleError] = React.useState({ id: '', message: '' });
       const [audioFiles, setAudioFiles] = React.useState([]);
       const [selectedAudioId, setSelectedAudioId] = React.useState('');
@@ -3260,22 +3305,14 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
         }
       };
 
-      const asrModelEntry = asrStatus?.catalog?.entries?.find((entry) => entry.id === (asrModelChoice || asrStatus?.catalog?.activeId)) || null;
-
+      // A catalog selection switches the model when it is on disk and downloads
+      // it when it is not. The family (SenseVoice / whisper.cpp) lives in the
+      // same control, so no second "recognition backend" select exists.
       const onAsrModelChoice = async (id) => {
-        setAsrModelChoice(id);
         const entry = asrStatus?.catalog?.entries?.find((item) => item.id === id);
         if (!entry) return;
         if (entry.downloaded) await onAsrModelSelect(entry.id);
         else await onAsrAction('asr-download-model', { id });
-      };
-
-      const onAsrAutoStartToggle = async (checked) => {
-        await onSettingsSave({ ...settings, asrAutoStart: checked });
-      };
-
-      const onLlmAutoStartToggle = async (checked) => {
-        await onSettingsSave({ ...settings, llmAutoStart: checked });
       };
 
       const onStartLocalModels = async () => {
@@ -3572,11 +3609,6 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
 
       const uiLanguage = () => (globalThis.navigator?.language || '').startsWith('zh') ? 'zh' : 'en';
 
-      React.useEffect(() => {
-        const active = asrStatus?.catalog?.activeId || '';
-        if (active) setAsrModelChoice(active);
-      }, [asrStatus?.catalog?.activeId]);
-
       const refreshVoices = React.useCallback(async () => {
         try {
           const result = await callHost('voices');
@@ -3660,6 +3692,27 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
           await refreshMeetings();
         } catch (cause) {
           setError(cause instanceof Error ? cause.message : String(cause));
+        }
+      };
+
+      /** Remove one voice from the book; the meeting text itself is untouched. */
+      const commitVoiceDelete = async (profileId) => {
+        if (!profileId || voiceDeleteBusy) return;
+        setVoiceDeleteBusy(profileId);
+        try {
+          const result = await callHost('voice-delete', { profileId });
+          setVoiceProfiles(result.profiles || []);
+          setDeletingProfile('');
+          setVoiceSampleError({ id: '', message: '' });
+          if (meetingId) {
+            const current = await callHost('get', { id: meetingId });
+            setSpeakerLabels(current.meeting?.speakerLabels || {});
+          }
+          await refreshMeetings();
+        } catch (cause) {
+          setError(`${t('voice.deleteFailed')}: ${cause instanceof Error ? cause.message : String(cause)}`);
+        } finally {
+          setVoiceDeleteBusy('');
         }
       };
 
@@ -4340,27 +4393,18 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
         className: `mvm-meeting-card${meeting.inProgress ? ' is-live' : ''}${librarySelection.includes(meeting.id) ? ' is-selected' : ''}`, key: meeting.id,
       },
         h('div', { className: 'mvm-meeting-card-head' },
-          // Selection works in both views: a reader who switched to cards
-          // should not lose the batch action.
-          h('input', {
-            type: 'checkbox', className: 'mvm-check mvm-meeting-card-check',
-            checked: librarySelection.includes(meeting.id),
-            'aria-label': t('library.selectRow'),
-            onChange: (event) => toggleLibrarySelection(meeting.id, event.target.checked),
-          }),
-          h('span', { className: 'mvm-meeting-thumb' }, String(meeting.title || 'M').slice(0, 2)),
+          // The card header is only the meeting itself: title, then when and
+          // how long. Selection lives in the list view, where the checkbox has
+          // a column of its own instead of sitting in front of every title.
           h('div', { className: 'mvm-meeting-card-titles' },
             h('button', {
               type: 'button', className: 'mvm-meeting-card-title',
               onClick: () => onOpenMeeting(meeting), disabled: isBusy,
             }, meeting.title || t('meeting.untitled')),
             h('div', { className: 'mvm-meeting-card-meta' },
-              `${formatDate(meeting.createdAt)} · ${formatClock(meeting.duration)}`)),
-          h('button', {
-            type: 'button', className: `mvm-meeting-card-star${meeting.favorite ? ' is-favorite' : ''}`,
-            title: t('action.favorite'), 'aria-label': t('action.favorite'),
-            onClick: () => onToggleMeetingFavorite(meeting.id), disabled: isBusy,
-          }, h(Icon, { name: 'star', size: 15, fill: meeting.favorite ? 'currentColor' : 'none' }))),
+              h('span', { className: 'mvm-meeting-card-date' }, formatCardDate(meeting.createdAt)),
+              h('span', { className: 'mvm-meeting-card-sep', 'aria-hidden': 'true' }, '·'),
+              h('span', { className: 'mvm-meeting-card-duration' }, formatClock(meeting.duration))))),
         meeting.inProgress
           ? h('span', { className: 'mvm-library-progress-pill is-inline' },
             h('span', { className: 'mvm-pulse-dot' }), t('library.inProgress'))
@@ -4753,6 +4797,19 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
               h('span', { style: { width: `${translationProgress.total ? (translationProgress.done / translationProgress.total) * 100 : 0}%` } }))) : null);
       };
 
+      /**
+       * Template ids are kebab-case ("intelligent-slicing") while the locale
+       * keys are camelCase ("library.template.intelligentSlicing"). Building
+       * the key straight from the id printed the raw key in the summary badge.
+       */
+      const templateLabel = (id) => {
+        const value = String(id || '');
+        if (!value) return '';
+        const key = 'library.template.' + value.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+        const label = t(key);
+        return label === key ? value : label;
+      };
+
       const renderSummaryTab = () => {
         const mins = minutes || liveSummary || null;
         const chapters = (mins?.chapters || []).filter((chapter) => matchesSearch(chapter.title) || matchesSearch(chapter.summary));
@@ -4768,7 +4825,7 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
             h('div', { className: 'mvm-summary-stats' },
               h('span', null, `${mins?.topics?.length || 0} ${t('detail.topics')}`),
               h('span', null, formatClock(duration)),
-              h('span', { className: 'mvm-template-badge' }, `${t('detail.templateUsed')}: ${t('library.template.' + (minutes?.template || selectedTemplate))}`))),
+              h('span', { className: 'mvm-template-badge' }, `${t('detail.templateUsed')}: ${templateLabel(minutes?.template || selectedTemplate)}`))),
           liveIsActive ? h('div', { className: 'mvm-hint' }, `${t('detail.liveSummaryGenerating')} ${t('detail.liveSummaryHint')}`) : null,
           mins ? h(React.Fragment, null,
             mins.background ? h('section', { className: 'mvm-minute-section' },
@@ -5059,7 +5116,22 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
       const renderVoiceRow = (profile, unnamed = false) => h('div', {
         className: `mvm-voice-item ${unnamed ? 'is-unnamed' : ''}`, key: profile.id,
       },
-        renamingProfile === profile.id
+        deletingProfile === profile.id
+          ? h('div', {
+            className: 'mvm-voicebook-confirm', role: 'group', 'aria-label': t('voice.delete'),
+          },
+            h('span', { className: 'mvm-voicebook-confirm-text' }, t('voice.deleteConfirm')),
+            h(Button, {
+              type: 'button', danger: true, title: t('action.delete'), 'aria-label': t('action.delete'),
+              disabled: voiceDeleteBusy === profile.id,
+              onClick: () => void commitVoiceDelete(profile.id),
+            }, t('action.delete')),
+            h(Button, {
+              type: 'button', title: t('voice.deleteCancel'), 'aria-label': t('voice.deleteCancel'),
+              disabled: voiceDeleteBusy === profile.id,
+              onClick: () => setDeletingProfile(''),
+            }, t('voice.deleteCancel')))
+          : renamingProfile === profile.id
           ? h('form', {
             className: 'mvm-voice-rename mvm-voicebook-rename',
             onSubmit: (event) => { event.preventDefault(); void commitVoiceRename(profile.id); },
@@ -5082,13 +5154,18 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
             }, h(Icon, { name: 'play', size: 11 })),
             h('button', {
               type: 'button', className: 'mvm-voice-button mvm-voice-name-button', title: t('voice.rename'),
-              onClick: () => { setRenamingProfile(profile.id); setLabelDraft(profile.name || ''); },
+              onClick: () => { setRenamingProfile(profile.id); setDeletingProfile(''); setLabelDraft(profile.name || ''); },
             },
               h('span', { className: 'mvm-voice-name-block' },
                 h('span', { className: 'mvm-voice-name' }, profile.name || t('voice.unnamed')),
                 h('span', { className: 'mvm-voice-meta' },
                   profile.sample ? t('voice.sampleReady') : t('voice.sampleMissing'))),
-              h(Icon, { name: 'edit', size: 13, className: 'mvm-voice-edit-icon' }))),
+              h(Icon, { name: 'edit', size: 13, className: 'mvm-voice-edit-icon' })),
+            h('button', {
+              type: 'button', className: 'mvm-voicebook-delete', title: t('voice.delete'),
+              'aria-label': t('voice.delete'),
+              onClick: () => { setDeletingProfile(profile.id); setRenamingProfile(''); },
+            }, h(Icon, { name: 'trash', size: 13 }))),
           voiceSampleError.id === profile.id && voiceSampleError.message
             ? h('div', { className: 'mvm-voice-error', role: 'alert' }, voiceSampleError.message)
             : null);
@@ -5279,6 +5356,171 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
       const fallbackModel = settings?.translationFallbackModel || DEFAULT_TRANSLATION_FALLBACK_MODEL;
       const fallbackBaseUrl = settings?.translationFallbackBaseUrl || DEFAULT_TRANSLATION_FALLBACK_BASE_URL;
 
+      // Settings is five separate jobs, one tab each: what transcribes, what
+      // writes the minutes, what translates, how the overlay looks, and what
+      // runs on this machine. A tab answers one question; a block inside a tab
+      // answers one part of it, and the sheet never nests a block inside a block.
+      const settingsTabs = [
+        ['asr', 'settings.section.asr'],
+        ['llm', 'settings.section.llm'],
+        ['translation', 'settings.section.translation'],
+        ['overlay', 'settings.section.overlay'],
+        ['services', 'settings.section.services'],
+      ];
+      const liveModelEntries = (asrStatus?.catalog?.entries || []).filter((entry) => entry.capability === 'live');
+      const activeLiveEntry = liveModelEntries.find((entry) => entry.id === asrStatus?.catalog?.activeId)
+        || liveModelEntries.find((entry) => entry.active) || null;
+      const liveModelSize = (entry) => (entry?.actualSize ? formatBytes(entry.actualSize) : (entry?.sizeLabel || ''));
+      const liveModelState = (entry) => (entry.active ? t('settings.asr.inUse') : entry.downloaded ? t('settings.asr.downloaded') : t('settings.asr.notDownloaded'));
+      const liveModelText = (entry) => (entry.label || entry.id) + ' · ' + liveModelSize(entry) + ' · ' + liveModelState(entry);
+      const localModelsState = localModels?.installed === false ? 'is-missing' : localModels?.ready ? 'is-ready' : 'is-pending';
+
+      // One control answers "which model writes the live captions". The family
+      // is the optgroup, because the old "recognition backend" select wrote the
+      // very same setting — two controls meant two answers.
+      const renderLiveModelSelect = () => {
+        const family = (backend) => liveModelEntries.filter((entry) => entry.backend === backend);
+        const placeholder = asrStatus?.catalog?.activeId
+          ? []
+          : [h('option', { value: '', key: 'none' }, t('settings.asr.noModel'))];
+        const choices = liveModelEntries.length
+          ? placeholder.concat([
+            h('optgroup', { label: t('settings.backend.sensevoice'), key: 'sensevoice' },
+              family('sensevoice').map((entry) => h('option', { value: entry.id, key: entry.id }, liveModelText(entry)))),
+            h('optgroup', { label: t('settings.backend.whispercpp'), key: 'whispercpp' },
+              family('whispercpp').map((entry) => h('option', { value: entry.id, key: entry.id }, liveModelText(entry)))),
+          ])
+          : ['sensevoice', 'whispercpp'].map((backend) => h('option', { value: backend, key: backend }, t('settings.backend.' + backend)));
+        return h('label', { className: 'mvm-field mvm-field-wide' },
+          h('span', { className: 'mvm-label' }, t('settings.asr.liveModel')),
+          h('select', {
+            className: 'mvm-input', 'aria-label': t('settings.asr.liveModel'),
+            value: liveModelEntries.length ? (asrStatus?.catalog?.activeId || '') : (settings?.asrBackend || 'sensevoice'),
+            onChange: (event) => {
+              const value = event.target.value;
+              if (!value) return;
+              // A catalog id switches the model; the bare fallback names only
+              // exist when the catalog could not be read, and then they write
+              // the backend the service starts from.
+              if (liveModelEntries.some((entry) => entry.id === value)) void onAsrModelChoice(value);
+              else updateSetting('asrBackend', value);
+            },
+          }, choices));
+      };
+
+      // The library is management, not configuration: it reports what is on
+      // disk and downloads or deletes it. Switching stays in the ASR tab, so
+      // one setting has one control.
+      const renderModelLibrary = () => h('div', { className: 'mvm-settings-block' },
+        h('div', { className: 'mvm-model-list-head' },
+          h('span', { className: 'mvm-label' }, t('settings.asr.modelList')),
+          h('span', { className: 'mvm-hint mvm-hint-inline' }, t('settings.asr.activeModel') + ': ' + (activeLiveEntry?.label || t('settings.asr.noModel')))),
+        liveModelEntries.length
+          ? h('div', { className: 'mvm-model-library' },
+            liveModelEntries.map((entry) => h('div', {
+              className: 'mvm-model-option' + (entry.active ? ' is-active' : ''), key: entry.id,
+            },
+              h('span', { className: 'mvm-model-option-name' }, entry.label || entry.id),
+              h('span', { className: 'mvm-model-option-size' }, liveModelSize(entry)),
+              h('span', { className: 'mvm-model-badge ' + (entry.active ? 'is-active' : entry.downloaded ? 'is-ready' : 'is-missing') },
+                liveModelState(entry)),
+              h('span', { className: 'mvm-model-option-actions' },
+                !entry.downloaded ? h(Button, {
+                  icon: 'save', title: t('settings.asr.downloadModel'),
+                  onClick: () => onAsrAction('asr-download-model', { id: entry.id }), disabled: asrBusy !== '',
+                }, t('settings.asr.downloadModel')) : null,
+                entry.downloaded && !entry.active ? h(Button, {
+                  icon: 'trash', danger: true, title: t('action.delete'),
+                  onClick: () => onAsrAction('asr-delete-model', { id: entry.id }), disabled: asrBusy !== '',
+                }, t('action.delete')) : null))))
+          : h('p', { className: 'mvm-hint mvm-hint-inline' }, t('settings.asr.noLiveModel')),
+        h('p', { className: 'mvm-hint mvm-hint-inline' }, t('settings.services.switchHint')));
+
+      // Two model roles, two blocks: the refiner never serves a caption, so
+      // mixing it into the caption picker made "switch the model" mean two
+      // unrelated things.
+      const renderRefineModel = () => (asrStatus?.refine ? h('div', { className: 'mvm-settings-block' },
+        h('div', { className: 'mvm-model-list-head' },
+          h('span', { className: 'mvm-label' }, t('settings.asr.refineModel')),
+          h('span', { className: 'mvm-model-badge ' + (asrStatus.refine.ready ? 'is-ready' : 'is-missing') },
+            asrStatus.refine.ready ? t('settings.asr.ready') : t('settings.asr.notDownloaded'))),
+        h('div', { className: 'mvm-role-row' },
+          h('span', { className: 'mvm-role-name' }, asrStatus.refine.label || asrStatus.refine.id),
+          h('span', { className: 'mvm-hint mvm-hint-inline' }, asrStatus.refine.size ? formatBytes(asrStatus.refine.size) : ''),
+          asrStatus.refine.ready
+            ? h(Button, {
+              icon: 'refresh', title: t('settings.asr.refineNow'),
+              onClick: () => onAsrAction('asr-refine-warmup'), disabled: asrBusy !== '',
+            }, t('settings.asr.refineNow'))
+            : h(Button, {
+              icon: 'save', title: t('settings.asr.downloadModel'),
+              onClick: () => onAsrAction('asr-download-model', { id: asrStatus.refine.id }), disabled: asrBusy !== '',
+            }, t('settings.asr.downloadModel'))),
+        h('p', { className: 'mvm-hint mvm-hint-inline' }, t('settings.asr.refineHint'))) : null);
+
+      // Startup behaviour is a setting, so it is a form control saved with the
+      // rest of the sheet — not a switch that silently saved the whole form.
+      const renderStartup = () => h('div', { className: 'mvm-settings-block' },
+        h('div', { className: 'mvm-settings-block-title' }, t('settings.services.startup')),
+        settingToggle('asrAutoStart', 'settings.asr.autoStart'),
+        settingToggle('llmAutoStart', 'settings.llm.autoStart', { defaultValue: true }));
+
+      // LM Studio serves the local models the settings point at; readiness
+      // here means "the model is resident", which is the only honest answer.
+      const renderLocalLlm = () => h('div', { className: 'mvm-settings-block' },
+        h('div', { className: 'mvm-model-list-head' },
+          h('span', { className: 'mvm-label' }, t('settings.services.localLlm')),
+          h('span', { className: 'mvm-local-models-state' },
+            h('span', { className: 'mvm-local-models-dot ' + localModelsState }),
+            localModels?.installed === false
+              ? t('settings.llm.missing')
+              : localModels?.ready ? t('settings.llm.ready') : t('settings.llm.pending'))),
+        h('div', { className: 'mvm-settings-row' },
+          h('span', { className: 'mvm-hint mvm-hint-inline' },
+            (localModels?.targets || []).map((target) => target.model).join(' · ') || t('settings.services.noLocalModel')),
+          h(Button, {
+            icon: 'play', title: t('settings.llm.start'),
+            onClick: onStartLocalModels, disabled: asrBusy !== '',
+          }, t('settings.llm.start'))),
+        h('p', { className: 'mvm-hint mvm-hint-inline' }, t('settings.llm.hint')));
+
+      const renderServicePaths = () => (asrStatus ? h('div', { className: 'mvm-settings-block' },
+        h('div', { className: 'mvm-path-row' },
+          h('span', { className: 'mvm-hint mvm-hint-inline' }, t('settings.asr.modelDir') + ': ' + asrStatus.modelDir),
+          h(Button, {
+            icon: 'folder', title: t('settings.asr.openModelDir'),
+            onClick: () => onOpenPath(asrStatus.modelDir), disabled: asrBusy !== '',
+          }, t('settings.asr.openModelDir'))),
+        h('div', { className: 'mvm-path-row' },
+          h('span', { className: 'mvm-hint mvm-hint-inline' }, t('settings.asr.launcher') + ': ' + asrStatus.launcher),
+          h(Button, {
+            icon: 'folder', title: t('settings.asr.openLauncher'),
+            onClick: () => onOpenPath(asrStatus.launcher), disabled: asrBusy !== '',
+          }, t('settings.asr.openLauncher')))) : null);
+
+      const renderServicesTab = () => h('div', { className: 'mvm-settings-grid' },
+        h('div', { className: 'mvm-settings-block' },
+          h('div', { className: 'mvm-model-list-head' },
+            h('span', { className: 'mvm-label' }, t('settings.asr.serviceTitle')),
+            h('span', { className: 'mvm-health-item ' + (asrStatus?.online ? 'is-online' : 'is-offline') },
+              h('span', { className: 'mvm-health-dot' }),
+              asrStatus ? t(asrStatus.online ? 'settings.services.running' : 'settings.services.stopped') : t('status.unknown'))),
+          h('div', { className: 'mvm-settings-meta' },
+            h('span', { className: 'mvm-hint mvm-hint-inline' },
+              t('settings.asr.liveModel') + ': ' + (activeLiveEntry?.label || t('settings.asr.noModel'))),
+            h('span', { className: 'mvm-hint mvm-hint-inline' },
+              t('settings.asr') + ': ' + (asrStatus?.endpoint || settings?.asrBaseUrl || '—'))),
+          h('div', { className: 'mvm-settings-row' },
+            h(Button, { icon: 'play', onClick: () => onAsrAction('asr-start'), disabled: asrBusy !== '' }, t('settings.asr.start')),
+            h(Button, { icon: 'stop', onClick: () => onAsrAction('asr-stop'), disabled: asrBusy !== '' }, t('settings.asr.stop')),
+            h(Button, { icon: 'restart', onClick: () => onAsrAction('asr-restart'), disabled: asrBusy !== '' }, t('settings.asr.restart')),
+            h(Button, { icon: 'refresh', onClick: refreshAsrStatus, disabled: asrBusy !== '' }, t('action.refresh')))),
+        renderStartup(),
+        renderModelLibrary(),
+        renderRefineModel(),
+        renderLocalLlm(),
+        renderServicePaths());
+
       return h('div', { className: 'mvm-page' },
         h('header', { className: 'mvm-header' },
           h('div', { className: 'mvm-heading' },
@@ -5324,18 +5566,20 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
             h('button', { type: 'button', className: 'mvm-icon-button', 'aria-label': t('action.close'), onClick: () => setSettingsOpen(false) }, h(Icon, { name: 'close' }))),
           h('div', { className: 'mvm-settings-layout' },
             h('nav', { className: 'mvm-settings-nav', role: 'tablist', 'aria-label': t('settings.title') },
-              [
-                ['asr', 'settings.section.asr'],
-                ['llm', 'settings.section.llm'],
-                ['translation', 'settings.section.translation'],
-                ['overlay', 'settings.section.overlay'],
-              ].map(([value, labelKey]) => h('button', {
+              settingsTabs.map(([value, labelKey]) => h('button', {
                 type: 'button', key: value, role: 'tab',
-                className: `mvm-settings-tab ${settingsTab === value ? 'is-active' : ''}`,
+                id: 'mvm-settings-tab-' + value,
+                'aria-controls': 'mvm-settings-panel-' + value,
+                className: 'mvm-settings-tab' + (settingsTab === value ? ' is-active' : ''),
                 'aria-selected': settingsTab === value,
                 onClick: () => setSettingsTab(value),
               }, t(labelKey)))),
-            h('div', { className: 'mvm-settings-content' },
+            h('div', { className: 'mvm-settings-body' },
+              h('div', {
+                className: 'mvm-settings-content', role: 'tabpanel',
+                id: 'mvm-settings-panel-' + settingsTab,
+                'aria-labelledby': 'mvm-settings-tab-' + settingsTab,
+              },
             settingsTab === 'asr' ? h('div', { className: 'mvm-settings-grid' },
             settingSelect('asrProvider', 'settings.asrProvider', [
               ['local', 'settings.provider.local'],
@@ -5346,19 +5590,16 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
               : settingField('asrBaseUrl', 'settings.asr'),
             settings?.asrProvider === 'siliconflow'
               ? settingField('siliconflowModel', 'settings.siliconflowModel')
-              : settingField('asrModel', 'settings.asrModel'),
+              : null,
             settings?.asrProvider === 'siliconflow'
               ? settingField('siliconflowApiKey', 'settings.siliconflowApiKey', { type: 'password', placeholderKey: 'settings.apiKeyPlaceholder' })
               : null,
+            // Local ASR has one model, and one control for it: the family is
+            // the optgroup, not a second 'recognition backend' select.
+            settings?.asrProvider !== 'siliconflow' ? renderLiveModelSelect() : null,
             settings?.asrProvider !== 'siliconflow'
-              ? settingSelect('asrBackend', 'settings.asrBackendLive', [
-                ['sensevoice', 'settings.backend.sensevoice'],
-                ['whispercpp', 'settings.backend.whispercpp'],
-              ], 'sensevoice')
-              : null,
-            settings?.asrProvider !== 'siliconflow'
-              ? h('div', { className: 'mvm-hint mvm-field-wide' }, t(`settings.backendHint.${settings?.asrBackend || 'whispercpp'}`))
-              : null,
+              ? h('div', { className: 'mvm-hint mvm-field-wide' }, t('settings.asr.liveModelHint'))
+              : h('div', { className: 'mvm-hint mvm-field-wide' }, t('settings.cloudNotice')),
             settings?.asrProvider !== 'siliconflow'
               ? settingSelect('liveChunkSeconds', 'settings.liveChunkSeconds', [
                 ['3', 'settings.chunk.3'],
@@ -5366,118 +5607,11 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
                 ['10', 'settings.chunk.10'],
               ], '3')
               : null,
-            settings?.asrProvider !== 'siliconflow' ? h('div', { className: 'mvm-asr-admin' },
-              h('div', { className: 'mvm-settings-section-title' }, t('settings.asr.serviceTitle')),
-              h('div', { className: 'mvm-asr-status-line' },
-                h('span', { className: `mvm-health-item ${asrStatus?.online ? 'is-online' : 'is-offline'}` },
-                  h('span', { className: 'mvm-health-dot' }),
-                  asrStatus ? `${asrStatus.health?.backend || 'ASR'} · ${asrStatus.catalog?.activeId || t('settings.asr.noModel')}` : t('status.unknown')),
-                h(Button, { icon: 'refresh', onClick: refreshAsrStatus, disabled: asrBusy !== '' }, t('action.refresh')),
-                h(Button, { icon: 'play', onClick: () => onAsrAction('asr-start'), disabled: asrBusy !== '' }, t('settings.asr.start')),
-                h(Button, { icon: 'close', onClick: () => onAsrAction('asr-stop'), disabled: asrBusy !== '' }, t('settings.asr.stop')),
-                h(Button, { icon: 'refresh', onClick: () => onAsrAction('asr-restart'), disabled: asrBusy !== '' }, t('settings.asr.restart'))),
-              (asrStatus?.catalog?.entries || []).some((entry) => entry.capability === 'live') ? h('div', { className: 'mvm-model-picker' },
-                h('div', { className: 'mvm-model-list-head' },
-                  h('span', { className: 'mvm-label' }, t('settings.asr.modelList')),
-                  h('span', { className: 'mvm-hint' }, `${t('settings.asr.activeModel')}: ${asrStatus.catalog.activeId || '—'}`)),
-                h('button', {
-                  type: 'button', className: 'mvm-model-trigger', 'aria-expanded': asrModelOpen,
-                  'aria-haspopup': 'listbox',
-                  onClick: () => setAsrModelOpen((value) => !value),
-                },
-                  h('span', { className: 'mvm-model-trigger-text' }, asrModelEntry
-                    ? `${asrModelEntry.label || asrModelEntry.id} · ${asrModelEntry.actualSize ? formatBytes(asrModelEntry.actualSize) : asrModelEntry.sizeLabel} · ${asrModelEntry.active ? t('settings.asr.inUse') : asrModelEntry.downloaded ? t('settings.asr.downloaded') : t('settings.asr.notDownloaded')}`
-                    : t('settings.asr.defaultModel')),
-                  h('span', { className: 'mvm-model-caret' },
-                    h(Icon, { name: 'caret', size: 14 }))),
-                asrModelOpen ? h('div', { className: 'mvm-model-menu', role: 'listbox' },
-                  asrStatus.catalog.entries.filter((entry) => entry.capability === 'live').map((entry) => h('div', {
-                    className: `mvm-model-option ${entry.active ? 'is-active' : ''}`, key: entry.id, role: 'option',
-                    'aria-selected': entry.active,
-                  },
-                    h('button', {
-                      type: 'button', className: 'mvm-model-option-main',
-                      onClick: () => onAsrModelChoice(entry.id),
-                    },
-                      h('span', { className: 'mvm-model-option-name' }, entry.label || entry.id),
-                      h('span', { className: 'mvm-model-option-size' }, entry.actualSize ? formatBytes(entry.actualSize) : entry.sizeLabel),
-                      h('span', {
-                        className: `mvm-model-badge ${entry.refine ? 'is-refine' : entry.active ? 'is-active' : entry.downloaded ? 'is-ready' : 'is-missing'}`,
-                      }, entry.refine
-                        ? t('settings.asr.refiner')
-                        : entry.active ? t('settings.asr.inUse') : entry.downloaded ? t('settings.asr.downloaded') : t('settings.asr.notDownloaded'))),
-                    h('span', { className: 'mvm-model-option-actions' },
-                      !entry.downloaded
-                        ? h(Button, {
-                          icon: 'save', title: t('settings.asr.downloadModel'),
-                          onClick: () => onAsrAction('asr-download-model', { id: entry.id }), disabled: asrBusy !== '',
-                        }, t('settings.asr.downloadModel'))
-                        : entry.active || entry.selectable === false ? null : h(Button, {
-                          icon: 'play', title: t('settings.asr.useModel'),
-                          onClick: () => onAsrModelSelect(entry.id), disabled: asrBusy !== '',
-                        }, t('settings.asr.useModel')),
-                      entry.downloaded && !entry.active ? h(Button, {
-                        icon: 'trash', danger: true, title: t('action.delete'),
-                        onClick: () => onAsrAction('asr-delete-model', { id: entry.id }), disabled: asrBusy !== '',
-                      }, t('action.delete')) : null)))) : null) : null,
-              h('label', { className: 'mvm-bilingual-toggle' },
-                h('input', { type: 'checkbox', checked: Boolean(settings?.asrAutoStart), onChange: (event) => onAsrAutoStartToggle(event.target.checked) }),
-                t('settings.asr.autoStart')),
-              h('label', { className: 'mvm-bilingual-toggle' },
-                h('input', { type: 'checkbox', checked: settings?.llmAutoStart !== false, onChange: (event) => onLlmAutoStartToggle(event.target.checked) }),
-                t('settings.llm.autoStart')),
-              h('div', { className: 'mvm-local-models' },
-                h('span', { className: 'mvm-local-models-state' },
-                  h('span', { className: `mvm-local-models-dot ${localModels?.ready ? 'is-ready' : localModels?.installed === false ? 'is-missing' : 'is-pending'}` }),
-                  localModels?.installed === false
-                    ? t('settings.llm.missing')
-                    : localModels?.ready ? t('settings.llm.ready') : t('settings.llm.pending'),
-                  (localModels?.targets || []).length
-                    ? h('span', { className: 'mvm-hint' }, localModels.targets.map((target) => target.model).join('、'))
-                    : null),
-                h(Button, {
-                  icon: 'refresh', title: t('settings.llm.start'),
-                  onClick: onStartLocalModels, disabled: asrBusy !== '',
-                }, t('settings.llm.start'))),
-              h('p', { className: 'mvm-hint mvm-local-models-hint' }, t('settings.llm.hint')),
-              h('p', { className: 'mvm-hint mvm-local-models-hint' }, t('settings.asr.backendHint')),
-              // The refinement model is its own block: it never serves a live
-              // caption, so mixing it into the caption picker made "switch the
-              // model" mean two unrelated things.
-              asrStatus?.refine ? h('div', { className: 'mvm-role-block' },
-                h('div', { className: 'mvm-model-list-head' },
-                  h('span', { className: 'mvm-label' }, t('settings.asr.refineModel')),
-                  h('span', {
-                    className: `mvm-model-badge ${asrStatus.refine.ready ? 'is-ready' : 'is-missing'}`,
-                  }, asrStatus.refine.ready ? t('settings.asr.ready') : t('settings.asr.notDownloaded'))),
-                h('div', { className: 'mvm-role-row' },
-                  h('span', { className: 'mvm-role-name' }, asrStatus.refine.label || asrStatus.refine.id),
-                  h('span', { className: 'mvm-hint' }, asrStatus.refine.size ? formatBytes(asrStatus.refine.size) : ''),
-                  asrStatus.refine.ready
-                    ? h(Button, {
-                      icon: 'refresh', title: t('settings.asr.refineNow'),
-                      onClick: () => onAsrAction('asr-refine-warmup'), disabled: asrBusy !== '',
-                    }, t('settings.asr.refineNow'))
-                    : h(Button, {
-                      icon: 'save', title: t('settings.asr.downloadModel'),
-                      onClick: () => onAsrAction('asr-download-model', { id: asrStatus.refine.id }), disabled: asrBusy !== '',
-                    }, t('settings.asr.downloadModel'))),
-                h('p', { className: 'mvm-hint' }, t('settings.asr.refineHint'))) : null,
-              asrStatus ? h('div', { className: 'mvm-path-row' },
-                h('span', { className: 'mvm-hint' }, `${t('settings.asr.modelDir')}: ${asrStatus.modelDir}`),
-                h(Button, {
-                  icon: 'folder', title: t('settings.asr.openModelDir'),
-                  onClick: () => onOpenPath(asrStatus.modelDir), disabled: asrBusy !== '',
-                }, t('settings.asr.openModelDir'))) : null,
-              asrStatus ? h('div', { className: 'mvm-path-row' },
-                h('span', { className: 'mvm-hint' }, `${t('settings.asr.launcher')}: ${asrStatus.launcher}`),
-                h(Button, {
-                  icon: 'folder', title: t('settings.asr.openLauncher'),
-                  onClick: () => onOpenPath(asrStatus.launcher), disabled: asrBusy !== '',
-                }, t('settings.asr.openLauncher'))) : null) : null,
-
-            settings?.asrProvider === 'siliconflow'
-              ? h('div', { className: 'mvm-hint mvm-field-wide' }, t('settings.cloudNotice'))
+            settings?.asrProvider !== 'siliconflow' && !liveModelEntries.some((entry) => entry.downloaded)
+              ? h('div', { className: 'mvm-hint mvm-field-wide' }, t('settings.asr.noLiveModel'))
+              : null,
+            settings?.asrProvider !== 'siliconflow' && asrStatus && !asrStatus.online
+              ? h('div', { className: 'mvm-hint mvm-field-wide' }, t('settings.asr.offlineHint'))
               : null) : null,
 
             settingsTab === 'llm' ? h('div', { className: 'mvm-settings-grid' },
@@ -5584,15 +5718,18 @@ button.mvm-library-row:hover{background:var(--mvm-hover)}
             // control cannot go there; the window clamps to the same floor.
             settingField('overlayOpacity', 'settings.overlayOpacity', { type: 'number', min: 0.85, max: 1, step: 0.05, number: true }),
             settingToggle('overlayCompact', 'settings.overlayCompact', { defaultValue: true }),
-            h('div', { className: 'mvm-hint mvm-field-wide' }, t('settings.overlayHint'))) : null)),
+            h('div', { className: 'mvm-hint mvm-field-wide' }, t('settings.overlayHint'))) : null,
+
+            settingsTab === 'services' ? renderServicesTab() : null))),
           // The page level alerts sit behind the modal backdrop, so the modal
           // carries its own copy; otherwise a failed action looks like nothing happened.
-          error ? h('div', { className: 'mvm-alert mvm-alert-error mvm-settings-alert', role: 'alert' },
-            h('span', null, error),
-            h('button', { type: 'button', className: 'mvm-icon-button', 'aria-label': t('action.close'), onClick: () => setError('') }, h(Icon, { name: 'close', size: 14 }))) : null,
-          notice ? h('div', { className: 'mvm-alert mvm-alert-notice mvm-settings-alert', role: 'status' }, h('span', null, notice)) : null,
-          h('div', { className: 'mvm-settings-actions' },
-            h(Button, { icon: 'save', primary: true, onClick: () => onSettingsSave(), disabled: isBusy || !settings }, busy === 'settings' ? t('state.saving') : t('settings.save'))))) : null,
+          h('div', { className: 'mvm-settings-foot' },
+            error ? h('div', { className: 'mvm-alert mvm-alert-error mvm-settings-alert', role: 'alert' },
+              h('span', null, error),
+              h('button', { type: 'button', className: 'mvm-icon-button', 'aria-label': t('action.close'), onClick: () => setError('') }, h(Icon, { name: 'close', size: 14 }))) : null,
+            notice ? h('div', { className: 'mvm-alert mvm-alert-notice mvm-settings-alert', role: 'status' }, h('span', null, notice)) : null,
+            h('div', { className: 'mvm-settings-actions' },
+              h(Button, { icon: 'save', primary: true, onClick: () => onSettingsSave(), disabled: isBusy || !settings }, busy === 'settings' ? t('state.saving') : t('settings.save')))))) : null,
 
         error ? h('div', { className: 'mvm-alert mvm-alert-error', role: 'alert' },
           h('span', null, error),

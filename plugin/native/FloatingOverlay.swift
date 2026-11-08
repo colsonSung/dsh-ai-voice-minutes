@@ -419,6 +419,14 @@ private struct ViewportHeightKey: PreferenceKey {
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
 
+/// Width of the transcript content, measured inside the ScrollView. The column
+/// header is laid out outside it, so this is the only width the two can agree
+/// on once a scrollbar starts taking room away from the rows.
+private struct ContentWidthKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+
 struct FloatingOverlayView: View {
     @ObservedObject var model: OverlayModel
     @ObservedObject var controller: OverlayWindowController
@@ -426,6 +434,7 @@ struct FloatingOverlayView: View {
     @State private var scrollOffset: CGFloat = 0
     @State private var contentHeight: CGFloat = 0
     @State private var viewportHeight: CGFloat = 0
+    @State private var contentWidth: CGFloat = 0
     @State private var dragOrigin: CGSize = .zero
     @State private var now = Date()
 
@@ -728,7 +737,12 @@ struct FloatingOverlayView: View {
 
     private var expandedBody: some View {
         VStack(spacing: 0) {
+            // The header sits outside the scroll area, so it has to be pinned
+            // to the width the rows are actually laid out at: a visible
+            // scrollbar narrows the rows, and a full-width header then splits
+            // its two columns at a different point than the rows do.
             columnHeaders
+                .frame(width: contentWidth > 0 ? contentWidth : nil, alignment: .leading)
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(spacing: 0) {
@@ -756,7 +770,9 @@ struct FloatingOverlayView: View {
                         }
                     }
                     .background(GeometryReader { geometry in
-                        Color.clear.preference(key: ContentHeightKey.self, value: geometry.size.height)
+                        Color.clear
+                            .preference(key: ContentHeightKey.self, value: geometry.size.height)
+                            .preference(key: ContentWidthKey.self, value: geometry.size.width)
                     })
                 }
                 .coordinateSpace(name: "transcript")
@@ -766,6 +782,7 @@ struct FloatingOverlayView: View {
                 .onPreferenceChange(ScrollOffsetKey.self) { scrollOffset = $0 }
                 .onPreferenceChange(ContentHeightKey.self) { contentHeight = $0 }
                 .onPreferenceChange(ViewportHeightKey.self) { viewportHeight = $0 }
+                .onPreferenceChange(ContentWidthKey.self) { contentWidth = $0 }
                 .onChange(of: model.rows.count) { _ in
                     // Only follow the newest line while the reader is at the bottom,
                     // so scrolling back through the conversation is not undone.
@@ -781,14 +798,14 @@ struct FloatingOverlayView: View {
     private var columnHeaders: some View {
         HStack(spacing: 0) {
             Text("Original")
-                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 16)
+                .frame(maxWidth: .infinity, alignment: .leading)
             Rectangle()
                 .fill(text.opacity(0.12))
                 .frame(width: 1, height: 16)
             Text("Translation")
-                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 16)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .font(.system(size: 11, weight: .semibold))
         .foregroundColor(secondary)
@@ -820,9 +837,14 @@ struct FloatingOverlayView: View {
             .foregroundColor(value.isEmpty ? secondary : text)
             .lineSpacing(3)
             .textSelection(.enabled)
-            .frame(maxWidth: .infinity, alignment: .topLeading)
+            .fixedSize(horizontal: false, vertical: true)
+            // The padding belongs inside the flexible frame: with the frame
+            // first, the HStack could squeeze the text narrower than its ideal
+            // width while the window resized, and the selection layer clipped
+            // the first glyph of every line.
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 
     // MARK: - Controls

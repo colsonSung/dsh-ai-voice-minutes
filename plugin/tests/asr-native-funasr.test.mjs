@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -12,6 +12,21 @@ const SERVER = join(PLUGIN, 'native/asr/local_asr_server.py');
 const PYTHON = existsSync(join(PLUGIN, 'native/asr/runtime/venv/bin/python'))
   ? join(PLUGIN, 'native/asr/runtime/venv/bin/python')
   : 'python3';
+
+/**
+ * The offline worker decodes WAV through soundfile, so the test needs a
+ * Python that can import it. A fresh clone has no runtime yet, and the
+ * system Python usually has no soundfile either — so the test skips instead
+ * of reporting a failure the machine cannot fix.
+ */
+function hasSoundfile() {
+  const result = spawnSync(PYTHON, ['-c', 'import soundfile'], { stdio: 'ignore' });
+  return result.status === 0;
+}
+
+const SKIP_WITHOUT_SOUNDFILE = hasSoundfile()
+  ? false
+  : 'this Python has no soundfile; run plugin/native/asr/download-fun-asr-nano.sh to install the offline runtime';
 const FUN_FILES = [
   'config.yaml', 'configuration.json', 'multilingual.tiktoken', 'model.pt',
   'Qwen3-0.6B/config.json', 'Qwen3-0.6B/generation_config.json',
@@ -98,7 +113,7 @@ async function postFinalize(base, audio) {
   return fetch(`${base}/finalize`, { method: 'POST', body: form });
 }
 
-test('funasr /finalize runs offline with a stub model, chunks long audio, and restores CTC offsets', async (t) => {
+test('funasr /finalize runs offline with a stub model, chunks long audio, and restores CTC offsets', { skip: SKIP_WITHOUT_SOUNDFILE }, async (t) => {
   const directory = await mkdtemp(join(tmpdir(), 'asr-native-funasr-'));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const modelDir = join(directory, 'models', 'fun-asr-nano');
@@ -174,7 +189,7 @@ test('funasr missing model returns JSON detail without killing the service', asy
   assert.equal((await fetch(`${base}/health`)).status, 200);
 });
 
-test('funasr decodes ECAPA speaker spans independently and offsets their CTC timestamps', async (t) => {
+test('funasr decodes ECAPA speaker spans independently and offsets their CTC timestamps', { skip: SKIP_WITHOUT_SOUNDFILE }, async (t) => {
   const directory = await mkdtemp(join(tmpdir(), 'asr-native-funasr-spans-'));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const audioPath = join(directory, 'spans.wav');

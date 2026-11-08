@@ -250,6 +250,10 @@ function createLiveRuntime(runtimeOptions = {}) {
       profiles: (runtimeOptions.voices || []).map((profile) => profile.id === payload.profileId
         ? { ...profile, name: payload.name } : profile),
     };
+    else if (method === 'voice-delete') result = {
+      profiles: (runtimeOptions.voices || []).filter((profile) => profile.id !== payload.profileId),
+      deletedId: payload.profileId,
+    };
     else if (method === 'translate') result = runtimeOptions.translation || {
       translation: payload.text === 'First' ? 'First translated'
         : payload.text === 'Second' ? 'Second translated' : 'Translated summary',
@@ -1002,6 +1006,57 @@ test('renaming a voice refreshes the open meeting speaker labels', async () => {
   assert.match(renderer.text(), /New name/);
 });
 
+test('deleting a voice asks for confirmation and removes only that voice', async () => {
+  const runtime = createLiveRuntime({
+    voices: [
+      { id: 'voice-keep', name: 'Keep me', embedding: [1] },
+      { id: 'voice-drop', name: 'Drop me', embedding: [0, 1] },
+    ],
+  });
+  const { renderer, requests } = runtime;
+  renderer.mount(runtime.mainFactory());
+  await runtime.flush();
+  renderer.render();
+  const trigger = renderer.findAll((node) => node.type === 'button'
+    && node.props['aria-label'] === 'Voice book')[0];
+  await trigger.props.onClick({});
+  renderer.render();
+
+  const deleteControls = renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-voicebook-delete'));
+  assert.equal(deleteControls.length, 2, 'every voice row carries a delete control');
+  await deleteControls[1].props.onClick({});
+  renderer.render();
+  assert.equal(requests.some((request) => request.method === 'voice-delete'), false,
+    'opening the confirmation does not delete anything');
+  const confirmStrip = () => renderer.findAll((node) => String(node.props.className).split(' ').includes('mvm-voicebook-confirm'));
+  const confirmButton = (text) => renderer.findAll((node) => node.type === 'button'
+    && String(node.props.className).includes('mvm-button')
+    && String(node.props.children).includes(text))[0];
+  assert.equal(confirmStrip().length, 1, 'the row turns into a confirmation instead of a modal');
+
+  const cancel = confirmButton('Cancel');
+  assert.ok(cancel, 'the confirmation can be cancelled');
+  await cancel.props.onClick({});
+  renderer.render();
+  assert.equal(confirmStrip().length, 0);
+  assert.equal(requests.some((request) => request.method === 'voice-delete'), false);
+
+  await deleteControls[1].props.onClick({});
+  renderer.render();
+  const confirm = confirmButton('Delete');
+  assert.ok(confirm, 'the confirmation carries the destructive action');
+  await confirm.props.onClick({});
+  await runtime.flush();
+  renderer.render();
+
+  const deleted = requests.find((request) => request.method === 'voice-delete');
+  assert.ok(deleted, 'the confirmation calls the host delete route');
+  assert.equal(deleted.payload.profileId, 'voice-drop');
+  assert.doesNotMatch(renderer.text(), /Drop me/);
+  assert.match(renderer.text(), /Keep me/);
+});
+
 test('the compact voice book searches and filters named and unnamed voices', async () => {
   const runtime = createLiveRuntime({
     voices: [
@@ -1065,7 +1120,7 @@ test('the voice book popover has one title row, one empty state and one storage 
     'the storage note appears once');
   const panelText = renderer.text();
   assert.match(panelText, /No voice labels yet/);
-  assert.equal((panelText.match(/Voiceprints are kept permanently/g) || []).length, 1,
+  assert.equal((panelText.match(/backed up automatically and can be renamed or deleted/g) || []).length, 1,
     'the storage note is not repeated');
   assert.doesNotMatch(panelText, /Voiceprints are permanently stored and backed up\./,
     'the duplicated hint is gone');

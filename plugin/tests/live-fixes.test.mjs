@@ -72,12 +72,12 @@ test('the in-progress library badge is a small inline pill instead of a full bar
   assert.doesNotMatch(source, /className: 'mvm-library-progress'/);
 });
 
-test('the voice book is collapsed by default and exposes samples and correction without deletion', () => {
+test('the voice book is collapsed by default and exposes samples, correction and deletion', () => {
   assert.match(source, /const \[voicebookOpen, setVoicebookOpen\] = React\.useState\(false\)/);
   assert.match(source, /const playVoiceSample = async \(profile, audioRef = voiceSampleRef\) =>/);
   assert.match(source, /mvm-voice-play/);
-  assert.doesNotMatch(source, /callHost\('voice-delete'/);
-  assert.doesNotMatch(source, /mvm-voice-delete/);
+  assert.match(source, /callHost\('voice-delete'/);
+  assert.match(source, /mvm-voicebook-delete/);
   assert.match(source, /voice\.unnamedGroup/);
 });
 

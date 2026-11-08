@@ -55,3 +55,14 @@ test('locale registration recovers from the previous plugin dictionary generatio
   assert.equal(t('action.transcribe'), 'Transcribe');
   assert.equal(sidebar.label(), 'Minutes');
 });
+
+test('the summary template badge resolves kebab-case template ids to locale labels', () => {
+  assert.match(source, /const templateLabel = \(id\) =>/);
+  assert.match(source, /library\.template\.' \+ value\.replace\(\/-\(\[a-z\]\)\/g/);
+  assert.doesNotMatch(source, /t\('library\.template\.' \+ \(minutes\?\.template \|\| selectedTemplate\)\)/);
+});
+
+test('the English dictionary carries English template names', () => {
+  assert.ok(source.includes("'library.template.intelligentSlicing': 'Intelligent Slicing'"));
+  assert.ok(source.includes("'library.template.visualSummary': 'Visual Summary'"));
+});

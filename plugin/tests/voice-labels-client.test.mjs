@@ -19,9 +19,15 @@ test('speakers can be labelled and the voice book is wired to the client', () =>
   assert.match(client, /speakerListOpen/);
 });
 
-test('the voice library supports correction but exposes no deletion path', () => {
+test('the voice library supports correction and deletion', () => {
   assert.match(client, /voice-rename/);
-  assert.doesNotMatch(client, /voice-delete|voice\.delete|mvm-voice-delete/);
+  // Deletion is destructive, so it goes through a host route and a second
+  // confirmation step instead of firing from the first icon press.
+  assert.match(client, /callHost\('voice-delete'/);
+  assert.match(client, /mvm-voicebook-delete/);
+  assert.match(client, /mvm-voicebook-confirm/);
+  assert.match(client, /voice\.deleteConfirm/);
+  assert.match(client, /commitVoiceDelete/);
 });
 
 test('the local ASR service exposes per-speaker voiceprints', () => {

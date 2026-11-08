@@ -49,7 +49,9 @@ afterwards** — the host half of a plugin is loaded at start-up.
 ## Model setup
 
 The plugin talks to three separate services, and each one is configured in
-its own section of the settings panel.
+its own section of the settings panel. A fourth section, **Local services**,
+covers what runs on this machine: the ASR service and its model library, the
+meeting-refinement model, and the local translation model.
 
 | Service | What it needs | Notes |
 | --- | --- | --- |
@@ -84,7 +86,7 @@ plugin/                 the plugin package
   realtime.js           the capture pipeline
   overlay.js            the floating overlay process
   native/               Swift sources and the built helpers
-  tests/                236 tests, run with node --test
+  tests/                337 tests, run with node --test
 ```
 
 ## Build the native helpers

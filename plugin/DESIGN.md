@@ -447,3 +447,28 @@ window.backgroundColor = NSColor(background).withAlphaComponent(appearance.opaci
 **验证**：新增 `tests/library-batch.test.mjs` 七条（归档保留内容只改标记、部分失败不整批失败、批量删除只剩该剩的、空批次是 no-op，以及三条界面契约：勾选列与全选中间态、归档 scope 与已归档标签、卡片视图也有选择）。harness 渲染了浅色与深色两版对照图。
 
 
+
+### 3.0m 三处 UIUX 收口：浮窗中缝、Outline 越界、声音库删除
+
+**浮窗双栏的中缝对不齐**。`columnHeaders` 画在 ScrollView 外面，按整窗宽分两栏；行画在 ScrollView 里面，宽度被滚动条吃掉一截，于是表头中缝比行中缝右偏（实测 19 物理像素）。行本身还有第二个隐患：`transcriptText` 先 `.frame(maxWidth: .infinity)` 再 `.padding(.horizontal, 16)`，HStack 分到的是"带 padding 的弹性框"，窗口 resize 时文字框可以被压到理想宽度以下，选区图层就在左侧裁掉一个字形（截图里 "It will be ready soon." 变成 "t will be ready soon."）。改法不写死滚动条宽度：在 ScrollView 内容里量一个 `ContentWidthKey`，表头按这个宽度布局；文字单元改成先 padding 后 frame，让 padded cell 本身成为弹性内容。实测两种内容长度（有/无滚动条）下表头与行的中缝都在同一列（x=919–920），首字形不再被裁。
+
+**AI Summary 的 Outline 越界**。时间范围那一列原来直接右对齐到 reader 边缘，和滚动条贴在一起，看起来像跑出内容区。把 Outline 收进一张带边框的卡片（18px 内边距，和页面其他 section 一致），标题 `min-width: 0`、时间列 `flex: none`，长标题只会自己收缩，不会把时间列顶出去；reader 的右侧留白从 2px 提到 8px。实测 `.mvm-outline` 右边缘距 reader 8px、时间列距卡片内边缘 1px、`.mvm-detail-tab-content` 横向溢出 0。
+
+**声音库支持删除**。原来的产品规则是"声纹永久保留、不提供删除入口或 API"，这次按需求改成可删。删除是行内二次确认：第一次点垃圾桶只是把该行换成确认条（写明"删除后不再自动识别它，历史会议文字保留"），第二次才真正删除，取消可恢复原行。后端新增 `voice-delete` → `deleteVoice`：从 `profiles.json` 删掉该条，并清掉各会议 `speakerProfiles` 里指向它的关联；会议逐字稿与 `speakerLabels` 不动，所以历史不会被改写。同一个人之后再次被聚出来是一条未命名的新档案，不会复活已删姓名。底部说明文案同步改掉"不可删除"，`voices/backups/` 历史快照仍然不自动清理。
+
+**验证**：全量 `node --test tests/*.test.mjs` 325 条 324 通过 0 失败 1 跳过；Swift 自检 54 项通过；`native-overlay` unittest 通过。真机（运行中的 DSH GUI，headless Chromium + 会话 cookie）量到：Outline 卡片右边缘 1372 / reader 右边缘 1380、时间列距卡片内边缘 1px、横向溢出 0；声音库行内有 1 个删除控件，确认条文案正确，取消后确认条消失且未发出任何 `voice-delete` 请求。
+
+### 3.0n 会议卡片的卡片头：把「信息重复」和「换行」一起收掉
+
+卡片头原来一行里塞了复选框、38px 首字圆、两行标题、右上角星星，下面再挂一行 `toLocaleString()` 的完整日期 + 时长。窄卡片里这行日期必然换行，于是「11/6/2026, 9:42:23 PM ·」独占一行、`02:46` 掉到下一行，分隔符悬在行尾；同一张卡片上还出现了两个星星（标题行一个、底栏一个），点哪个都是同一个收藏开关。
+
+改法：
+
+1. **一个收藏开关**：删掉标题行的星星，保留底栏那一个（和删除图标同一组动作），顺带把标题列宽出 36px。
+2. **日期只留卡片需要的精度**：新增 `formatCardDate()`，去掉秒、只在跨年时带年份，卡片上显示成 `11/6, 09:42 PM · 02:46`；完整日期仍在详情页。
+3. **meta 行不再换行**：`date / · / duration` 拆成三段，容器 `nowrap`，日期 `min-width:0` + 省略号，时长 `flex:none` —— 再窄也只会截断日期，不会把分隔符单独留在行尾。
+4. **命中区与节奏**：14px 复选框包进 24px 的 label 命中区（WCAG 2.2 SC 2.5.8）；首字圆在卡片里收到 32px；标题行高 1.35、字距 -0.01em，两行截断更整齐。
+
+**验证**：`tests/workspace-redesign.test.mjs` 新增一条（卡片只有一个 Favorite 按钮、标题行不再有星星、meta 日期无秒、24px 命中区与 nowrap 的样式守卫）；全量 328 条 327 通过 0 失败 1 跳过；真机量到卡片头 41px、标题列 252px、meta `scrollWidth == clientWidth`（不溢出）、复选框命中区 24×24；浅色与暗色、选中态（批量条出现）各截图对照。
+
+**追加（同一天）**：卡片头里的首字圆和复选框被整体删掉了。首字圆显示的是标题前两个字，纯重复；复选框在卡片里没有独立列位，会挤在标题前面。现在卡片头从标题开始，多选回到列表视图：列表里选中的会议切到卡片仍带 `is-selected` 描边，批量条照常出现（真机验证：列表选中 1 条 → 切卡片，`.mvm-meeting-card.is-selected` = 1）。`tests/library-batch.test.mjs` 的那条断言从"卡片也带复选框"改成"卡片不重复复选框、但会显示列表里的选中态"，`tests/workspace-redesign.test.mjs` 的卡片头测试同步删掉 24px 命中区与首字圆断言。

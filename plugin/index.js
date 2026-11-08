@@ -2076,6 +2076,47 @@ class MinutesService {
     return ok({ profiles });
   }
 
+  /**
+   * Remove one voice from the global voice book.
+   *
+   * Deleting a voice is not deleting history: the meetings that used it keep
+   * their transcript and their speaker names. Only the identity itself goes
+   * away, and the meetings drop their pointer to it so a later labelling of
+   * the same speaker starts a fresh profile instead of reviving a deleted one.
+   */
+  async deleteVoice(payload = {}) {
+    return this.withVoiceLibraryLock(() => this.deleteVoiceUnlocked(payload));
+  }
+
+  async deleteVoiceUnlocked(payload = {}) {
+    const profileId = String(payload.profileId || '');
+    if (!profileId) return fail('minutes/voice-missing', '缺少声音标识');
+    const profiles = await this.loadVoiceProfilesUnlocked();
+    const index = profiles.findIndex((item) => item.id === profileId);
+    if (index < 0) return fail('minutes/not-found', '没有找到该声音');
+    const [deleted] = profiles.splice(index, 1);
+    await this.saveVoiceProfilesUnlocked(profiles);
+    await this.clearProfileReferences(profileId);
+    return ok({ profiles, deletedId: profileId, deletedName: deleted?.name || '' });
+  }
+
+  /** Drop the pointer to one deleted voice from every meeting that used it. */
+  async clearProfileReferences(profileId) {
+    if (!profileId) return;
+    const names = await readdir(this.meetingsDir()).catch(() => []);
+    for (const file of names.filter((item) => item.endsWith('.json'))) {
+      const record = await this.readMeetingRecord(file.replace(/\.json$/, ''));
+      if (!record || !record.speakerProfiles) continue;
+      let changed = false;
+      for (const [speaker, id] of Object.entries(record.speakerProfiles)) {
+        if (id !== profileId) continue;
+        delete record.speakerProfiles[speaker];
+        changed = true;
+      }
+      if (changed) await this.writeMeetingRecord(record);
+    }
+  }
+
   async applyProfileName(profileId, name) {
     if (!profileId) return;
     const names = await readdir(this.meetingsDir()).catch(() => []);
@@ -2817,6 +2858,8 @@ export function apply(ctx, options = {}) {
         return service.labelVoice(payload || {});
       case 'voice-rename':
         return service.renameVoice(payload || {});
+      case 'voice-delete':
+        return service.deleteVoice(payload || {});
       case 'compare-translation':
         return service.compareTranslation(payload || {});
       case 'recover-meetings':

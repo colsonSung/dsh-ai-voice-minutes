@@ -41,9 +41,10 @@ test('live caption chunks never run speaker clustering', () => {
 });
 
 test('the panel says which model refines and which one runs live', () => {
-  assert.match(source, /settings\.asr\.refiner/, 'the model list badges the refiner');
-  assert.match(source, /entry\.refine/, 'the badge reads the catalog flag');
-  assert.match(source, /settings\.asr\.backendHint/, 'the settings explain why Fun-ASR is not the live backend');
+  assert.match(source, /settings\.asr\.refineModel/, 'the refiner keeps its own block');
+  assert.match(source, /asrStatus\.refine\.ready/, 'the refine badge reads the catalog state');
+  assert.match(source, /capability === 'live'/, 'the caption picker only offers live backends');
+  assert.match(source, /settings\.asr\.refineHint/, 'the settings explain why Fun-ASR is not the live backend');
 });
 
 test('AsrAdmin maps a saved funasr setting without throwing', () => {
